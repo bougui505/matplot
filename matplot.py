@@ -23,16 +23,25 @@ histogram_options.add_option("-H", "--histogram",
 histogram_options.add_option("-b", "--bins",
                     dest="n_bins", default=10, type="int",
                     help="Number of bins in the histogram", metavar=10)
+histogram_options.add_option("--xmin", dest="xmin", default=None, type='float',
+                            help="Minimum x-value of the histogram")
+histogram_options.add_option("--xmax", dest="xmax", default=None, type='float',
+                            help="Maximum x-value of the histogram")
 parser.add_option_group(histogram_options)
 (options, args) = parser.parse_args()
 
-def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins):
+def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=options.xmin,
+            xmax=options.xmax):
     if not histogram:
         plt.plot(x,y)
         plt.grid()
         plt.show()
     else:
-        plt.hist(y, bins=n_bins)
+        if xmin is None:
+            xmin = min(y)
+        if xmax is None:
+            xmax = max(y)
+        plt.hist(y, bins=n_bins, range=(xmin,xmax))
         plt.grid()
         plt.show()
 
