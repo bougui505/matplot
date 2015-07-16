@@ -12,8 +12,16 @@ Thanks!
 import sys
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib
+import numpy
 from optparse import OptionParser
 from optparse import OptionGroup
+try:
+    from sklearn import mixture
+    is_sklearn = True
+except ImportError:
+    print "sklearn is not installed you cannot use the Gaussian Mixture Model option"
+    is_sklearn = False
 
 parser = OptionParser()
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
@@ -33,8 +41,26 @@ histogram_options.add_option("--xmax", dest="xmax", default=None, type='float',
                             help="Maximum x-value of the histogram")
 histogram_options.add_option("--histtype", dest="histtype", default='bar', type='str',
                             help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
+histogram_options.add_option("--normed", dest="normed", default=False, action="store_true",
+                            help="If True, the first element of the return tuple will be the counts normalized to form a probability density")
+if is_sklearn:
+    histogram_options.add_option("--gmm", dest="gmm", default=None, type='int',
+                                help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
 parser.add_option_group(histogram_options)
 (options, args) = parser.parse_args()
+
+if is_sklearn:
+# from: http://stackoverflow.com/a/19182915/1679629
+    def fit_mixture(data, ncomp=2):
+        clf = mixture.GMM(n_components=ncomp, covariance_type='full')
+        clf.fit(data)
+        ml = clf.means_
+        wl = clf.weights_
+        cl = clf.covars_
+        ms = [m[0] for m in ml]
+        cs = [numpy.sqrt(c[0][0]) for c in cl]
+        ws = [w for w in wl]
+        return ms, cs, ws
 
 def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=options.xmin,
             xmax=options.xmax):
@@ -45,7 +71,20 @@ def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=optio
             xmin = min(y)
         if xmax is None:
             xmax = max(y)
-        plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype)
+        if is_sklearn and options.gmm is not None:
+            options.normed = True
+        histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
+        if is_sklearn:
+            if options.gmm is not None:
+                ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
+                print "Gaussian Mixture Model with %d components"%options.gmm
+                print "Means: %s"%ms
+                print "Variances: %s"%cs
+                print "Weights: %s"%ws
+                fitting = numpy.zeros_like(histo[1])
+                for w, m, c in zip(ws, ms, cs):
+                    fitting += w*matplotlib.mlab.normpdf(histo[1],m,numpy.sqrt(c))
+                plt.plot(histo[1], fitting, linewidth=3)
     if options.xlabel is not None:
         plt.xlabel(options.xlabel)
     if options.ylabel is not None:
