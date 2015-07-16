@@ -3,7 +3,7 @@
 """
 author: Guillaume Bouvier
 email: guillaume.bouvier@ens-cachan.org
-creation date: 2015 07 08
+creation date: 2015 07 16
 license: GNU GPL
 Please feel free to use and modify this, but keep the above information.
 Thanks!
@@ -27,6 +27,8 @@ histogram_options.add_option("--xmin", dest="xmin", default=None, type='float',
                             help="Minimum x-value of the histogram")
 histogram_options.add_option("--xmax", dest="xmax", default=None, type='float',
                             help="Maximum x-value of the histogram")
+histogram_options.add_option("--histtype", dest="histtype", default='bar', type='str',
+                            help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
 parser.add_option_group(histogram_options)
 (options, args) = parser.parse_args()
 
@@ -41,7 +43,7 @@ def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=optio
             xmin = min(y)
         if xmax is None:
             xmax = max(y)
-        plt.hist(y, bins=n_bins, range=(xmin,xmax))
+        plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype)
         plt.grid()
         plt.show()
 
