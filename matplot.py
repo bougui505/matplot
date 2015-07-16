@@ -16,6 +16,10 @@ from optparse import OptionParser
 from optparse import OptionGroup
 
 parser = OptionParser()
+parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
+                    help="x axis label")
+parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
+                    help="y axis label")
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
                     action="store_true", dest="histogram", default=False,
@@ -36,16 +40,18 @@ def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=optio
             xmax=options.xmax):
     if not histogram:
         plt.plot(x,y)
-        plt.grid()
-        plt.show()
     else:
         if xmin is None:
             xmin = min(y)
         if xmax is None:
             xmax = max(y)
         plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype)
-        plt.grid()
-        plt.show()
+    if options.xlabel is not None:
+        plt.xlabel(options.xlabel)
+    if options.ylabel is not None:
+        plt.ylabel(options.ylabel)
+    plt.grid()
+    plt.show()
 
 data = numpy.genfromtxt(sys.stdin)
 n = data.shape[0]
