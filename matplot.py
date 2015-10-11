@@ -3,7 +3,7 @@
 """
 author: Guillaume Bouvier
 email: guillaume.bouvier@ens-cachan.org
-creation date: 2015 07 16
+creation date: 2015 10 11
 license: GNU GPL
 Please feel free to use and modify this, but keep the above information.
 Thanks!
@@ -22,6 +22,20 @@ try:
 except ImportError:
     print "sklearn is not installed you cannot use the Gaussian Mixture Model option"
     is_sklearn = False
+
+# For publication quality plot
+params = {
+   'axes.labelsize': 8,
+   'font.size': 8,
+   'legend.fontsize': 10,
+   'xtick.labelsize': 10,
+   'ytick.labelsize': 10,
+   'text.usetex': False,
+   #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
+   'axes.color_cycle' : 'gray'
+   }
+plt.rcParams.update(params)
+plt.axes(frameon=0)
 
 parser = OptionParser()
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
