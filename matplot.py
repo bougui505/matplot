@@ -32,10 +32,10 @@ params = {
    'ytick.labelsize': 12,
    'text.usetex': False,
    #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
-   'axes.color_cycle' : 'gray'
+   'axes.color_cycle' : 'gray, black'
    }
 plt.rcParams.update(params)
-plt.axes(frameon=0)
+#plt.axes(frameon=0)
 
 parser = OptionParser()
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
