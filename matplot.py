@@ -3,7 +3,7 @@
 """
 author: Guillaume Bouvier
 email: guillaume.bouvier@ens-cachan.org
-creation date: 2015 10 11
+creation date: 2015 10 12
 license: GNU GPL
 Please feel free to use and modify this, but keep the above information.
 Thanks!
@@ -27,9 +27,9 @@ except ImportError:
 params = {
    'axes.labelsize': 8,
    'font.size': 8,
-   'legend.fontsize': 10,
-   'xtick.labelsize': 10,
-   'ytick.labelsize': 10,
+   'legend.fontsize': 12,
+   'xtick.labelsize': 12,
+   'ytick.labelsize': 12,
    'text.usetex': False,
    #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
    'axes.color_cycle' : 'gray'
