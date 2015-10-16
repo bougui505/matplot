@@ -25,8 +25,8 @@ except ImportError:
 
 # For publication quality plot
 params = {
-   'axes.labelsize': 8,
-   'font.size': 8,
+   'axes.labelsize': 14,
+   'font.size': 14,
    'legend.fontsize': 12,
    'xtick.labelsize': 12,
    'ytick.labelsize': 12,
