@@ -3,7 +3,7 @@
 """
 author: Guillaume Bouvier
 email: guillaume.bouvier@ens-cachan.org
-creation date: 2015 10 12
+creation date: 2015 10 16
 license: GNU GPL
 Please feel free to use and modify this, but keep the above information.
 Thanks!
@@ -32,7 +32,6 @@ params = {
    'ytick.labelsize': 12,
    'text.usetex': False,
    #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
-   'axes.color_cycle' : 'gray, black'
    }
 plt.rcParams.update(params)
 #plt.axes(frameon=0)
