@@ -41,6 +41,9 @@ parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
                     help="y axis label")
+parser.add_option("--scatter", action="store_true",
+                  dest="scatter", default=False,
+                  help="Scatter plot of the (x,y) data")
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
                     action="store_true", dest="histogram", default=False,
@@ -75,10 +78,12 @@ if is_sklearn:
         ws = [w for w in wl]
         return ms, cs, ws
 
-def do_plot(x, y, histogram=options.histogram, n_bins=options.n_bins, xmin=options.xmin,
-            xmax=options.xmax):
-    if not histogram:
+def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
+            n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
+    if not histogram and not scatter:
         plt.plot(x,y)
+    elif scatter:
+        plt.scatter(x,y)
     else:
         if xmin is None:
             xmin = min(y)
