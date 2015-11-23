@@ -44,6 +44,7 @@ parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
 parser.add_option("--scatter", action="store_true",
                   dest="scatter", default=False,
                   help="Scatter plot of the (x,y) data")
+
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
                     action="store_true", dest="histogram", default=False,
@@ -63,6 +64,15 @@ if is_sklearn:
     histogram_options.add_option("--gmm", dest="gmm", default=None, type='int',
                                 help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
 parser.add_option_group(histogram_options)
+
+histogram2d_options = OptionGroup(parser, "Plotting 2D-histogram")
+histogram2d_options.add_option("--histogram2d", action="store_true",
+                                dest="histogram2d", default=False,
+                                help="Compute and plot 2D-histogram from data. -b (--bins) can be used to define the number of bins.")
+histogram2d_options.add_option("--logscale", action="store_true",
+                                dest="logscale", default=False,
+                                help="log scale")
+parser.add_option_group(histogram2d_options)
 (options, args) = parser.parse_args()
 
 if is_sklearn:
@@ -79,11 +89,18 @@ if is_sklearn:
         return ms, cs, ws
 
 def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
+            histogram2d=options.histogram2d, logscale=options.logscale,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
-    if not histogram and not scatter:
+    if not histogram and not scatter and not histogram2d:
         plt.plot(x,y)
     elif scatter:
         plt.scatter(x,y)
+    elif histogram2d:
+        if logscale:
+            plt.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
+        else:
+            plt.hist2d(x, y, bins=n_bins)
+        plt.colorbar()
     else:
         if xmin is None:
             xmin = min(y)
