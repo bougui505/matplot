@@ -72,6 +72,9 @@ histogram2d_options.add_option("--histogram2d", action="store_true",
 histogram2d_options.add_option("--logscale", action="store_true",
                                 dest="logscale", default=False,
                                 help="log scale")
+histogram2d_options.add_option("--projection1d", action="store_true",
+                                dest="projection1d", default=False,
+                                help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
 (options, args) = parser.parse_args()
 
@@ -90,17 +93,60 @@ if is_sklearn:
 
 def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
+            projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
     if not histogram and not scatter and not histogram2d:
         plt.plot(x,y)
+        plt.grid()
     elif scatter:
         plt.scatter(x,y)
+        plt.grid()
     elif histogram2d:
-        if logscale:
-            plt.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
+        if projection1d: #1D projections of histogram
+            # definitions for the axes
+            left, width = 0.1, 0.65
+            bottom, height = 0.1, 0.65
+            bottom_h = left_h = left + width + 0.02
+
+            rect_scatter = [left, bottom, width, height]
+            rect_histx = [left, bottom_h, width, 0.2]
+            rect_histy = [left_h, bottom, 0.2, height]
+            # start with a rectangular Figure
+            plt.figure(1, figsize=(8, 8))
+            axScatter = plt.axes(rect_scatter)
+            axHistx = plt.axes(rect_histx)
+            axHisty = plt.axes(rect_histy)
+            # no labels
+            nullfmt = matplotlib.ticker.NullFormatter()
+            axHistx.xaxis.set_major_formatter(nullfmt)
+            axHistx.grid()
+            axHisty.yaxis.set_major_formatter(nullfmt)
+            axHisty.grid()
+            if logscale:
+                axScatter.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
+                axScatter.grid()
+            else:
+                axScatter.hist2d(x, y, bins=n_bins)
+                axScatter.grid()
+            if options.xlabel is not None:
+                axScatter.set_xlabel(options.xlabel)
+            if options.ylabel is not None:
+                axScatter.set_ylabel(options.ylabel)
+            axHistx.hist(x, bins=n_bins)
+            axHisty.hist(y, bins=n_bins, orientation='horizontal')
+            axHistx.set_xlim(axScatter.get_xlim())
+            axHisty.set_ylim(axScatter.get_ylim())
+            #Cool trick that changes the number of tickmarks for the histogram axes
+            axHisty.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+            axHistx.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
         else:
-            plt.hist2d(x, y, bins=n_bins)
-        plt.colorbar()
+            if logscale:
+                plt.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
+                plt.grid()
+            else:
+                plt.hist2d(x, y, bins=n_bins)
+                plt.grid()
+            plt.colorbar()
     else:
         if xmin is None:
             xmin = min(y)
@@ -109,6 +155,7 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
         if is_sklearn and options.gmm is not None:
             options.normed = True
         histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
+        plt.grid()
         if is_sklearn:
             if options.gmm is not None:
                 ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
@@ -120,11 +167,11 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
                 for w, m, c in zip(ws, ms, cs):
                     fitting += w*matplotlib.mlab.normpdf(histo[1],m,numpy.sqrt(c))
                 plt.plot(histo[1], fitting, linewidth=3)
-    if options.xlabel is not None:
-        plt.xlabel(options.xlabel)
-    if options.ylabel is not None:
-        plt.ylabel(options.ylabel)
-    plt.grid()
+    if not projection1d:
+        if options.xlabel is not None:
+            plt.xlabel(options.xlabel)
+        if options.ylabel is not None:
+            plt.ylabel(options.ylabel)
     plt.show()
 
 data = numpy.genfromtxt(sys.stdin)
