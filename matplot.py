@@ -13,6 +13,7 @@ import sys
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.cm as cm
 import numpy
 from optparse import OptionParser
 from optparse import OptionGroup
@@ -44,6 +45,9 @@ parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
 parser.add_option("--scatter", action="store_true",
                   dest="scatter", default=False,
                   help="Scatter plot of the (x,y) data")
+parser.add_option("--fields", dest="fields", default=None, type='str',
+                  help="Fields for the data; e.g. 'xyxy'. By default\
+                  the first column is for x data and the other for y data.")
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
@@ -99,7 +103,13 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
         plt.plot(x,y)
         plt.grid()
     elif scatter:
-        plt.scatter(x,y)
+        if len(x.shape) == 1:
+            plt.scatter(x,y)
+        else:
+            colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
+            for i, xi in enumerate(x.T):
+                yi = y.T[i]
+                plt.scatter(xi, yi, c=colors[i])
         plt.grid()
     elif histogram2d:
         if projection1d: #1D projections of histogram
@@ -180,6 +190,16 @@ if len(data.shape) == 1:
     x = range(n)
     y = data
 else:
-    x = data[:,0]
-    y = data[:,1:]
+    if options.fields is None:
+        x = data[:,0]
+        y = data[:,1:]
+    else:
+        x, y = [], []
+        for i, field in enumerate(options.fields):
+            if field == 'x':
+                x.append(data[:,i])
+            elif field == 'y':
+                y.append(data[:,i])
+        x, y = numpy.asarray(x).T, numpy.asarray(y).T
+    print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x,y)
