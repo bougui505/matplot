@@ -48,6 +48,9 @@ parser.add_option("--scatter", action="store_true",
 parser.add_option("--fields", dest="fields", default=None, type='str',
                   help="Fields for the data; e.g. 'xyxy'. By default\
                   the first column is for x data and the other for y data.")
+parser.add_option("--moving_average", dest="moving_average", default=None,
+                  type='int', help="Plot a moving average on the data with the\
+                  given window size", metavar=10)
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
@@ -95,13 +98,27 @@ if is_sklearn:
         ws = [w for w in wl]
         return ms, cs, ws
 
+def movingaverage(data, window_size):
+    """
+    see: http://goo.gl/OMbvco
+    """
+    window= numpy.ones(int(window_size))/float(window_size)
+    return numpy.convolve(data, window, 'same')
+
 def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
     if not histogram and not scatter and not histogram2d:
-        plt.plot(x,y)
-        plt.grid()
+        if options.moving_average is None:
+            plt.plot(x,y)
+            plt.grid()
+        else: # Moving average
+            plt.plot(x,y, '-', color='gray', alpha=.25)
+            ws =  options.moving_average # window size
+            plt.plot(x[ws:-ws], movingaverage(y, ws)[ws:-ws], 'r',
+                     linewidth=1.5)
+            plt.grid()
     elif scatter:
         if len(x.shape) == 1:
             plt.scatter(x,y)
