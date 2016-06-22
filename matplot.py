@@ -201,7 +201,7 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
             plt.ylabel(options.ylabel)
     plt.show()
 
-data = numpy.genfromtxt(sys.stdin)
+data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
 n = data.shape[0]
 if len(data.shape) == 1:
     x = range(n)
