@@ -116,7 +116,7 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
         else: # Moving average
             plt.plot(x,y, '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
-            plt.plot(x[ws:-ws], movingaverage(y, ws)[ws:-ws], 'r',
+            plt.plot(x[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
                      linewidth=1.5)
             plt.grid()
     elif scatter:
