@@ -42,15 +42,19 @@ parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
                     help="y axis label")
-parser.add_option("--scatter", action="store_true",
-                  dest="scatter", default=False,
-                  help="Scatter plot of the (x,y) data")
-parser.add_option("--fields", dest="fields", default=None, type='str',
-                  help="Fields for the data; e.g. 'xyxy'. By default\
-                  the first column is for x data and the other for y data.")
 parser.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
                   given window size", metavar=10)
+
+scatter_options = OptionGroup(parser, "Scatter plot")
+scatter_options.add_option("--scatter", action="store_true",
+                  dest="scatter", default=False,
+                  help="Scatter plot of the (x,y) data")
+scatter_options.add_option("--fields", dest="fields", default=None, type='str',
+                  help="Fields for the data; e.g. 'xyxy'. By default\
+                  the first column is for x data and the other for y data.")
+parser.add_option_group(scatter_options)
+
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
