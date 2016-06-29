@@ -52,7 +52,9 @@ scatter_options.add_option("--scatter", action="store_true",
                   help="Scatter plot of the (x,y) data")
 scatter_options.add_option("--fields", dest="fields", default=None, type='str',
                   help="Fields for the data; e.g. 'xyxy'. By default\
-                  the first column is for x data and the other for y data.")
+                  the first column is for x data and the other for y data. \
+If a 'z' field is given, this field is used to color \
+the scatter dots.")
 parser.add_option_group(scatter_options)
 
 
@@ -109,7 +111,7 @@ def movingaverage(data, window_size):
     window= numpy.ones(int(window_size))/float(window_size)
     return numpy.convolve(data, window, 'same')
 
-def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
+def do_plot(x, y, z=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
@@ -124,8 +126,12 @@ def do_plot(x, y, histogram=options.histogram, scatter=options.scatter,
                      linewidth=1.5)
             plt.grid()
     elif scatter:
-        if len(x.shape) == 1:
-            plt.scatter(x,y)
+        if x.shape[1] == 1:
+            if z is not None:
+                plt.scatter(x,y,c=z)
+                plt.colorbar()
+            else:
+                plt.scatter(x,y)
         else:
             colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
             for i, xi in enumerate(x.T):
@@ -215,12 +221,16 @@ else:
         x = data[:,0]
         y = data[:,1:]
     else:
-        x, y = [], []
+        x, y, z = [], [], []
         for i, field in enumerate(options.fields):
             if field == 'x':
                 x.append(data[:,i])
             elif field == 'y':
                 y.append(data[:,i])
-        x, y = numpy.asarray(x).T, numpy.asarray(y).T
+            elif field == 'z':
+                z.append(data[:,i])
+        x, y, z = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T
+        if len(z) == 0:
+            z = None
     print "Shape of x and y data: %s %s"%(x.shape, y.shape)
-do_plot(x,y)
+do_plot(x, y, z)
