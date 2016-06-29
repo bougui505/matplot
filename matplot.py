@@ -216,10 +216,12 @@ n = data.shape[0]
 if len(data.shape) == 1:
     x = range(n)
     y = data
+    z = None
 else:
     if options.fields is None:
         x = data[:,0]
         y = data[:,1:]
+        z = None
     else:
         x, y, z = [], [], []
         for i, field in enumerate(options.fields):
