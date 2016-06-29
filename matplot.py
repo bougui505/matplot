@@ -111,6 +111,24 @@ def movingaverage(data, window_size):
     window= numpy.ones(int(window_size))/float(window_size)
     return numpy.convolve(data, window, 'same')
 
+
+def sort_scatter_data(data, nbins=None):
+    """
+    Sort scatter data such as less frequent data points are plot on the top of the scatter plot to remain visible
+    • data: data to plot [[x,y,z], ...] where z is the color of the data points
+    • nbins: The number of bins to use for the 3D histogram used to order the data
+    """
+    if nbins is None:
+        nbins = int(len(data) * .002)
+    if nbins < 10:
+        nbins = 10
+    print "Number of bins used to order the data: %d"%nbins
+    hdd, bins = numpy.histogramdd(data, bins=nbins)
+    digits = numpy.asarray([numpy.digitize(v, bins[i], right=True) for i,v in enumerate(data.T)]).T
+    digits[digits==nbins]-=1
+    counts = numpy.asarray([hdd[tuple(e)] for e in digits])
+    return data[counts.argsort()][::-1]
+
 def do_plot(x, y, z=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
@@ -234,5 +252,10 @@ else:
         x, y, z = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T
         if len(z) == 0:
             z = None
+        else:
+            data_sorted = sort_scatter_data(numpy.c_[x,y,z])
+            x = data_sorted[:,0][:,None]
+            y = data_sorted[:,1][:,None]
+            z = data_sorted[:,2]
     print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x, y, z)
