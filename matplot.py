@@ -258,5 +258,6 @@ else:
             x = data_sorted[:,0][:,None]
             y = data_sorted[:,1][:,None]
             z = data_sorted[:,2]
+    x = numpy.asarray(x)[:,None]
     print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x, y, z)
