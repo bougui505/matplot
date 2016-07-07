@@ -235,6 +235,7 @@ if len(data.shape) == 1:
     x = range(n)
     y = data
     z = None
+    x = numpy.asarray(x)[:,None]
 else:
     if options.fields is None:
         x = data[:,0]
