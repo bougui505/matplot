@@ -157,6 +157,7 @@ def do_plot(x, y, z=None, histogram=options.histogram, scatter=options.scatter,
                 plt.scatter(xi, yi, c=colors[i])
         plt.grid()
     elif histogram2d:
+        x, y = x.flatten(), y.flatten()
         if projection1d: #1D projections of histogram
             # definitions for the axes
             left, width = 0.1, 0.65
