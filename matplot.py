@@ -54,7 +54,8 @@ scatter_options.add_option("--fields", dest="fields", default=None, type='str',
                   help="Fields for the data; e.g. 'xyxy'. By default\
                   the first column is for x data and the other for y data. \
 If a 'z' field is given, this field is used to color \
-the scatter dots.")
+the scatter dots. \
+If a 'e' field is given it is used to plot the error.")
 parser.add_option_group(scatter_options)
 
 
@@ -129,18 +130,22 @@ def sort_scatter_data(data, nbins=None):
     counts = numpy.asarray([hdd[tuple(e)] for e in digits])
     return data[counts.argsort()][::-1]
 
-def do_plot(x, y, z=None, histogram=options.histogram, scatter=options.scatter,
+def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
-            plt.plot(x,y)
+            plt.plot(x.flatten(), y.flatten())
+            if e is not None:
+                plt.fill_between(x.flatten(), y.flatten() - e.flatten(),
+                                 y.flatten() + e.flatten(), facecolor='gray',
+                                 alpha=.5)
             plt.grid()
         else: # Moving average
-            plt.plot(x,y, '-', color='gray', alpha=.25)
+            plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
-            plt.plot(x[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
+            plt.plot(x.flatten()[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
                      linewidth=1.5)
             plt.grid()
     elif scatter:
@@ -155,6 +160,9 @@ def do_plot(x, y, z=None, histogram=options.histogram, scatter=options.scatter,
             for i, xi in enumerate(x.T):
                 yi = y.T[i]
                 plt.scatter(xi, yi, c=colors[i])
+        if e is not None:
+            plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
+                         markersize=0.)
         plt.grid()
     elif histogram2d:
         x, y = x.flatten(), y.flatten()
@@ -243,7 +251,7 @@ else:
         y = data[:,1:]
         z = None
     else:
-        x, y, z = [], [], []
+        x, y, z, e = [], [], [], []
         for i, field in enumerate(options.fields):
             if field == 'x':
                 x.append(data[:,i])
@@ -251,7 +259,10 @@ else:
                 y.append(data[:,i])
             elif field == 'z':
                 z.append(data[:,i])
-        x, y, z = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T
+            elif field == 'e':
+                e.append(data[:,i])
+        x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
+                     numpy.asarray(e).T
         if len(z) == 0:
             z = None
         else:
@@ -259,6 +270,8 @@ else:
             x = data_sorted[:,0][:,None]
             y = data_sorted[:,1][:,None]
             z = data_sorted[:,2]
+        if len(e) == 0:
+            e = None
     x = numpy.asarray(x)[:,None]
     print "Shape of x and y data: %s %s"%(x.shape, y.shape)
-do_plot(x, y, z)
+do_plot(x, y, z, e)
