@@ -136,7 +136,18 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
-            plt.plot(x.flatten(), y.flatten())
+            if x.shape[1] == 1 and y.shape[1] == 1:
+                plt.plot(x.flatten(), y.flatten())
+            else:
+                if x.shape[1] > 1:
+                    colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
+                    for i, xi in enumerate(x.T):
+                        yi = y.T[i]
+                        plt.plot(xi.flatten(), yi.flatten(), c=colors[i])
+                elif y.shape[1] > 1:
+                    colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
+                    for i, yi in enumerate(y.T):
+                        plt.plot(x.flatten(), yi.flatten(), c=colors[i])
             if e is not None:
                 plt.fill_between(x.flatten(), y.flatten() - e.flatten(),
                                  y.flatten() + e.flatten(), facecolor='gray',
