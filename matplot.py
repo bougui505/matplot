@@ -260,12 +260,14 @@ if len(data.shape) == 1:
     x = range(n)
     y = data
     z = None
+    e = None
     x = numpy.asarray(x)[:,None]
 else:
     if options.fields is None:
         x = data[:,0]
         y = data[:,1:]
         z = None
+        e = None
     else:
         x, y, z, e = [], [], [], []
         for i, field in enumerate(options.fields):
