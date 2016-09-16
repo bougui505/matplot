@@ -262,6 +262,7 @@ if len(data.shape) == 1:
     z = None
     e = None
     x = numpy.asarray(x)[:,None]
+    y = numpy.asarray(y)[:,None]
 else:
     if options.fields is None:
         x = data[:,0]
@@ -291,5 +292,5 @@ else:
         if len(e) == 0:
             e = None
     x = numpy.asarray(x)[:,None]
-    print "Shape of x and y data: %s %s"%(x.shape, y.shape)
+print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x, y, z, e)
