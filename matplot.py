@@ -292,5 +292,7 @@ else:
         if len(e) == 0:
             e = None
     x = numpy.asarray(x)[:,None]
+x = numpy.squeeze(x)
+y = numpy.squeeze(y)
 print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x, y, z, e)
