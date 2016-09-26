@@ -3,7 +3,7 @@
 """
 author: Guillaume Bouvier
 email: guillaume.bouvier@ens-cachan.org
-creation date: 2015 10 16
+creation date: 2016 09 26
 license: GNU GPL
 Please feel free to use and modify this, but keep the above information.
 Thanks!
@@ -136,8 +136,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
-            if x.shape[1] == 1 and y.shape[1] == 1:
-                plt.plot(x.flatten(), y.flatten())
+            if len(x.shape) == 1 and len(y.shape) == 1:
+                plt.plot(x, y)
             else:
                 if x.shape[1] > 1:
                     colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
