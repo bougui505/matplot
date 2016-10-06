@@ -57,7 +57,8 @@ scatter_options.add_option("--fields", dest="fields", default=None, type='str',
                   the first column is for x data and the other for y data. \
 If a 'z' field is given, this field is used to color \
 the scatter dots. \
-If a 'e' field is given it is used to plot the error.")
+If a 'e' field is given it is used to plot the error. \
+If --fields='*' is given all the columns are considered as y values.")
 parser.add_option_group(scatter_options)
 
 
@@ -287,6 +288,8 @@ else:
                 z.append(data[:,i])
             elif field == 'e':
                 e.append(data[:,i])
+            elif field == '*':
+                y = data.T
         x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
                      numpy.asarray(e).T
         if len(z) == 0:
