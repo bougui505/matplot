@@ -134,10 +134,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
-    if len(x.shape) == 1:
-        x = x[:, None]
-    if len(y.shape) == 1:
-        y = y[:, None]
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
