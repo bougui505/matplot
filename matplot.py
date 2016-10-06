@@ -45,6 +45,8 @@ parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
 parser.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
                   given window size", metavar=10)
+parser.add_option("--bar", dest="bar", default=False, action="store_true",
+                  help="Simple bar plot for single unidimensional data")
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
@@ -137,7 +139,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
-                plt.plot(x, y)
+                if not options.bar:
+                    plt.plot(x, y)
+                else:
+                    plt.bar(x, y)
             else:
                 if x.shape[1] > 1:
                     colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
