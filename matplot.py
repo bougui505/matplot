@@ -143,7 +143,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 if not options.bar:
                     plt.plot(x, y)
                 else:
-                    plt.bar(x, y)
+                    plt.bar(x, y, align='center')
             else:
                 if len(x.shape) == 1:
                     x = x[:,None]
