@@ -144,6 +144,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 else:
                     plt.bar(x, y)
             else:
+                if len(x.shape) == 1:
+                    x = x[:,None]
                 if x.shape[1] > 1:
                     colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
                     for i, xi in enumerate(x.T):
@@ -299,5 +301,7 @@ else:
     x = numpy.asarray(x)[:,None]
 x = numpy.squeeze(x)
 y = numpy.squeeze(y)
+if x.shape == (0,): # If not x field is given with fields option
+    x = numpy.arange(y.shape[0])
 print "Shape of x and y data: %s %s"%(x.shape, y.shape)
 do_plot(x, y, z, e)
