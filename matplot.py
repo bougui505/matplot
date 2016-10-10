@@ -170,6 +170,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
     elif scatter:
         if len(x.shape) == 1:
             x = x[:,None]
+        if len(y.shape) == 1:
+            y = y[:,None]
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 plt.scatter(x,y,c=z)
