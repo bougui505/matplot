@@ -9,6 +9,7 @@ Please feel free to use and modify this, but keep the above information.
 Thanks!
 """
 
+import time
 import sys
 import numpy
 import matplotlib.pyplot as plt
@@ -38,6 +39,9 @@ plt.rcParams.update(params)
 #plt.axes(frameon=0)
 
 parser = OptionParser()
+parser.add_option("--interactive", dest="interactive", default=False,
+                  action="store_true",
+                  help="Plot data interactively from stdin stream")
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
@@ -94,6 +98,9 @@ histogram2d_options.add_option("--projection1d", action="store_true",
                                 help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
 (options, args) = parser.parse_args()
+
+if options.interactive:
+    plt.ion() # Invoke matplotlib's interactive mode
 
 if is_sklearn:
 # from: http://stackoverflow.com/a/19182915/1679629
@@ -264,51 +271,70 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.xlabel(options.xlabel)
         if options.ylabel is not None:
             plt.ylabel(options.ylabel)
-    plt.show()
-
-data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
-n = data.shape[0]
-if len(data.shape) == 1:
-    x = range(n)
-    y = data
-    z = None
-    e = None
-    x = numpy.asarray(x)[:,None]
-    y = numpy.asarray(y)[:,None]
-else:
-    if options.fields is None:
-        x = data[:,0]
-        y = data[:,1:]
-        z = None
-        e = None
+    if options.interactive:
+        plt.draw()
     else:
-        x, y, z, e = [], [], [], []
-        for i, field in enumerate(options.fields):
-            if field == 'x':
-                x.append(data[:,i])
-            elif field == 'y':
-                y.append(data[:,i])
-            elif field == 'z':
-                z.append(data[:,i])
-            elif field == 'e':
-                e.append(data[:,i])
-            elif field == '*':
-                y = data.T
-        x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
-                     numpy.asarray(e).T
-        if len(z) == 0:
-            z = None
+        plt.show()
+
+data = None
+while True:
+    if options.interactive:
+        dataline = sys.stdin.readline()
+        if len(dataline) == 0:
+            time.sleep(2)
+        if data is None:
+            data = numpy.asarray(dataline.split(), dtype=numpy.float)
+            print data.shape
         else:
-            data_sorted = sort_scatter_data(numpy.c_[x,y,z])
-            x = data_sorted[:,0][:,None]
-            y = data_sorted[:,1][:,None]
-            z = data_sorted[:,2]
-        if len(e) == 0:
+            data = numpy.r_[data, numpy.asarray(dataline.split(), dtype=numpy.float)]
+    else:
+        data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
+    n = data.shape[0]
+    if n > 1:
+        if len(data.shape) == 1:
+            x = range(n)
+            y = data
+            z = None
             e = None
-    x = numpy.asarray(x)[:,None]
-x = numpy.squeeze(x)
-y = numpy.squeeze(y)
-if x.shape == (0,): # If not x field is given with fields option
-    x = numpy.arange(y.shape[0])
-print "Shape of x and y data: %s %s"%(x.shape, y.shape)
-do_plot(x, y, z, e)
+            x = numpy.asarray(x)[:,None]
+            y = numpy.asarray(y)[:,None]
+        else:
+            if options.fields is None:
+                x = data[:,0]
+                y = data[:,1:]
+                z = None
+                e = None
+            else:
+                x, y, z, e = [], [], [], []
+                for i, field in enumerate(options.fields):
+                    if field == 'x':
+                        x.append(data[:,i])
+                    elif field == 'y':
+                        y.append(data[:,i])
+                    elif field == 'z':
+                        z.append(data[:,i])
+                    elif field == 'e':
+                        e.append(data[:,i])
+                    elif field == '*':
+                        y = data.T
+                x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
+                             numpy.asarray(e).T
+                if len(z) == 0:
+                    z = None
+                else:
+                    data_sorted = sort_scatter_data(numpy.c_[x,y,z])
+                    x = data_sorted[:,0][:,None]
+                    y = data_sorted[:,1][:,None]
+                    z = data_sorted[:,2]
+                if len(e) == 0:
+                    e = None
+            x = numpy.asarray(x)[:,None]
+        x = numpy.squeeze(x)
+        y = numpy.squeeze(y)
+        if x.shape == (0,): # If not x field is given with fields option
+            x = numpy.arange(y.shape[0])
+        print "Shape of x and y data: %s %s"%(x.shape, y.shape)
+        plt.clf()
+        do_plot(x, y, z, e)
+    if not options.interactive:
+        break
