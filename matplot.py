@@ -292,10 +292,17 @@ while True:
             data = numpy.asarray(dataline.split(), dtype=numpy.float)
             print data.shape
         else:
-            data = numpy.r_[data, numpy.asarray(dataline.split(), dtype=numpy.float)]
+            data = numpy.r_[data.flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
+        if options.fields is not None:
+            n_field = len(options.fields)
+            n_point = len(data)/n_field
+            data = data.reshape(n_point, n_field)
+            n = n_point
+        else:
+            n = data.shape[0]
     else:
         data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
-    n = data.shape[0]
+        n = data.shape[0]
     if n > 1:
         if len(data.shape) == 1:
             x = range(n)
