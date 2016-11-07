@@ -63,6 +63,9 @@ If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
 If --fields='*' is given all the columns are considered as y values.")
+scatter_options.add_option("--line", dest='line', default=False,
+                           action="store_true",
+                           help="Plot line between points")
 parser.add_option_group(scatter_options)
 
 
@@ -194,7 +197,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             elif y.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
                 for i, yi in enumerate(y.T):
-                    plt.scatter(x, yi, c=colors[i])
+                    if options.line:
+                        plt.plot(x, yi,  '.-', c=colors[i])
+                    else:
+                        plt.scatter(x, yi, c=colors[i])
         if e is not None:
             plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
                          markersize=0.)
