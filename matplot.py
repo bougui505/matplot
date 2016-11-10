@@ -153,7 +153,11 @@ def freedman_diaconis_rule(data):
     q75, q25 = numpy.percentile(data, [75 ,25])
     iqr = q75 - q25
     bin_size = 2*iqr/(len(data))**(1./3)
-    n_bins = numpy.ptp(y)/bin_size
+    n_bins = numpy.ceil(numpy.ptp(y)/bin_size)
+    if numpy.isnan(n_bins):
+        n_bins = 2
+    else:
+        n_bins = int(n_bins)
     print "Freedman–Diaconis optimal number of bins: %d"%n_bins
     return n_bins
 
