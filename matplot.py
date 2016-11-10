@@ -46,6 +46,10 @@ parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
                     help="y axis label")
+parser.add_option("--ymin", dest="ymin", default=None, type='float',
+                  help="Lower limit for y-axis")
+parser.add_option("--ymax", dest="ymax", default=None, type='float',
+                  help="Upper limit for y-axis")
 parser.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
                   given window size", metavar=10)
@@ -160,6 +164,15 @@ def freedman_diaconis_rule(data):
         n_bins = int(n_bins)
     print "Freedman–Diaconis optimal number of bins: %d"%n_bins
     return n_bins
+
+def set_y_lim(ymin, ymax):
+    axes = plt.gca()
+    limits = plt.axis()
+    if ymin is None:
+        ymin = limits[-2]
+    if ymax is None:
+        ymax = limits[-1]
+    axes.set_ylim([ymin,ymax])
 
 def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
@@ -297,6 +310,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.xlabel(options.xlabel)
         if options.ylabel is not None:
             plt.ylabel(options.ylabel)
+    set_y_lim(options.ymin, options.ymax)
     if options.interactive:
         plt.draw()
     else:
