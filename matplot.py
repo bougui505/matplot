@@ -290,7 +290,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 print "Weights: %s"%ws
                 fitting = numpy.zeros_like(histo[1])
                 for w, m, c in zip(ws, ms, cs):
-                    fitting += w*matplotlib.mlab.normpdf(histo[1],m,numpy.sqrt(c))
+                    fitting += w*matplotlib.mlab.normpdf(histo[1],m,c)
                 plt.plot(histo[1], fitting, linewidth=3)
     if not projection1d:
         if options.xlabel is not None:
