@@ -74,8 +74,9 @@ histogram_options.add_option("-H", "--histogram",
                     action="store_true", dest="histogram", default=False,
                     help="Compute and plot histogram from data")
 histogram_options.add_option("-b", "--bins",
-                    dest="n_bins", default=10, type="int",
-                    help="Number of bins in the histogram", metavar=10)
+                    dest="n_bins", default=-1, type="int",
+                    help="Number of bins in the histogram. If -1 (default) the optimal number of bins is determined using the Freedman-Diaconis rule.",
+                    metavar=10)
 histogram_options.add_option("--xmin", dest="xmin", default=None, type='float',
                             help="Minimum x-value of the histogram")
 histogram_options.add_option("--xmax", dest="xmax", default=None, type='float',
@@ -142,6 +143,19 @@ def sort_scatter_data(data, nbins=None):
     digits[digits==nbins]-=1
     counts = numpy.asarray([hdd[tuple(e)] for e in digits])
     return data[counts.argsort()][::-1]
+
+
+def freedman_diaconis_rule(data):
+    """
+    Compute the optimal number of bins accordingly to the Freedman–Diaconis rule.
+    See: https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule
+    """
+    q75, q25 = numpy.percentile(data, [75 ,25])
+    iqr = q75 - q25
+    bin_size = 2*iqr/(len(data))**(1./3)
+    n_bins = numpy.ptp(y)/bin_size
+    print "Freedman–Diaconis optimal number of bins: %d"%n_bins
+    return n_bins
 
 def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
@@ -259,6 +273,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             xmax = max(y)
         if is_sklearn and options.gmm is not None:
             options.normed = True
+        if n_bins == -1:
+            n_bins = freedman_diaconis_rule(y)
         histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
         plt.grid()
         if is_sklearn:
