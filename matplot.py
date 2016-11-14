@@ -158,7 +158,7 @@ def freedman_diaconis_rule(data):
     iqr = q75 - q25
     bin_size = 2*iqr/(len(data))**(1./3)
     n_bins = numpy.ceil(numpy.ptp(y)/bin_size)
-    if numpy.isnan(n_bins):
+    if numpy.isnan(n_bins) or n_bins == numpy.inf:
         n_bins = 2
     else:
         n_bins = int(n_bins)
