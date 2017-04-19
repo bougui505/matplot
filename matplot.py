@@ -237,9 +237,15 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 for i, xi in enumerate(x.T):
                     yi = y.T[i]
                     if labels is not None:
-                        plt.scatter(xi, yi, c=colors[i], label=labels[i])
+                        if options.line:
+                            plt.plot(xi, yi, '.-', c=colors[i], label=labels[i])
+                        else:
+                            plt.scatter(xi, yi, c=colors[i], label=labels[i])
                     else:
-                        plt.scatter(xi, yi, c=colors[i])
+                        if options.line:
+                            plt.plot(xi, yi, '.-', c=colors[i])
+                        else:
+                            plt.scatter(xi, yi, c=colors[i])
             elif y.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
                 for i, yi in enumerate(y.T):
