@@ -72,6 +72,9 @@ If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
 If --fields='*' is given all the columns are considered as y values.")
+scatter_options.add_option("--labels", dest="labels", default=None, type='str',
+                           help="Comma separated list of labels for each field \
+defined with the --fields option.")
 scatter_options.add_option("--line", dest='line', default=False,
                            action="store_true",
                            help="Plot line between points")
@@ -225,22 +228,37 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             else:
                 plt.scatter(x,y)
         else:
+            if options.labels is not None:
+                labels = options.labels.split(',')
+            else:
+                labels = None
             if x.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
                 for i, xi in enumerate(x.T):
                     yi = y.T[i]
-                    plt.scatter(xi, yi, c=colors[i])
+                    if labels is not None:
+                        plt.scatter(xi, yi, c=colors[i], label=labels[i])
+                    else:
+                        plt.scatter(xi, yi, c=colors[i])
             elif y.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
                 for i, yi in enumerate(y.T):
                     if options.line:
-                        plt.plot(x, yi,  '.-', c=colors[i])
+                        if labels is not None:
+                            plt.plot(x, yi,  '.-', c=colors[i], label=labels[i])
+                        else:
+                            plt.plot(x, yi,  '.-', c=colors[i])
                     else:
-                        plt.scatter(x, yi, c=colors[i])
+                        if labels is not None:
+                            plt.scatter(x, yi, c=colors[i], label=labels[i])
+                        else:
+                            plt.scatter(x, yi, c=colors[i])
         if e is not None:
             plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
                          markersize=0.)
         plt.grid()
+        if options.labels is not None:
+            plt.legend()
     elif histogram2d:
         x, y = x.flatten(), y.flatten()
         if projection1d: #1D projections of histogram
