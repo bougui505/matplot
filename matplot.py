@@ -55,6 +55,11 @@ parser.add_option("--moving_average", dest="moving_average", default=None,
                   given window size", metavar=10)
 parser.add_option("--bar", dest="bar", default=False, action="store_true",
                   help="Simple bar plot for single unidimensional data")
+parser.add_option("--normalize", dest="normalize", default=None, type='str',
+                  help='Normalize the values to 1. If normalize=x, normalize the \
+x values, if normalize=y then normalize the y values. Normalization scales all \
+numeric variables in the range [0,1] given the formula: (x-xmin)/(xmax-xmin)',
+                  metavar='x')
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
@@ -382,6 +387,12 @@ while True:
             x = numpy.arange(y.shape[0])
         print "Shape of x and y data: %s %s"%(x.shape, y.shape)
         plt.clf()
+        if options.normalize == 'x':
+            xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
+            x = (x - xmin)/(xmax - xmin)
+        if options.normalize == 'y':
+            ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
+            y = (y - ymin)/(ymax - ymin)
         do_plot(x, y, z, e)
     if not options.interactive:
         break
