@@ -213,9 +213,15 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     for i, yi in enumerate(y.T):
                         plt.plot(x.flatten(), yi.flatten(), c=colors[i])
             if e is not None:
-                plt.fill_between(x.flatten(), y.flatten() - e.flatten(),
-                                 y.flatten() + e.flatten(), facecolor='gray',
-                                 alpha=.5)
+                if len(y.shape) == 1: # No more than 1 curve
+                    plt.fill_between(x.flatten(), y.flatten() - e.flatten(),
+                                     y.flatten() + e.flatten(), facecolor='gray',
+                                     alpha=.5)
+                else:
+                    for i, errror in enumerate(e.T):
+                        plt.fill_between(x[:, i], y[:, i] - e[:, i],
+                                         y[:, i] + e[:, i], facecolor='gray',
+                                         alpha=.5)
             plt.grid()
         else: # Moving average
             plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
