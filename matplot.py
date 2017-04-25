@@ -60,6 +60,8 @@ parser.add_option("--normalize", dest="normalize", default=None, type='str',
 x values, if normalize=y then normalize the y values. Normalization scales all \
 numeric variables in the range [0,1] given the formula: (x-xmin)/(xmax-xmin)',
                   metavar='x')
+parser.add_option("--semilog", dest="semilog", default=None, type='str',
+                  metavar='x', help="Log scale for the given axis (x or y)")
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
@@ -186,6 +188,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
+    if options.semilog is not None:
+        if options.semilog == "x":
+            plt.xscale('log')
+        elif options.semilog == 'y':
+            plt.yscale('log')
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
