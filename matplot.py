@@ -11,6 +11,10 @@ Thanks!
 
 import time
 import sys
+# Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
+reload(sys)
+sys.setdefaultencoding('utf8')
+##############################
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib
