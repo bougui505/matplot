@@ -208,7 +208,13 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                                           int(options.subplot[0][1]))
         for i, ydata in enumerate(y.T):
             plt.subplot(gs[i])
-            plt.plot(x, ydata)
+            if options.semilog is not None:
+                if options.semilog == "x":
+                    plt.semilogx(x, ydata)
+                elif options.semilog == 'y':
+                    plt.semilogy(x, ydata)
+            else:
+                plt.plot(x, ydata)
         plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
