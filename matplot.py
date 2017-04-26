@@ -204,10 +204,14 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         elif options.semilog == 'y':
             plt.yscale('log')
     if options.subplot is not None:
-        gs = matplotlib.gridspec.GridSpec(int(options.subplot[0][0]),
-                                          int(options.subplot[0][1]))
+        n, p = int(options.subplot[0][0]), int(options.subplot[0][1])
+        # n: number of row
+        # p: numper of column
+        gs = matplotlib.gridspec.GridSpec(n, p)
         for i, ydata in enumerate(y.T):
             plt.subplot(gs[i])
+            # Set the same scale for all axis
+            plt.axis((x.min(),x.max(),y.min(),y.max()))
             if options.semilog is not None:
                 if options.semilog == "x":
                     plt.semilogx(x, ydata)
@@ -215,6 +219,12 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     plt.semilogy(x, ydata)
             else:
                 plt.plot(x, ydata)
+            if i < n*p - p: # Not last row
+                # Hide xtick labels:
+                plt.tick_params(labelbottom='off')
+            if i % p != 0: # Not first column
+                # Hide y labels:
+                plt.tick_params(labelleft='off')
         plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
