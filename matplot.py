@@ -68,6 +68,10 @@ parser.add_option("--semilog", dest="semilog", default=None, type='str',
                   metavar='x', help="Log scale for the given axis (x or y)")
 parser.add_option("--transpose", dest="transpose", default=False,
                   action="store_true", help="Transpose the input data")
+parser.add_option("--subplot", dest="subplot", nargs=2, action='append',
+                  default=None,
+                  help="Arrange multiple plot on a grid of shape n×p, given by \
+                  arguments: --subplot n p")
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
@@ -199,6 +203,14 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.xscale('log')
         elif options.semilog == 'y':
             plt.yscale('log')
+    if options.subplot is not None:
+        gs = matplotlib.gridspec.GridSpec(int(options.subplot[0][0]),
+                                          int(options.subplot[0][1]))
+        for i, ydata in enumerate(y.T):
+            plt.subplot(gs[i])
+            plt.plot(x, ydata)
+        plt.show()
+        return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
