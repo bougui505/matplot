@@ -66,6 +66,8 @@ numeric variables in the range [0,1] given the formula: (x-xmin)/(xmax-xmin)',
                   metavar='x')
 parser.add_option("--semilog", dest="semilog", default=None, type='str',
                   metavar='x', help="Log scale for the given axis (x or y)")
+parser.add_option("--transpose", dest="transpose", default=False,
+                  action="store_true", help="Transpose the input data")
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
@@ -383,6 +385,8 @@ while True:
     else:
         data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
         n = data.shape[0]
+    if options.transpose:
+        data = data.T
     if n > 1:
         if len(data.shape) == 1:
             x = range(n)
