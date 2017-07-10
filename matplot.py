@@ -15,6 +15,23 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 ##############################
+try:
+    import seaborn as sns
+    sns.set_context('talk')
+except ImportError:
+    print "seaborn not installed"
+# For publication quality plot
+    params = {
+       'axes.labelsize': 14,
+       'font.size': 14,
+       'legend.fontsize': 12,
+       'xtick.labelsize': 12,
+       'ytick.labelsize': 12,
+       'text.usetex': False,
+       #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
+       }
+    plt.rcParams.update(params)
+    pass
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib
@@ -29,18 +46,6 @@ except ImportError:
     print "sklearn is not installed you cannot use the Gaussian Mixture Model option"
     is_sklearn = False
 
-# For publication quality plot
-params = {
-   'axes.labelsize': 14,
-   'font.size': 14,
-   'legend.fontsize': 12,
-   'xtick.labelsize': 12,
-   'ytick.labelsize': 12,
-   'text.usetex': False,
-   #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
-   }
-plt.rcParams.update(params)
-#plt.axes(frameon=0)
 
 parser = OptionParser()
 parser.add_option("--interactive", dest="interactive", default=False,
@@ -256,13 +261,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                         plt.fill_between(x[:, i], y[:, i] - e[:, i],
                                          y[:, i] + e[:, i], facecolor='gray',
                                          alpha=.5)
-            plt.grid()
         else: # Moving average
             plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
             plt.plot(x.flatten()[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
                      linewidth=1.5)
-            plt.grid()
     elif scatter:
         if len(x.shape) == 1:
             x = x[:,None]
@@ -309,7 +312,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if e is not None:
             plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
                          markersize=0.)
-        plt.grid()
         if options.labels is not None:
             plt.legend()
     elif histogram2d:
@@ -354,10 +356,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         else:
             if logscale:
                 plt.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
-                plt.grid()
             else:
                 plt.hist2d(x, y, bins=n_bins)
-                plt.grid()
             plt.colorbar()
     else:
         if xmin is None:
@@ -369,7 +369,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if n_bins == -1:
             n_bins = freedman_diaconis_rule(y)
         histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
-        plt.grid()
         if is_sklearn:
             if options.gmm is not None:
                 ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
