@@ -387,6 +387,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
     set_y_lim(options.ymin, options.ymax)
     if options.interactive:
         plt.draw()
+        plt.pause(0.0001)
     else:
         plt.show()
 
