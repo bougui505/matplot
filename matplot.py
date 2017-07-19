@@ -49,7 +49,9 @@ except ImportError:
 parser = OptionParser()
 parser.add_option("--interactive", dest="interactive", default=False,
                   action="store_true",
-                  help="Plot data interactively from stdin stream")
+                  help="Plot data interactively from stdin stream. \
+                  Example usage:                                   \
+                  tail -n 1000 -f file.txt | grep --line-buffered 'pattern' | awk '{print $2; system('')}' | matplot")
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
