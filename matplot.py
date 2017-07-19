@@ -36,7 +36,6 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.cm as cm
-import numpy
 from optparse import OptionParser
 from optparse import OptionGroup
 try:
