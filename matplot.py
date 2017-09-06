@@ -277,7 +277,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 plt.scatter(x,y,c=z)
                 plt.colorbar()
             else:
-                plt.scatter(x,y)
+                if options.line:
+                    plt.plot(x, y, '.-')
+                else:
+                    plt.scatter(x,y)
         else:
             if options.labels is not None:
                 labels = options.labels.split(',')
