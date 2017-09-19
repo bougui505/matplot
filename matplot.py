@@ -314,8 +314,13 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                         else:
                             plt.scatter(x, yi, c=colors[i])
         if e is not None:
-            plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
-                         markersize=0.)
+            if y.shape[1] == 1:
+                plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
+                             markersize=0.)
+            else:
+                for i, yi in enumerate(y.T):
+                    plt.errorbar(x.flatten(), yi, yerr=e[:,i],
+                                 markersize=0., c=colors[i])
         if options.labels is not None:
             plt.legend()
     elif histogram2d:
