@@ -467,7 +467,10 @@ while True:
         y = numpy.squeeze(y)
         if x.shape == (0,): # If not x field is given with fields option
             x = numpy.arange(y.shape[0])
-        print "Shape of x and y data: %s %s"%(x.shape, y.shape)
+        if not options.interactive:
+            print "Shape of x and y data: %s %s"%(x.shape, y.shape)
+        else:
+            print "x: %s; y: %s"%(x[-1], y[-1])
         plt.clf()
         if options.normalize == 'x':
             xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
