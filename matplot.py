@@ -60,9 +60,14 @@ parser.add_option("--ymin", dest="ymin", default=None, type='float',
                   help="Lower limit for y-axis")
 parser.add_option("--ymax", dest="ymax", default=None, type='float',
                   help="Upper limit for y-axis")
-parser.add_option("--moving_average", dest="moving_average", default=None,
+moving_average_options = OptionGroup(parser, "Moving average")
+moving_average_options.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
                   given window size", metavar=10)
+moving_average_options.add_option("--no_gray_plot", dest="gray_plot", default=True,
+                  action="store_false",
+                  help="Do not plot original data in gray with moving_average option")
+parser.add_option_group(moving_average_options)
 parser.add_option("--bar", dest="bar", default=False, action="store_true",
                   help="Simple bar plot for single unidimensional data")
 parser.add_option("--normalize", dest="normalize", default=None, type='str',
@@ -263,7 +268,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                                          y[:, i] + e[:, i], facecolor='gray',
                                          alpha=.5)
         else: # Moving average
-            plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
+            if options.gray_plot:
+                plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
             plt.plot(x.flatten()[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
                      linewidth=1.5)
