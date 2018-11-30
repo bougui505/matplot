@@ -44,6 +44,7 @@ try:
 except ImportError:
     print "sklearn is not installed you cannot use the Gaussian Mixture Model option"
     is_sklearn = False
+from prettytable import PrettyTable
 
 
 parser = OptionParser()
@@ -63,7 +64,7 @@ parser.add_option("--ymax", dest="ymax", default=None, type='float',
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
-                  given window size", metavar=10)
+                  given window size. It also prints the values on stdout", metavar=10)
 moving_average_options.add_option("--no_gray_plot", dest="gray_plot", default=True,
                   action="store_false",
                   help="Do not plot original data in gray with moving_average option")
@@ -153,6 +154,16 @@ if is_sklearn:
         cs = [numpy.sqrt(c[0][0]) for c in cl]
         ws = [w for w in wl]
         return ms, cs, ws
+
+def prettyprint(A):
+    """
+    Pretty print of an array (A)
+    """
+    x = PrettyTable(A.dtype.names, header=False,border=False)
+    for row in A:
+        x.add_row(row)
+    print x
+
 
 def movingaverage(data, window_size):
     """
@@ -271,8 +282,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             if options.gray_plot:
                 plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
-            plt.plot(x.flatten()[ws:-ws], movingaverage(y.flatten(), ws)[ws:-ws], 'r',
+            ma_array = numpy.c_[x.flatten()[ws:-ws],
+                                movingaverage(y.flatten(), ws)[ws:-ws]]
+            plt.plot(ma_array[:, 0], ma_array[:, 1], 'r',
                      linewidth=1.5)
+            prettyprint(ma_array)
     elif scatter:
         if len(x.shape) == 1:
             x = x[:,None]
@@ -473,10 +487,10 @@ while True:
         y = numpy.squeeze(y)
         if x.shape == (0,): # If not x field is given with fields option
             x = numpy.arange(y.shape[0])
-        if not options.interactive:
-            print "Shape of x and y data: %s %s"%(x.shape, y.shape)
-        else:
-            print "x: %s; y: %s"%(x[-1], y[-1])
+        #if not options.interactive:
+        #    print "Shape of x and y data: %s %s"%(x.shape, y.shape)
+        #else:
+        #    print "x: %s; y: %s"%(x[-1], y[-1])
         plt.clf()
         if options.normalize == 'x':
             xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
