@@ -325,7 +325,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                              markersize=0.)
             else:
                 for i, yi in enumerate(y.T):
-                    plt.errorbar(x.flatten(), yi, yerr=e[:,i],
+                    plt.errorbar(x[:, i].flatten(), yi, yerr=e[:,i],
                                  markersize=0., c=colors[i])
         if options.labels is not None:
             plt.legend()
