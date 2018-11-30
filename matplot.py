@@ -286,7 +286,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                                 movingaverage(y.flatten(), ws)[ws:-ws]]
             plt.plot(ma_array[:, 0], ma_array[:, 1], 'r',
                      linewidth=1.5)
-            prettyprint(ma_array)
+            #prettyprint(ma_array)
     elif scatter:
         if len(x.shape) == 1:
             x = x[:,None]
