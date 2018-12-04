@@ -124,6 +124,8 @@ histogram_options.add_option("--normed", dest="normed", default=False, action="s
 if is_sklearn:
     histogram_options.add_option("--gmm", dest="gmm", default=None, type='int',
                                 help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
+histogram_options.add_option("--kde", dest="kde", default=False, action="store_true",
+                            help="Plot a gaussian kernel density estimate along with the histogram")
 parser.add_option_group(histogram_options)
 
 histogram2d_options = OptionGroup(parser, "Plotting 2D-histogram")
@@ -397,7 +399,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             options.normed = True
         if n_bins == -1:
             n_bins = freedman_diaconis_rule(y)
-        histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
+        if not options.kde:
+            histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
+        else:
+            sns.distplot(y, hist_kws={"range": (xmin,xmax)})
         if is_sklearn:
             if options.gmm is not None:
                 ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
