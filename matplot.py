@@ -227,6 +227,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.xscale('log')
         elif options.semilog == 'y':
             plt.yscale('log')
+    if options.labels is not None:
+        labels = options.labels.split(',')
+    else:
+        labels = None
     if options.subplot is not None:
         n, p = int(options.subplot[0][0]), int(options.subplot[0][1])
         # n: number of row
@@ -304,10 +308,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 else:
                     plt.scatter(x,y)
         else:
-            if options.labels is not None:
-                labels = options.labels.split(',')
-            else:
-                labels = None
             if x.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
                 for i, xi in enumerate(x.T):
@@ -405,7 +405,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             if data.ndim > 1:
                 for ndim_ in range(data.ndim):
                     sel = ~numpy.isnan(data[:, ndim_])
-                    sns.distplot(data[:, ndim_][sel], label='col %d'%(ndim_+1))
+                    if labels is not None:
+                        label = labels[ndim_]
+                    else:
+                        label = 'col %d'%(ndim_+1)
+                    sns.distplot(data[:, ndim_][sel], label=label)
                 plt.legend()
             else:
                 sns.distplot(y)
