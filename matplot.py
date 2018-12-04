@@ -96,7 +96,7 @@ If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
 If --fields='*' is given all the columns are considered as y values.")
-scatter_options.add_option("--labels", dest="labels", default=None, type='str',
+parser.add_option("--labels", dest="labels", default=None, type='str',
                            help="Comma separated list of labels for each field \
 defined with the --fields option.")
 scatter_options.add_option("--line", dest='line', default=False,
