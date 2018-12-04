@@ -402,7 +402,13 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if not options.kde:
             histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
         else:
-            sns.distplot(y, hist_kws={"range": (xmin,xmax)})
+            if data.ndim > 1:
+                for ndim_ in range(data.ndim):
+                    sel = ~numpy.isnan(data[:, ndim_])
+                    sns.distplot(data[:, ndim_][sel], label='col %d'%(ndim_+1))
+                plt.legend()
+            else:
+                sns.distplot(y)
         if is_sklearn:
             if options.gmm is not None:
                 ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
