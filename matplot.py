@@ -48,11 +48,16 @@ from prettytable import PrettyTable
 
 
 parser = OptionParser()
-parser.add_option("--interactive", dest="interactive", default=False,
-                  action="store_true",
-                  help="Plot data interactively from stdin stream. \
-                  Example usage:                                   \
-                  tail -n 1000 -f file.txt | grep --line-buffered 'pattern' | awk '{print $2; system(\"\")}' | matplot")
+interactive_options = OptionGroup(parser, "Interactive")
+interactive_options.add_option("--interactive", dest="interactive", default=False,
+                               action="store_true",
+                               help="Plot data interactively from stdin stream. \
+                               Example usage:                                   \
+                               tail -n 1000 -f file.txt | grep --line-buffered 'pattern' | awk '{print $2; system(\"\")}' | matplot --interactive")
+interactive_options.add_option("--tail", dest="tail", default=None, type='int',
+                               help="Plot only the last N lines in interactive plotting",
+                               metavar="N")
+parser.add_option_group(interactive_options)
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
@@ -446,7 +451,10 @@ while True:
             data = numpy.asarray(dataline.split(), dtype=numpy.float)
             print data.shape
         else:
-            data = numpy.r_[data.flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
+            if options.tail is not None:
+                data = numpy.r_[data[-(options.tail-1):].flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
+            else:
+                data = numpy.r_[data.flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
         if options.fields is not None:
             n_field = len(options.fields)
             n_point = len(data)/n_field
