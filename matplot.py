@@ -12,14 +12,17 @@ Thanks!
 import time
 import sys
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
-reload(sys)
-sys.setdefaultencoding('utf8')
+#reload(sys)
+#sys.setdefaultencoding('utf8')
 ##############################
+import matplotlib.pyplot as plt
+import matplotlib
+import matplotlib.cm as cm
 try:
     import seaborn as sns
     sns.set_context('talk')
 except ImportError:
-    print "seaborn not installed"
+    print("seaborn not installed")
 # For publication quality plot
     params = {
        'axes.labelsize': 14,
@@ -33,16 +36,13 @@ except ImportError:
     plt.rcParams.update(params)
     pass
 import numpy
-import matplotlib.pyplot as plt
-import matplotlib
-import matplotlib.cm as cm
 from optparse import OptionParser
 from optparse import OptionGroup
 try:
     from sklearn import mixture
     is_sklearn = True
 except ImportError:
-    print "sklearn is not installed you cannot use the Gaussian Mixture Model option"
+    print("sklearn is not installed you cannot use the Gaussian Mixture Model option")
     is_sklearn = False
 from prettytable import PrettyTable
 
@@ -169,7 +169,7 @@ def prettyprint(A):
     x = PrettyTable(A.dtype.names, header=False,border=False)
     for row in A:
         x.add_row(row)
-    print x
+    print(x)
 
 
 def movingaverage(data, window_size):
@@ -190,7 +190,7 @@ def sort_scatter_data(data, nbins=None):
         nbins = int(len(data) * .002)
     if nbins < 10:
         nbins = 10
-    print "Number of bins used to order the data: %d"%nbins
+    print("Number of bins used to order the data: %d"%nbins)
     hdd, bins = numpy.histogramdd(data, bins=nbins)
     digits = numpy.asarray([numpy.digitize(v, bins[i], right=True) for i,v in enumerate(data.T)]).T
     digits[digits==nbins]-=1
@@ -211,7 +211,7 @@ def freedman_diaconis_rule(data):
         n_bins = 2
     else:
         n_bins = int(n_bins)
-    print "Freedman–Diaconis optimal number of bins: %d"%n_bins
+    print("Freedman–Diaconis optimal number of bins: %d"%n_bins)
     return n_bins
 
 def set_y_lim(ymin, ymax):
@@ -421,10 +421,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if is_sklearn:
             if options.gmm is not None:
                 ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
-                print "Gaussian Mixture Model with %d components"%options.gmm
-                print "Means: %s"%ms
-                print "Variances: %s"%cs
-                print "Weights: %s"%ws
+                print("Gaussian Mixture Model with %d components"%options.gmm)
+                print("Means: %s"%ms)
+                print("Variances: %s"%cs)
+                print("Weights: %s"%ws)
                 fitting = numpy.zeros_like(histo[1])
                 for w, m, c in zip(ws, ms, cs):
                     fitting += w*matplotlib.mlab.normpdf(histo[1],m,c)
@@ -449,7 +449,7 @@ while True:
             time.sleep(2)
         if data is None:
             data = numpy.asarray(dataline.split(), dtype=numpy.float)
-            print data.shape
+            print(data.shape)
         else:
             if options.tail is not None:
                 data = numpy.r_[data[-(options.tail-1):].flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
