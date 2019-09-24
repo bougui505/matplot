@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF8 -*-
 """
 author: Guillaume Bouvier
@@ -20,7 +20,7 @@ import matplotlib
 import matplotlib.cm as cm
 try:
     import seaborn as sns
-    sns.set_context('talk')
+    sns.set_context('paper')
 except ImportError:
     print("seaborn not installed")
 # For publication quality plot
