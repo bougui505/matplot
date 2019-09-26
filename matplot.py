@@ -397,9 +397,9 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.colorbar()
     else:
         if xmin is None:
-            xmin = min(y)
+            xmin = min(y.flatten())
         if xmax is None:
-            xmax = max(y)
+            xmax = max(y.flatten())
         if is_sklearn and options.gmm is not None:
             options.normed = True
         if n_bins == -1:
