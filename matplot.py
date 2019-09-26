@@ -162,6 +162,22 @@ if is_sklearn:
         ws = [w for w in wl]
         return ms, cs, ws
 
+def mypause(interval):
+    """
+    Custom pause function for interactive plotting replacing plt.pause.
+    This function avoids making interactive window to pop to front on each update
+    (see: https://stackoverflow.com/a/45734500/1679629)
+    """
+    backend = plt.rcParams['backend']
+    if backend in matplotlib.rcsetup.interactive_bk:
+        figManager = matplotlib._pylab_helpers.Gcf.get_active()
+        if figManager is not None:
+            canvas = figManager.canvas
+            if canvas.figure.stale:
+                canvas.draw()
+            canvas.start_event_loop(interval)
+            return
+
 def prettyprint(A):
     """
     Pretty print of an array (A)
@@ -437,7 +453,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
     set_y_lim(options.ymin, options.ymax)
     if options.interactive:
         plt.draw()
-        plt.pause(0.0001)
+        mypause(0.0001)
     else:
         plt.show()
 
