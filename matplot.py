@@ -424,7 +424,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
         else:
             if data.ndim > 1:
-                for ndim_ in range(data.ndim):
+                for ndim_ in range(data.shape[1]):
                     sel = ~numpy.isnan(data[:, ndim_])
                     if labels is not None:
                         label = labels[ndim_]
