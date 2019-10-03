@@ -473,7 +473,7 @@ while True:
                 data = numpy.r_[data.flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
         if options.fields is not None:
             n_field = len(options.fields)
-            n_point = len(data)/n_field
+            n_point = len(data)//n_field
             data = data.reshape(n_point, n_field)
             n = n_point
         else:
