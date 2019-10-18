@@ -23,6 +23,10 @@ try:
     sns.set_context('paper')
 except ImportError:
     print("seaborn not installed")
+try:
+    import mpld3
+except ImportError:
+    print("mpld3 not installed")
 # For publication quality plot
     params = {
        'axes.labelsize': 14,
@@ -58,6 +62,8 @@ interactive_options.add_option("--tail", dest="tail", default=None, type='int',
                                help="Plot only the last N lines in interactive plotting",
                                metavar="N")
 parser.add_option_group(interactive_options)
+parser.add_option("--mpld3" , dest="mpld3", default=False, action="store_true",
+                    help="plot in the browser using mpld3 library")
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
@@ -274,7 +280,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             if i % p != 0: # Not first column
                 # Hide y labels:
                 plt.tick_params(labelleft='off')
-        plt.show()
+        if options.mpld3:
+            mpld3.show()
+        else:
+            plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
@@ -455,7 +464,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         plt.draw()
         mypause(.5)
     else:
-        plt.show()
+        if options.mpld3:
+            mpld3.show()
+        else:
+            plt.show()
 
 data = None
 while True:
