@@ -282,6 +282,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 plt.tick_params(labelleft='off')
         if options.mpld3:
             mpld3.show()
+            mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
             plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
@@ -466,6 +467,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
     else:
         if options.mpld3:
             mpld3.show()
+            mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
             plt.show()
 
