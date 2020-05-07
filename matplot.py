@@ -319,8 +319,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             if options.gray_plot:
                 plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
             ws =  options.moving_average # window size
-            ma_array = numpy.c_[x.flatten()[ws/2:-ws/2],
-                                movingaverage(y.flatten(), ws)[ws/2:-ws/2]]
+            ma_array = numpy.c_[x.flatten()[int(ws / 2): int(-ws / 2)],
+                                movingaverage(y.flatten(), ws)[int(ws / 2): int(-ws / 2)]]
             plt.plot(ma_array[:, 0], ma_array[:, 1], 'r',
                      linewidth=1.5)
             #prettyprint(ma_array)
