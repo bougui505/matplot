@@ -269,6 +269,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.subplot(gs[i])
             # Set the same scale for all axis
             plt.axis((x.min(), x.max(), y.min(), y.max()))
+            if labels is not None:
+                plt.title(labels[i])
             if options.semilog is not None:
                 if options.semilog == "x":
                     plt.semilogx(xdata, ydata)
