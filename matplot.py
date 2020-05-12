@@ -279,7 +279,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             else:
                 if options.scatter:
                     plt.scatter(xdata, ydata)
-                if options.histogram2d:
+                elif options.histogram2d:
                     plt.hist2d(xdata, ydata, bins=n_bins)
                 else:
                     plt.plot(xdata, ydata)
