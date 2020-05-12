@@ -264,20 +264,25 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         # p: numper of column
         gs = matplotlib.gridspec.GridSpec(n, p)
         for i, ydata in enumerate(y.T):
+            print(f"Subplot {i} from {y.T.shape}")
+            xdata = x.T[i]
             plt.subplot(gs[i])
             # Set the same scale for all axis
-            plt.axis((x.min(),x.max(),y.min(),y.max()))
+            plt.axis((x.min(), x.max(), y.min(), y.max()))
             if options.semilog is not None:
                 if options.semilog == "x":
-                    plt.semilogx(x, ydata)
+                    plt.semilogx(xdata, ydata)
                 elif options.semilog == 'y':
-                    plt.semilogy(x, ydata)
+                    plt.semilogy(xdata, ydata)
             else:
-                plt.plot(x, ydata)
-            if i < n*p - p: # Not last row
+                if options.scatter:
+                    plt.scatter(xdata, ydata)
+                else:
+                    plt.plot(xdata, ydata)
+            if i < n * p - p:  # Not last row
                 # Hide xtick labels:
                 plt.tick_params(labelbottom='off')
-            if i % p != 0: # Not first column
+            if i % p != 0:  # Not first column
                 # Hide y labels:
                 plt.tick_params(labelleft='off')
         if options.mpld3:
