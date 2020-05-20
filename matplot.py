@@ -293,6 +293,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.show()
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
+            plt.grid()
             plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
@@ -478,6 +479,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.show()
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
+            plt.grid()
             plt.show()
 
 data = None
