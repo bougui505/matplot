@@ -441,7 +441,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if n_bins == -1:
             n_bins = freedman_diaconis_rule(y)
         if not options.kde:
-            histo = plt.hist(y, bins=n_bins, range=(xmin,xmax), histtype=options.histtype, normed=options.normed)
+            histo = plt.hist(y, bins=n_bins, range=(xmin, xmax),
+                             histtype=options.histtype, normed=options.normed,
+                             label=labels)
+            if options.labels is not None:
+                plt.legend()
         else:
             if data.ndim > 1:
                 for ndim_ in range(data.shape[1]):
