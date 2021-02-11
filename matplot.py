@@ -153,7 +153,7 @@ parser.add_option_group(histogram2d_options)
 
 function_options = OptionGroup(parser, "Plotting functions")
 function_options.add_option("-f", "--func", type=str, default=None,
-                            help="Evaluate and plot the function given as a string.")
+                            help="Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'")
 parser.add_option_group(function_options)
 
 (options, args) = parser.parse_args()
@@ -591,5 +591,8 @@ while True:
             ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
             y = (y - ymin)/(ymax - ymin)
         do_plot(x, y, z, e)
+    else:
+        plot_function(options.func, xlims=[options.xmin, options.xmax])
+        plt.show()
     if not options.interactive:
         break
