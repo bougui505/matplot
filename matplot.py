@@ -68,6 +68,10 @@ parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
                     help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
                     help="y axis label")
+parser.add_option("--xmin", dest="xmin", default=None, type='float',
+                  help="Minimum x-value")
+parser.add_option("--xmax", dest="xmax", default=None, type='float',
+                  help="Maximum x-value")
 parser.add_option("--ymin", dest="ymin", default=None, type='float',
                   help="Lower limit for y-axis")
 parser.add_option("--ymax", dest="ymax", default=None, type='float',
@@ -124,10 +128,6 @@ histogram_options.add_option("-b", "--bins",
                     dest="n_bins", default=-1, type="int",
                     help="Number of bins in the histogram. If -1 (default) the optimal number of bins is determined using the Freedman-Diaconis rule.",
                     metavar=10)
-histogram_options.add_option("--xmin", dest="xmin", default=None, type='float',
-                            help="Minimum x-value of the histogram")
-histogram_options.add_option("--xmax", dest="xmax", default=None, type='float',
-                            help="Maximum x-value of the histogram")
 histogram_options.add_option("--histtype", dest="histtype", default='bar', type='str',
                             help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
 histogram_options.add_option("--normed", dest="normed", default=False, action="store_true",
@@ -150,6 +150,12 @@ histogram2d_options.add_option("--projection1d", action="store_true",
                                 dest="projection1d", default=False,
                                 help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
+
+function_options = OptionGroup(parser, "Plotting functions")
+function_options.add_option("-f", "--func", type=str, default=None,
+                            help="Evaluate and plot the function given as a string.")
+parser.add_option_group(function_options)
+
 (options, args) = parser.parse_args()
 
 if options.interactive:
@@ -245,10 +251,26 @@ def set_y_lim(ymin, ymax):
         ymax = limits[-1]
     axes.set_ylim([ymin,ymax])
 
+
+def plot_function(expression_string, xlims, npts=100):
+    """
+    Plot a function given as an expression string
+    """
+    x = numpy.linspace(xlims[0], xlims[1], num=npts)
+    y = eval(expression_string)
+    plt.plot(x, y)
+    return x, y
+
+
 def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.scatter,
             histogram2d=options.histogram2d, logscale=options.logscale,
             projection1d=options.projection1d,
-            n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax):
+            n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax,
+            func=options.func):
+    if xmin is None:
+        xmin = x.min()
+    if xmax is None:
+        xmax = x.max()
     if options.semilog is not None:
         if options.semilog == "x":
             plt.xscale('log')
@@ -469,6 +491,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                 for w, m, c in zip(ws, ms, cs):
                     fitting += w*matplotlib.mlab.normpdf(histo[1],m,c)
                 plt.plot(histo[1], fitting, linewidth=3)
+    if func is not None:
+        plot_function(func, [xmin, xmax])
     if not projection1d:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
