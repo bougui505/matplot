@@ -152,8 +152,8 @@ histogram2d_options.add_option("--projection1d", action="store_true",
 parser.add_option_group(histogram2d_options)
 
 function_options = OptionGroup(parser, "Plotting functions")
-function_options.add_option("-f", "--func", type=str, default=None,
-                            help="Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'")
+function_options.add_option("-f", "--func", type=str, default=None, action='append',
+                            help="Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'. Multiple functions can be plotted at the same time by giving multiple expression with multiple -f option passed.")
 parser.add_option_group(function_options)
 
 (options, args) = parser.parse_args()
@@ -252,13 +252,22 @@ def set_y_lim(ymin, ymax):
     axes.set_ylim([ymin,ymax])
 
 
+def plot_functions(expression_strings, xlims, npts=100):
+    """
+    Plot a list of functions given as a list of expression strings
+    """
+    for expression_string in expression_strings:
+        plot_function(expression_string, xlims, npts=npts)
+
+
 def plot_function(expression_string, xlims, npts=100):
     """
     Plot a function given as an expression string
     """
     x = numpy.linspace(xlims[0], xlims[1], num=npts)
     y = eval(expression_string)
-    plt.plot(x, y)
+    plt.plot(x, y, label=expression_string)
+    plt.legend()
     return x, y
 
 
@@ -492,7 +501,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     fitting += w*matplotlib.mlab.normpdf(histo[1],m,c)
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
-        plot_function(func, [xmin, xmax])
+        plot_functions(func, [xmin, xmax])
     if not projection1d:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
@@ -592,7 +601,7 @@ while True:
             y = (y - ymin)/(ymax - ymin)
         do_plot(x, y, z, e)
     else:
-        plot_function(options.func, xlims=[options.xmin, options.xmax])
+        plot_functions(options.func, xlims=[options.xmin, options.xmax])
         plt.show()
     if not options.interactive:
         break
