@@ -276,9 +276,9 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             projection1d=options.projection1d,
             n_bins=options.n_bins, xmin=options.xmin, xmax=options.xmax,
             func=options.func):
-    if xmin is None:
+    if xmin is None and func is not None:
         xmin = x.min()
-    if xmax is None:
+    if xmax is None and func is not None:
         xmax = x.max()
     if options.semilog is not None:
         if options.semilog == "x":
