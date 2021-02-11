@@ -576,11 +576,11 @@ while True:
                              numpy.asarray(e).T
                 if len(z) == 0:
                     z = None
-                else:
-                    data_sorted = sort_scatter_data(numpy.c_[x,y,z])
-                    x = data_sorted[:,0][:,None]
-                    y = data_sorted[:,1][:,None]
-                    z = data_sorted[:,2]
+                # else:
+                #     data_sorted = sort_scatter_data(numpy.c_[x,y,z])
+                #     x = data_sorted[:,0][:,None]
+                #     y = data_sorted[:,1][:,None]
+                #     z = data_sorted[:,2]
                 if len(e) == 0:
                     e = None
             x = numpy.asarray(x)[:,None]
