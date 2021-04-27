@@ -475,7 +475,9 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if n_bins == -1:
             n_bins = freedman_diaconis_rule(y)
         if not options.kde:
-            histo = plt.hist(y, bins=n_bins, range=(xmin, xmax),
+            bins = numpy.linspace(xmin, xmax, n_bins)
+            print(f"bins: {bins}")
+            histo = plt.hist(y, bins=bins, range=(xmin, xmax),
                              histtype=options.histtype, normed=options.normed,
                              label=labels, cumulative=options.cumulative)
             if options.labels is not None:
