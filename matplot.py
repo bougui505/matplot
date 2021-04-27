@@ -131,7 +131,10 @@ histogram_options.add_option("-b", "--bins",
 histogram_options.add_option("--histtype", dest="histtype", default='bar', type='str',
                             help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
 histogram_options.add_option("--normed", dest="normed", default=False, action="store_true",
-                            help="If True, the first element of the return tuple will be the counts normalized to form a probability density")
+                             help="If True, the first element of the return tuple will be the counts normalized to form a probability density")
+histogram_options.add_option("--cumulative",
+                             action="store_true", dest="cumulative", default=False,
+                             help="Cumulative histogram")
 if is_sklearn:
     histogram_options.add_option("--gmm", dest="gmm", default=None, type='int',
                                 help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
@@ -474,7 +477,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if not options.kde:
             histo = plt.hist(y, bins=n_bins, range=(xmin, xmax),
                              histtype=options.histtype, normed=options.normed,
-                             label=labels)
+                             label=labels, cumulative=options.cumulative)
             if options.labels is not None:
                 plt.legend()
         else:
