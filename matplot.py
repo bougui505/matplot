@@ -76,6 +76,8 @@ parser.add_option("--ymin", dest="ymin", default=None, type='float',
                   help="Lower limit for y-axis")
 parser.add_option("--ymax", dest="ymax", default=None, type='float',
                   help="Upper limit for y-axis")
+parser.add_option("--polyfit", dest="polyfit", default=None, type='int',
+                  help="Least squares polynomial fit, with the given degree.")
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option("--moving_average", dest="moving_average", default=None,
                   type='int', help="Plot a moving average on the data with the\
@@ -263,15 +265,27 @@ def plot_functions(expression_strings, xlims, npts=100):
         plot_function(expression_string, xlims, npts=npts)
 
 
-def plot_function(expression_string, xlims, npts=100):
+def plot_function(expression_string, xlims, npts=100, color=None, label=None):
     """
     Plot a function given as an expression string
     """
     x = numpy.linspace(xlims[0], xlims[1], num=npts)
     y = eval(expression_string)
-    plt.plot(x, y, label=expression_string)
+    if label is None:
+        label = expression_string
+    plt.plot(x, y, label=label, color=color)
     plt.legend()
     return x, y
+
+
+def polyfit(x, y, degree):
+    p = numpy.polyfit(x, y, degree)
+    n = degree
+    poly = '+'.join([f"{p[i]}*x**{n-i}" for i in range(n)])
+    poly += f"+{p[n]}"
+    label = '+'.join([f"{p[i]:.2g}*x**{n-i}" for i in range(n)])
+    label += f"+{p[n]:.2g}"
+    return poly, label
 
 
 def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.scatter,
@@ -283,6 +297,10 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         xmin = x.min()
     if xmax is None and func is not None:
         xmax = x.max()
+    if options.polyfit is not None:
+        poly, polylabel = polyfit(x, y, options.polyfit)
+        print(f"polyfit: {polylabel}")
+        plot_function(poly, (x.min(), x.max()), color='red', label=polylabel)
     if options.semilog is not None:
         if options.semilog == "x":
             plt.xscale('log')
