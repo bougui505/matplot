@@ -50,6 +50,7 @@ interactive_options.add_option("--tail", dest="tail", default=None, type='int',
                                help="Plot only the last N lines in interactive plotting",
                                metavar="N")
 parser.add_option_group(interactive_options)
+parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
 parser.add_option("--mpld3" , dest="mpld3", default=False, action="store_true",
                     help="plot in the browser using mpld3 library")
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
@@ -552,7 +553,7 @@ while True:
         else:
             n = data.shape[0]
     else:
-        data = numpy.genfromtxt(sys.stdin, invalid_raise=False)
+        data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
         n = data.shape[0]
     if options.transpose:
         data = data.T
