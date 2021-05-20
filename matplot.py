@@ -12,32 +12,21 @@ Thanks!
 import time
 import sys
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
-#reload(sys)
-#sys.setdefaultencoding('utf8')
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 ##############################
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.cm as cm
-try:
-    import seaborn as sns
-    sns.set_context('paper')
-except ImportError:
-    print("seaborn not installed")
+# try:
+#     import seaborn as sns
+#     sns.set_context('paper')
+# except ImportError:
+#     print("seaborn not installed")
 try:
     import mpld3
 except ImportError:
     print("mpld3 not installed")
-# For publication quality plot
-    params = {
-       'axes.labelsize': 14,
-       'font.size': 14,
-       'legend.fontsize': 12,
-       'xtick.labelsize': 12,
-       'ytick.labelsize': 12,
-       'text.usetex': False,
-       #'axes.color_cycle'    : 'b, g, r, c, m, y, k',
-       }
-    plt.rcParams.update(params)
     pass
 import numpy
 from optparse import OptionParser
@@ -49,7 +38,6 @@ except ImportError:
     print("sklearn is not installed you cannot use the Gaussian Mixture Model option")
     is_sklearn = False
 from prettytable import PrettyTable
-
 
 parser = OptionParser()
 interactive_options = OptionGroup(parser, "Interactive")
@@ -347,7 +335,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.show()
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
-            plt.grid()
             plt.show()
         return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
@@ -541,7 +528,6 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.show()
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
-            plt.grid()
             plt.show()
 
 data = None
