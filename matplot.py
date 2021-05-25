@@ -486,7 +486,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             bins = numpy.linspace(xmin, xmax, n_bins)
             print(f"bins: {bins}")
             histo = plt.hist(y, bins=bins, range=(xmin, xmax),
-                             histtype=options.histtype, normed=options.normed,
+                             histtype=options.histtype, density=options.normed,
                              label=labels, cumulative=options.cumulative)
             if options.labels is not None:
                 plt.legend()
