@@ -51,6 +51,7 @@ interactive_options.add_option("--tail", dest="tail", default=None, type='int',
                                metavar="N")
 parser.add_option_group(interactive_options)
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
+parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
 parser.add_option("--mpld3" , dest="mpld3", default=False, action="store_true",
                     help="plot in the browser using mpld3 library")
@@ -530,6 +531,8 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.show()
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
+            if options.title is not None:
+                plt.title(options.title)
             if options.outfilename is None:
                 plt.show()
             else:
