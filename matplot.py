@@ -250,6 +250,16 @@ def set_y_lim(ymin, ymax):
     axes.set_ylim([ymin,ymax])
 
 
+def set_x_lim(xmin, xmax):
+    axes = plt.gca()
+    limits = plt.axis()
+    if xmin is None:
+        xmin = limits[0]
+    if xmax is None:
+        xmax = limits[1]
+    axes.set_xlim([xmin, xmax])
+
+
 def plot_functions(expression_strings, xlims, npts=100):
     """
     Plot a list of functions given as a list of expression strings
@@ -522,6 +532,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.xlabel(options.xlabel)
         if options.ylabel is not None:
             plt.ylabel(options.ylabel)
+    set_x_lim(options.xmin, options.xmax)
     set_y_lim(options.ymin, options.ymax)
     if options.interactive:
         plt.draw()
