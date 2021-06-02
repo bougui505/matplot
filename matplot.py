@@ -106,6 +106,7 @@ If a 'e' field is given it is used to plot the error. \
 If --fields='*' is given all the columns are considered as y values.")
 scatter_options.add_option("-s", "--size", default=2., type=float,
                            help='size of the dots for the scatter plot (default: 2)')
+scatter_options.add_option("--sizez", action='store_true', help="Use a variable size given by the z-field")
 parser.add_option("--labels", dest="labels", default=None, type='str',
                            help="Comma separated list of labels for each field \
 defined with the --fields option.")
@@ -395,8 +396,11 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             y = y[:,None]
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
-                plt.scatter(x, y, c=z, s=options.size)
-                plt.colorbar()
+                if options.sizez:
+                    plt.scatter(x, y, s=z * options.size)
+                else:
+                    plt.scatter(x, y, c=z, s=options.size)
+                    plt.colorbar()
             else:
                 if options.line:
                     plt.plot(x, y, ',-')
