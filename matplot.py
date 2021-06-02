@@ -97,6 +97,7 @@ scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
                   dest="scatter", default=False,
                   help="Scatter plot of the (x,y) data")
+scatter_options.add_option("--alpha", type=float, default=1., help='Transparency of the scatter dots')
 scatter_options.add_option("--fields", dest="fields", default=None, type='str',
                   help="Fields for the data; e.g. 'xyxy'. By default\
                   the first column is for x data and the other for y data. \
@@ -334,7 +335,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     plt.semilogy(xdata, ydata)
             else:
                 if options.scatter:
-                    plt.scatter(xdata, ydata)
+                    plt.scatter(xdata, ydata, alpha=options.alpha)
                 elif options.histogram2d:
                     plt.hist2d(xdata, ydata, bins=n_bins)
                 else:
@@ -397,15 +398,15 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 if options.sizez:
-                    plt.scatter(x, y, s=z * options.size)
+                    plt.scatter(x, y, s=z * options.size, alpha=options.alpha)
                 else:
-                    plt.scatter(x, y, c=z, s=options.size)
+                    plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha)
                     plt.colorbar()
             else:
                 if options.line:
                     plt.plot(x, y, ',-')
                 else:
-                    plt.scatter(x, y, s=options.size)
+                    plt.scatter(x, y, s=options.size, alpha=options.alpha)
         else:
             if x.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
@@ -417,17 +418,17 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                             plt.plot(xi, yi, ',-', c=colors[i], label=labels[i])
                         else:
                             if options.sizez:
-                                plt.scatter(xi, yi, c=colors[i], label=labels[i], s=zi * options.size)
+                                plt.scatter(xi, yi, c=colors[i], label=labels[i], s=zi * options.size, alpha=options.alpha)
                             else:
-                                plt.scatter(xi, yi, c=colors[i], label=labels[i])
+                                plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha)
                     else:
                         if options.line:
                             plt.plot(xi, yi, ',-', c=colors[i])
                         else:
                             if options.sizez:
-                                plt.scatter(xi, yi, c=colors[i], s=zi * options.size)
+                                plt.scatter(xi, yi, c=colors[i], s=zi * options.size, alpha=options.alpha)
                             else:
-                                plt.scatter(xi, yi, c=colors[i])
+                                plt.scatter(xi, yi, c=colors[i], alpha=options.alpha)
             elif y.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
                 for i, yi in enumerate(y.T):
@@ -438,9 +439,9 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                             plt.plot(x, yi,  ',-', c=colors[i])
                     else:
                         if labels is not None:
-                            plt.scatter(x, yi, c=colors[i], label=labels[i])
+                            plt.scatter(x, yi, c=colors[i], label=labels[i], alpha=options.alpha)
                         else:
-                            plt.scatter(x, yi, c=colors[i])
+                            plt.scatter(x, yi, c=colors[i], alpha=options.alpha)
         if e is not None:
             if y.shape[1] == 1:
                 plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(),
