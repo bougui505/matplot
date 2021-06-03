@@ -40,16 +40,6 @@ except ImportError:
 from prettytable import PrettyTable
 
 parser = OptionParser()
-interactive_options = OptionGroup(parser, "Interactive")
-interactive_options.add_option("--interactive", dest="interactive", default=False,
-                               action="store_true",
-                               help="Plot data interactively from stdin stream. \
-                               Example usage:                                   \
-                               tail -n 1000 -f file.txt | grep --line-buffered 'pattern' | awk '{print $2; system(\"\")}' | matplot --interactive")
-interactive_options.add_option("--tail", dest="tail", default=None, type='int',
-                               help="Plot only the last N lines in interactive plotting",
-                               metavar="N")
-parser.add_option_group(interactive_options)
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
@@ -158,11 +148,9 @@ parser.add_option_group(function_options)
 
 (options, args) = parser.parse_args()
 
-if options.interactive:
-    plt.ion() # Invoke matplotlib's interactive mode
 
 if is_sklearn:
-# from: http://stackoverflow.com/a/19182915/1679629
+    # from: http://stackoverflow.com/a/19182915/1679629
     def fit_mixture(data, ncomp=2):
         clf = mixture.GMM(n_components=ncomp, covariance_type='full')
         clf.fit(data)
@@ -174,27 +162,12 @@ if is_sklearn:
         ws = [w for w in wl]
         return ms, cs, ws
 
-def mypause(interval):
-    """
-    Custom pause function for interactive plotting replacing plt.pause.
-    This function avoids making interactive window to pop to front on each update
-    (see: https://stackoverflow.com/a/45734500/1679629)
-    """
-    backend = plt.rcParams['backend']
-    if backend in matplotlib.rcsetup.interactive_bk:
-        figManager = matplotlib._pylab_helpers.Gcf.get_active()
-        if figManager is not None:
-            canvas = figManager.canvas
-            if canvas.figure.stale:
-                canvas.draw()
-            canvas.start_event_loop(interval)
-            return
 
 def prettyprint(A):
     """
     Pretty print of an array (A)
     """
-    x = PrettyTable(A.dtype.names, header=False,border=False)
+    x = PrettyTable(A.dtype.names, header=False, border=False)
     for row in A:
         x.add_row(row)
     print(x)
@@ -204,7 +177,7 @@ def movingaverage(data, window_size):
     """
     see: http://goo.gl/OMbvco
     """
-    window= numpy.ones(int(window_size))/float(window_size)
+    window = numpy.ones(int(window_size)) / float(window_size)
     return numpy.convolve(data, window, 'same')
 
 
@@ -546,104 +519,73 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             plt.ylabel(options.ylabel)
     set_x_lim(options.xmin, options.xmax)
     set_y_lim(options.ymin, options.ymax)
-    if options.interactive:
-        plt.draw()
-        mypause(.01)
+    if options.mpld3:
+        mpld3.show()
+        mpld3.save_html(plt.gcf(), 'mpld3.html')
     else:
-        if options.mpld3:
-            mpld3.show()
-            mpld3.save_html(plt.gcf(), 'mpld3.html')
+        if options.title is not None:
+            plt.title(options.title)
+        if options.outfilename is None:
+            plt.show()
         else:
-            if options.title is not None:
-                plt.title(options.title)
-            if options.outfilename is None:
-                plt.show()
-            else:
-                plt.savefig(options.outfilename)
+            plt.savefig(options.outfilename)
 
-data = None
-while True:
-    if options.interactive:
-        dataline = sys.stdin.readline()
-        if len(dataline) == 0:
-            time.sleep(2)
-        if data is None:
-            data = numpy.asarray(dataline.split(), dtype=numpy.float)
-            print(data.shape)
-        else:
-            if options.tail is not None:
-                data = numpy.r_[data[-(options.tail-1):].flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
-            else:
-                data = numpy.r_[data.flatten(), numpy.asarray(dataline.split(), dtype=numpy.float)]
-        if options.fields is not None:
-            n_field = len(options.fields)
-            n_point = len(data)//n_field
-            data = data.reshape(n_point, n_field)
-            n = n_point
-        else:
-            n = data.shape[0]
+
+data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
+n = data.shape[0]
+if options.transpose:
+    data = data.T
+if n > 1:
+    if len(data.shape) == 1:
+        x = range(n)
+        y = data
+        z = None
+        e = None
+        x = numpy.asarray(x)[:,None]
+        y = numpy.asarray(y)[:,None]
     else:
-        data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
-        n = data.shape[0]
-    if options.transpose:
-        data = data.T
-    if n > 1:
-        if len(data.shape) == 1:
-            x = range(n)
-            y = data
+        if options.fields is None:
+            x = data[:,0]
+            y = data[:,1:]
             z = None
             e = None
-            x = numpy.asarray(x)[:,None]
-            y = numpy.asarray(y)[:,None]
         else:
-            if options.fields is None:
-                x = data[:,0]
-                y = data[:,1:]
+            x, y, z, e = [], [], [], []
+            for i, field in enumerate(options.fields):
+                if field == 'x':
+                    x.append(data[:,i])
+                elif field == 'y':
+                    y.append(data[:,i])
+                elif field == 'z':
+                    z.append(data[:,i])
+                elif field == 'e':
+                    e.append(data[:,i])
+                elif field == '*':
+                    y = data.T
+            x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
+                         numpy.asarray(e).T
+            if len(z) == 0:
                 z = None
+            # else:
+            #     data_sorted = sort_scatter_data(numpy.c_[x,y,z])
+            #     x = data_sorted[:,0][:,None]
+            #     y = data_sorted[:,1][:,None]
+            #     z = data_sorted[:,2]
+            if len(e) == 0:
                 e = None
-            else:
-                x, y, z, e = [], [], [], []
-                for i, field in enumerate(options.fields):
-                    if field == 'x':
-                        x.append(data[:,i])
-                    elif field == 'y':
-                        y.append(data[:,i])
-                    elif field == 'z':
-                        z.append(data[:,i])
-                    elif field == 'e':
-                        e.append(data[:,i])
-                    elif field == '*':
-                        y = data.T
-                x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
-                             numpy.asarray(e).T
-                if len(z) == 0:
-                    z = None
-                # else:
-                #     data_sorted = sort_scatter_data(numpy.c_[x,y,z])
-                #     x = data_sorted[:,0][:,None]
-                #     y = data_sorted[:,1][:,None]
-                #     z = data_sorted[:,2]
-                if len(e) == 0:
-                    e = None
-            x = numpy.asarray(x)[:,None]
-        x = numpy.squeeze(x)
-        y = numpy.squeeze(y)
-        if x.shape == (0,): # If not x field is given with fields option
-            x = numpy.arange(y.shape[0])
-        #if not options.interactive:
-        #    print "Shape of x and y data: %s %s"%(x.shape, y.shape)
-        #else:
-        #    print "x: %s; y: %s"%(x[-1], y[-1])
-        plt.clf()
-        if options.normalize == 'x':
-            xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
-            x = (x - xmin)/(xmax - xmin)
-        if options.normalize == 'y':
-            ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
-            y = (y - ymin)/(ymax - ymin)
-        do_plot(x, y, z, e)
-    else:
-        plot_functions(options.func, xlims=[options.xmin, options.xmax])
-        plt.show()
-    if not options.interactive:
-        break
+        x = numpy.asarray(x)[:,None]
+    x = numpy.squeeze(x)
+    y = numpy.squeeze(y)
+    if x.shape == (0,): # If not x field is given with fields option
+        x = numpy.arange(y.shape[0])
+    plt.clf()
+    if options.normalize == 'x':
+        xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
+        x = (x - xmin)/(xmax - xmin)
+    if options.normalize == 'y':
+        ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
+        y = (y - ymin)/(ymax - ymin)
+    do_plot(x, y, z, e)
+else:
+    plot_functions(options.func, xlims=[options.xmin, options.xmax])
+    plt.show()
