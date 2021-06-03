@@ -370,7 +370,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 if options.sizez:
-                    plt.scatter(x, y, s=z * options.size, alpha=options.alpha)
+                    plt.scatter(x, y, s=z * options.size, alpha=options.alpha, facecolor='none', edgecolor='blue')
                 else:
                     plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha)
                     plt.colorbar()
@@ -390,7 +390,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                             plt.plot(xi, yi, ',-', c=colors[i], label=labels[i])
                         else:
                             if options.sizez:
-                                plt.scatter(xi, yi, c=colors[i], label=labels[i], s=zi * options.size, alpha=options.alpha)
+                                plt.scatter(xi, yi, label=labels[i], s=zi * options.size, alpha=options.alpha, facecolor='none', edgecolor=colors[i])
                             else:
                                 plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha)
                     else:
@@ -398,7 +398,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                             plt.plot(xi, yi, ',-', c=colors[i])
                         else:
                             if options.sizez:
-                                plt.scatter(xi, yi, c=colors[i], s=zi * options.size, alpha=options.alpha)
+                                plt.scatter(xi, yi, s=zi * options.size, alpha=options.alpha, facecolor='none', edgecolor=colors[i])
                             else:
                                 plt.scatter(xi, yi, c=colors[i], alpha=options.alpha)
             elif y.shape[1] > 1:
