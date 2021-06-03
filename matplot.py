@@ -9,7 +9,6 @@ Please feel free to use and modify this, but keep the above information.
 Thanks!
 """
 
-import time
 import sys
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
 # reload(sys)
@@ -43,12 +42,12 @@ parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
-parser.add_option("--mpld3" , dest="mpld3", default=False, action="store_true",
-                    help="plot in the browser using mpld3 library")
+parser.add_option("--mpld3", dest="mpld3", default=False, action="store_true",
+                  help="plot in the browser using mpld3 library")
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str',
-                    help="x axis label")
+                  help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str',
-                    help="y axis label")
+                  help="y axis label")
 parser.add_option("--xmin", dest="xmin", default=None, type='float',
                   help="Minimum x-value")
 parser.add_option("--xmax", dest="xmax", default=None, type='float',
@@ -61,11 +60,11 @@ parser.add_option("--polyfit", dest="polyfit", default=None, type='int',
                   help="Least squares polynomial fit, with the given degree.")
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option("--moving_average", dest="moving_average", default=None,
-                  type='int', help="Plot a moving average on the data with the\
-                  given window size. It also prints the values on stdout", metavar=10)
+                                  type='int', help="Plot a moving average on the data with the\
+                                  given window size. It also prints the values on stdout", metavar=10)
 moving_average_options.add_option("--no_gray_plot", dest="gray_plot", default=True,
-                  action="store_false",
-                  help="Do not plot original data in gray with moving_average option")
+                                  action="store_false",
+                                  help="Do not plot original data in gray with moving_average option")
 parser.add_option_group(moving_average_options)
 parser.add_option("--bar", dest="bar", default=False, action="store_true",
                   help="Simple bar plot for single unidimensional data")
@@ -85,12 +84,12 @@ parser.add_option("--subplot", dest="subplot", nargs=2, action='append',
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter", action="store_true",
-                  dest="scatter", default=False,
-                  help="Scatter plot of the (x,y) data")
+                           dest="scatter", default=False,
+                           help="Scatter plot of the (x,y) data")
 scatter_options.add_option("--alpha", type=float, default=1., help='Transparency of the scatter dots')
 scatter_options.add_option("--fields", dest="fields", default=None, type='str',
-                  help="Fields for the data; e.g. 'xyxy'. By default\
-                  the first column is for x data and the other for y data. \
+                           help="Fields for the data; e.g. 'xyxy'. By default\
+                           the first column is for x data and the other for y data. \
 If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
@@ -99,8 +98,8 @@ scatter_options.add_option("-s", "--size", default=2., type=float,
                            help='size of the dots for the scatter plot (default: 2)')
 scatter_options.add_option("--sizez", action='store_true', help="Use a variable size given by the z-field")
 parser.add_option("--labels", dest="labels", default=None, type='str',
-                           help="Comma separated list of labels for each field \
-defined with the --fields option.")
+                  help="Comma separated list of labels for each field \
+                  defined with the --fields option.")
 scatter_options.add_option("--line", dest='line', default=False,
                            action="store_true",
                            help="Plot line between points")
@@ -109,14 +108,14 @@ parser.add_option_group(scatter_options)
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H", "--histogram",
-                    action="store_true", dest="histogram", default=False,
-                    help="Compute and plot histogram from data")
+                             action="store_true", dest="histogram", default=False,
+                             help="Compute and plot histogram from data")
 histogram_options.add_option("-b", "--bins",
-                    dest="n_bins", default=-1, type="int",
-                    help="Number of bins in the histogram. If -1 (default) the optimal number of bins is determined using the Freedman-Diaconis rule.",
-                    metavar=10)
+                             dest="n_bins", default=-1, type="int",
+                             help="Number of bins in the histogram. If -1 (default) the optimal number of bins is determined using the Freedman-Diaconis rule.",
+                             metavar=10)
 histogram_options.add_option("--histtype", dest="histtype", default='bar', type='str',
-                            help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
+                             help="Histogram type: bar, barstacked, step, stepfilled", metavar='bar')
 histogram_options.add_option("--normed", dest="normed", default=False, action="store_true",
                              help="If True, the first element of the return tuple will be the counts normalized to form a probability density")
 histogram_options.add_option("--cumulative",
@@ -124,21 +123,21 @@ histogram_options.add_option("--cumulative",
                              help="Cumulative histogram")
 if is_sklearn:
     histogram_options.add_option("--gmm", dest="gmm", default=None, type='int',
-                                help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
+                                 help="Gaussian Mixture Model with n components. Trigger the normed option.", metavar=2)
 histogram_options.add_option("--kde", dest="kde", default=False, action="store_true",
-                            help="Plot a gaussian kernel density estimate along with the histogram")
+                             help="Plot a gaussian kernel density estimate along with the histogram")
 parser.add_option_group(histogram_options)
 
 histogram2d_options = OptionGroup(parser, "Plotting 2D-histogram")
 histogram2d_options.add_option("--histogram2d", action="store_true",
-                                dest="histogram2d", default=False,
-                                help="Compute and plot 2D-histogram from data. -b (--bins) can be used to define the number of bins.")
+                               dest="histogram2d", default=False,
+                               help="Compute and plot 2D-histogram from data. -b (--bins) can be used to define the number of bins.")
 histogram2d_options.add_option("--logscale", action="store_true",
-                                dest="logscale", default=False,
-                                help="log scale")
+                               dest="logscale", default=False,
+                               help="log scale")
 histogram2d_options.add_option("--projection1d", action="store_true",
-                                dest="projection1d", default=False,
-                                help="Plot 1D histogram for the x and y axis")
+                               dest="projection1d", default=False,
+                               help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
 
 function_options = OptionGroup(parser, "Plotting functions")
@@ -191,10 +190,10 @@ def sort_scatter_data(data, nbins=None):
         nbins = int(len(data) * .002)
     if nbins < 10:
         nbins = 10
-    print("Number of bins used to order the data: %d"%nbins)
+    print("Number of bins used to order the data: %d" % nbins)
     hdd, bins = numpy.histogramdd(data, bins=nbins)
-    digits = numpy.asarray([numpy.digitize(v, bins[i], right=True) for i,v in enumerate(data.T)]).T
-    digits[digits==nbins]-=1
+    digits = numpy.asarray([numpy.digitize(v, bins[i], right=True) for i, v in enumerate(data.T)]).T
+    digits[digits == nbins] -= 1
     counts = numpy.asarray([hdd[tuple(e)] for e in digits])
     return data[counts.argsort()][::-1]
 
@@ -204,16 +203,17 @@ def freedman_diaconis_rule(data):
     Compute the optimal number of bins accordingly to the Freedman–Diaconis rule.
     See: https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule
     """
-    q75, q25 = numpy.percentile(data, [75 ,25])
+    q75, q25 = numpy.percentile(data, [75, 25])
     iqr = q75 - q25
-    bin_size = 2*iqr/(len(data))**(1./3)
-    n_bins = numpy.ceil(numpy.ptp(data)/bin_size)
+    bin_size = 2 * iqr / (len(data))**(1. / 3)
+    n_bins = numpy.ceil(numpy.ptp(data) / bin_size)
     if numpy.isnan(n_bins) or n_bins == numpy.inf:
         n_bins = 2
     else:
         n_bins = int(n_bins)
-    print("Freedman–Diaconis optimal number of bins: %d"%n_bins)
+    print("Freedman–Diaconis optimal number of bins: %d" % n_bins)
     return n_bins
+
 
 def set_y_lim(ymin, ymax):
     axes = plt.gca()
@@ -222,7 +222,7 @@ def set_y_lim(ymin, ymax):
         ymin = limits[-2]
     if ymax is None:
         ymax = limits[-1]
-    axes.set_ylim([ymin,ymax])
+    axes.set_ylim([ymin, ymax])
 
 
 def set_x_lim(xmin, xmax):
@@ -324,7 +324,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             mpld3.save_html(plt.gcf(), 'mpld3.html')
         else:
             plt.show()
-        return None # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
+        return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
@@ -334,18 +334,18 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     plt.bar(x, y, align='center')
             else:
                 if len(x.shape) == 1:
-                    x = x[:,None]
+                    x = x[:, None]
                 if x.shape[1] > 1:
-                    colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
+                    colors = cm.rainbow(numpy.linspace(0, 1, x.shape[1]))
                     for i, xi in enumerate(x.T):
                         yi = y.T[i]
                         plt.plot(xi.flatten(), yi.flatten(), c=colors[i])
                 elif y.shape[1] > 1:
-                    colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
+                    colors = cm.rainbow(numpy.linspace(0, 1, y.shape[1]))
                     for i, yi in enumerate(y.T):
                         plt.plot(x.flatten(), yi.flatten(), c=colors[i])
             if e is not None:
-                if len(y.shape) == 1: # No more than 1 curve
+                if len(y.shape) == 1:  # No more than 1 curve
                     plt.fill_between(x.flatten(), y.flatten() - e.flatten(),
                                      y.flatten() + e.flatten(), facecolor='gray',
                                      alpha=.5)
@@ -354,20 +354,19 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                         plt.fill_between(x[:, i], y[:, i] - e[:, i],
                                          y[:, i] + e[:, i], facecolor='gray',
                                          alpha=.5)
-        else: # Moving average
+        else:  # Moving average
             if options.gray_plot:
                 plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
-            ws =  options.moving_average # window size
+            ws = options.moving_average  # window size
             ma_array = numpy.c_[x.flatten()[int(ws / 2): int(-ws / 2)],
                                 movingaverage(y.flatten(), ws)[int(ws / 2): int(-ws / 2)]]
             plt.plot(ma_array[:, 0], ma_array[:, 1], 'r',
                      linewidth=1.5)
-            #prettyprint(ma_array)
     elif scatter:
         if len(x.shape) == 1:
-            x = x[:,None]
+            x = x[:, None]
         if len(y.shape) == 1:
-            y = y[:,None]
+            y = y[:, None]
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 if options.sizez:
@@ -382,7 +381,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     plt.scatter(x, y, s=options.size, alpha=options.alpha)
         else:
             if x.shape[1] > 1:
-                colors = cm.rainbow(numpy.linspace(0,1,x.shape[1]))
+                colors = cm.rainbow(numpy.linspace(0, 1, x.shape[1]))
                 for i, xi in enumerate(x.T):
                     yi = y.T[i]
                     zi = z.T[i]
@@ -403,13 +402,13 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                             else:
                                 plt.scatter(xi, yi, c=colors[i], alpha=options.alpha)
             elif y.shape[1] > 1:
-                colors = cm.rainbow(numpy.linspace(0,1,y.shape[1]))
+                colors = cm.rainbow(numpy.linspace(0, 1, y.shape[1]))
                 for i, yi in enumerate(y.T):
                     if options.line:
                         if labels is not None:
-                            plt.plot(x, yi,  ',-', c=colors[i], label=labels[i])
+                            plt.plot(x, yi, ',-', c=colors[i], label=labels[i])
                         else:
-                            plt.plot(x, yi,  ',-', c=colors[i])
+                            plt.plot(x, yi, ',-', c=colors[i])
                     else:
                         if labels is not None:
                             plt.scatter(x, yi, c=colors[i], label=labels[i], alpha=options.alpha)
@@ -421,13 +420,13 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                              markersize=0.)
             else:
                 for i, yi in enumerate(y.T):
-                    plt.errorbar(x[:, i].flatten(), yi, yerr=e[:,i],
+                    plt.errorbar(x[:, i].flatten(), yi, yerr=e[:, i],
                                  markersize=0., c=colors[i])
         if options.labels is not None:
             plt.legend()
     elif histogram2d:
         x, y = x.flatten(), y.flatten()
-        if projection1d: #1D projections of histogram
+        if projection1d:  # 1D projections of histogram
             # definitions for the axes
             left, width = 0.1, 0.65
             bottom, height = 0.1, 0.65
@@ -461,7 +460,7 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
             axHisty.hist(y, bins=n_bins, orientation='horizontal')
             axHistx.set_xlim(axScatter.get_xlim())
             axHisty.set_ylim(axScatter.get_ylim())
-            #Cool trick that changes the number of tickmarks for the histogram axes
+            # Cool trick that changes the number of tickmarks for the histogram axes
             axHisty.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
             axHistx.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
         else:
@@ -494,21 +493,21 @@ def do_plot(x, y, z=None, e=None, histogram=options.histogram, scatter=options.s
                     if labels is not None:
                         label = labels[ndim_]
                     else:
-                        label = 'col %d'%(ndim_+1)
+                        label = 'col %d' % (ndim_ + 1)
                     sns.distplot(data[:, ndim_][sel], label=label)
                 plt.legend()
             else:
                 sns.distplot(y)
         if is_sklearn:
             if options.gmm is not None:
-                ms, cs, ws = fit_mixture(y, ncomp = options.gmm)
-                print("Gaussian Mixture Model with %d components"%options.gmm)
-                print("Means: %s"%ms)
-                print("Variances: %s"%cs)
-                print("Weights: %s"%ws)
+                ms, cs, ws = fit_mixture(y, ncomp=options.gmm)
+                print("Gaussian Mixture Model with %d components" % options.gmm)
+                print("Means: %s" % ms)
+                print("Variances: %s" % cs)
+                print("Weights: %s" % ws)
                 fitting = numpy.zeros_like(histo[1])
                 for w, m, c in zip(ws, ms, cs):
-                    fitting += w*matplotlib.mlab.normpdf(histo[1],m,c)
+                    fitting += w * matplotlib.mlab.normpdf(histo[1], m, c)
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
         plot_functions(func, [xmin, xmax])
@@ -541,29 +540,28 @@ if n > 1:
         y = data
         z = None
         e = None
-        x = numpy.asarray(x)[:,None]
-        y = numpy.asarray(y)[:,None]
+        x = numpy.asarray(x)[:, None]
+        y = numpy.asarray(y)[:, None]
     else:
         if options.fields is None:
-            x = data[:,0]
-            y = data[:,1:]
+            x = data[:, 0]
+            y = data[:, 1:]
             z = None
             e = None
         else:
             x, y, z, e = [], [], [], []
             for i, field in enumerate(options.fields):
                 if field == 'x':
-                    x.append(data[:,i])
+                    x.append(data[:, i])
                 elif field == 'y':
-                    y.append(data[:,i])
+                    y.append(data[:, i])
                 elif field == 'z':
-                    z.append(data[:,i])
+                    z.append(data[:, i])
                 elif field == 'e':
-                    e.append(data[:,i])
+                    e.append(data[:, i])
                 elif field == '*':
                     y = data.T
-            x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T,\
-                         numpy.asarray(e).T
+            x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T, numpy.asarray(e).T
             if len(z) == 0:
                 z = None
             # else:
@@ -573,18 +571,18 @@ if n > 1:
             #     z = data_sorted[:,2]
             if len(e) == 0:
                 e = None
-        x = numpy.asarray(x)[:,None]
+        x = numpy.asarray(x)[:, None]
     x = numpy.squeeze(x)
     y = numpy.squeeze(y)
-    if x.shape == (0,): # If not x field is given with fields option
+    if x.shape == (0,):  # If not x field is given with fields option
         x = numpy.arange(y.shape[0])
     plt.clf()
     if options.normalize == 'x':
         xmin, xmax = numpy.min(x, axis=0), numpy.max(x, axis=0)
-        x = (x - xmin)/(xmax - xmin)
+        x = (x - xmin) / (xmax - xmin)
     if options.normalize == 'y':
         ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
-        y = (y - ymin)/(ymax - ymin)
+        y = (y - ymin) / (ymax - ymin)
     do_plot(x, y, z, e)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax])
