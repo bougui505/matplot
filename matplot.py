@@ -15,6 +15,7 @@ import sys
 # sys.setdefaultencoding('utf8')
 ##############################
 import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 import matplotlib
 import matplotlib.cm as cm
 # try:
@@ -133,6 +134,10 @@ scatter_options.add_option("--scatter",
                            dest="scatter",
                            default=False,
                            help="Scatter plot of the (x,y) data")
+scatter_options.add_option("--plot3d",
+                           help="Scatter plot in 3D",
+                           action='store_true',
+                           default=False)
 scatter_options.add_option("--alpha",
                            type=float,
                            default=1.,
@@ -501,8 +506,16 @@ def do_plot(x,
                                 facecolor='none',
                                 edgecolor='blue')
                 else:
-                    plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha)
-                    plt.colorbar()
+                    if not options.plot3d:
+                        plt.scatter(x,
+                                    y,
+                                    c=z,
+                                    s=options.size,
+                                    alpha=options.alpha)
+                        plt.colorbar()
+                    else:
+                        ax = plt.axes(projection='3d')
+                        ax.scatter3D(x, y, z, s=options.size)
             else:
                 if options.line:
                     plt.plot(x, y, ',-')
