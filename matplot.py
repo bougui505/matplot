@@ -53,6 +53,11 @@ parser.add_option("--ylabel",
                   default=None,
                   type='str',
                   help="y axis label")
+parser.add_option("--ylabel2",
+                  dest="ylabel2",
+                  default=None,
+                  type='str',
+                  help="y axis label for second y-axis (see --dax)")
 parser.add_option("--xmin",
                   dest="xmin",
                   default=None,
@@ -119,6 +124,13 @@ parser.add_option("--transpose",
                   default=False,
                   action="store_true",
                   help="Transpose the input data")
+parser.add_option("--dax",
+                  dest="dax",
+                  default=None,
+                  type=str,
+                  help="Double axis plot. Can plot multiple dataset.\
+    Give the 1 or 2 label to select the axis to plot on, e.g. 12 to plot the first dataset on axis 1 and the second on axis 2",
+                  metavar='12')
 parser.add_option(
     "--subplot",
     dest="subplot",
@@ -394,7 +406,8 @@ def do_plot(x,
             n_bins=options.n_bins,
             xmin=options.xmin,
             xmax=options.xmax,
-            func=options.func):
+            func=options.func,
+            dax=options.dax):
     if xmin is None and func is not None:
         xmin = x.min()
     if xmax is None and func is not None:
@@ -445,7 +458,7 @@ def do_plot(x,
                 plt.tick_params(labelleft='off')
         plt.show()
         return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
-    if not histogram and not scatter and not histogram2d:
+    if not histogram and not scatter and not histogram2d and not dax:
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
                 if not options.bar:
@@ -648,6 +661,22 @@ def do_plot(x,
             else:
                 plt.hist2d(x, y, bins=n_bins)
             plt.colorbar()
+    elif dax is not None:
+        dax = numpy.asarray([int(e) for e in dax])
+        plt.close()
+        fig, ax1 = plt.subplots()
+        ax2 = ax1.twinx()
+        for datai, daxi in enumerate(dax):
+            if daxi == 1:
+                ax1.plot(data[:, datai], 'g-')
+            else:
+                ax2.plot(data[:, datai], 'b-')
+        if options.xlabel is not None:
+            ax1.set_xlabel(options.xlabel)
+        if options.ylabel is not None:
+            ax1.set_ylabel(options.ylabel, color='g')
+        if options.ylabel2 is not None:
+            ax2.set_ylabel(options.ylabel2, color='b')
     else:
         if xmin is None:
             xmin = min(y.flatten())
@@ -698,7 +727,7 @@ def do_plot(x,
     if not projection1d:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
-        if options.ylabel is not None:
+        if options.ylabel is not None and options.dax is None:
             plt.ylabel(options.ylabel)
     set_x_lim(options.xmin, options.xmax)
     set_y_lim(options.ymin, options.ymax)
