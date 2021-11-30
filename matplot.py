@@ -35,6 +35,7 @@ except ImportError:
     )
     is_sklearn = False
 from prettytable import PrettyTable
+import numexpr as ne
 
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
@@ -268,7 +269,7 @@ function_options.add_option(
     default=None,
     action='append',
     help=
-    "Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'. Multiple functions can be plotted at the same time by giving multiple expression with multiple -f option passed."
+    "Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'. Multiple functions can be plotted at the same time by giving multiple expression with multiple -f option passed. Numpy functions can be used and given without np prefix (e.g. exp)"
 )
 parser.add_option_group(function_options)
 
@@ -376,7 +377,7 @@ def plot_function(expression_string, xlims, npts=100, color=None, label=None):
     Plot a function given as an expression string
     """
     x = numpy.linspace(xlims[0], xlims[1], num=npts)
-    y = eval(expression_string)
+    y = ne.evaluate(expression_string)
     if label is None:
         label = expression_string
     plt.plot(x, y, label=label, color=color)
