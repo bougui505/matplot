@@ -185,6 +185,11 @@ scatter_options.add_option("--line",
                            default=False,
                            action="store_true",
                            help="Plot line between points")
+scatter_options.add_option("--histy",
+                           action="store_true",
+                           dest="histy",
+                           default=False,
+                           help="Plot 1D histogram for the y axis")
 parser.add_option_group(scatter_options)
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
@@ -534,7 +539,31 @@ def do_plot(x,
                 if options.line:
                     plt.plot(x, y, ',-')
                 else:
-                    plt.scatter(x, y, s=options.size, alpha=options.alpha)
+                    if options.histy:
+                        left, width = 0.1, 0.65
+                        bottom, height = 0.1, 0.8
+                        bottom_h = left_h = left + width + 0.02
+                        rect_scatter = [left, bottom, width, height]
+                        rect_histx = [left, bottom_h, width, 0.2]
+                        rect_histy = [left_h, bottom, 0.2, height]
+                        axScatter = plt.axes(rect_scatter)
+                        if options.xlabel is not None:
+                            axScatter.set_xlabel(options.xlabel)
+                        if options.ylabel is not None:
+                            axScatter.set_ylabel(options.ylabel)
+                        axHisty = plt.axes(rect_histy, sharey=axScatter)
+                        axHisty.tick_params(labelleft=False)
+                        # nullfmt = matplotlib.ticker.NullFormatter()
+                        # axHisty.yaxis.set_major_formatter(nullfmt)
+                        if n_bins == -1:
+                            n_bins = freedman_diaconis_rule(y)
+                        axScatter.scatter(x,
+                                          y,
+                                          s=options.size,
+                                          alpha=options.alpha)
+                        axHisty.hist(y, bins=n_bins, orientation='horizontal')
+                    else:
+                        plt.scatter(x, y, s=options.size, alpha=options.alpha)
         else:
             if x.shape[1] > 1:
                 colors = cm.rainbow(numpy.linspace(0, 1, x.shape[1]))
@@ -725,7 +754,7 @@ def do_plot(x,
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
         plot_functions(func, [xmin, xmax])
-    if not projection1d:
+    if not projection1d and not options.histy:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
         if options.ylabel is not None and options.dax is None:
