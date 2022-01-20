@@ -84,6 +84,9 @@ parser.add_option("--polyfit",
                   default=None,
                   type='int',
                   help="Least squares polynomial fit, with the given degree.")
+parser.add_option("--bw",
+                  help='Plot in black and white using grey shade',
+                  action='store_true')
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option(
     "--moving_average",
@@ -414,6 +417,10 @@ def do_plot(x,
             xmax=options.xmax,
             func=options.func,
             dax=options.dax):
+    if options.bw:
+        cmap = cm.Greys
+    else:
+        cmap = cm.rainbow
     if xmin is None and func is not None:
         xmin = x.min()
     if xmax is None and func is not None:
@@ -475,12 +482,12 @@ def do_plot(x,
                 if len(x.shape) == 1:
                     x = x[:, None]
                 if x.shape[1] > 1:
-                    colors = cm.rainbow(numpy.linspace(0, 1, x.shape[1]))
+                    colors = cmap(numpy.linspace(0, 1, x.shape[1]))
                     for i, xi in enumerate(x.T):
                         yi = y.T[i]
                         plt.plot(xi.flatten(), yi.flatten(), c=colors[i])
                 elif y.shape[1] > 1:
-                    colors = cm.rainbow(numpy.linspace(0, 1, y.shape[1]))
+                    colors = cmap(numpy.linspace(0, 1, y.shape[1]))
                     for i, yi in enumerate(y.T):
                         plt.plot(x.flatten(), yi.flatten(), c=colors[i])
             if e is not None:
@@ -566,7 +573,7 @@ def do_plot(x,
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
         else:
             if x.shape[1] > 1:
-                colors = cm.rainbow(numpy.linspace(0, 1, x.shape[1]))
+                colors = cmap(numpy.linspace(0, 1, x.shape[1]))
                 for i, xi in enumerate(x.T):
                     yi = y.T[i]
                     zi = z.T[i]
@@ -609,7 +616,7 @@ def do_plot(x,
                                             c=colors[i],
                                             alpha=options.alpha)
             elif y.shape[1] > 1:
-                colors = cm.rainbow(numpy.linspace(0, 1, y.shape[1]))
+                colors = cmap(numpy.linspace(0, 1, y.shape[1]))
                 for i, yi in enumerate(y.T):
                     if options.line:
                         if labels is not None:
