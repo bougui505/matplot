@@ -484,12 +484,26 @@ def do_plot(x,
                 if x.shape[1] > 1:
                     colors = cmap(numpy.linspace(0, 1, x.shape[1]))
                     for i, xi in enumerate(x.T):
+                        if labels is not None:
+                            label = labels[i]
+                        else:
+                            label = None
                         yi = y.T[i]
-                        plt.plot(xi.flatten(), yi.flatten(), c=colors[i])
+                        plt.plot(xi.flatten(),
+                                 yi.flatten(),
+                                 c=colors[i],
+                                 label=label)
                 elif y.shape[1] > 1:
                     colors = cmap(numpy.linspace(0, 1, y.shape[1]))
                     for i, yi in enumerate(y.T):
-                        plt.plot(x.flatten(), yi.flatten(), c=colors[i])
+                        if labels is not None:
+                            label = labels[i]
+                        else:
+                            label = None
+                        plt.plot(x.flatten(),
+                                 yi.flatten(),
+                                 c=colors[i],
+                                 label=label)
             if e is not None:
                 if len(y.shape) == 1:  # No more than 1 curve
                     plt.fill_between(x.flatten(),
@@ -648,8 +662,6 @@ def do_plot(x,
                                  yerr=e[:, i],
                                  markersize=0.,
                                  c=colors[i])
-        if options.labels is not None:
-            plt.legend()
     elif histogram2d:
         x, y = x.flatten(), y.flatten()
         if projection1d:  # 1D projections of histogram
@@ -733,8 +745,6 @@ def do_plot(x,
                              density=options.normed,
                              label=labels,
                              cumulative=options.cumulative)
-            if options.labels is not None:
-                plt.legend()
         else:
             if data.ndim > 1:
                 for ndim_ in range(data.shape[1]):
@@ -770,6 +780,8 @@ def do_plot(x,
     set_y_lim(options.ymin, options.ymax)
     if options.title is not None:
         plt.title(options.title)
+    if options.labels is not None:
+        plt.legend()
     if options.outfilename is None:
         plt.show()
     else:
