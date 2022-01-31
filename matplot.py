@@ -94,6 +94,12 @@ parser.add_option(
     type=float,
     default=None,
     action='append')
+parser.add_option(
+    '--vlabel',
+    help=
+    'Optional labels for the vertical lines. --vlabel option can be given multiple time',
+    default=None,
+    action='append')
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option(
     "--moving_average",
@@ -424,7 +430,8 @@ def do_plot(x,
             xmax=options.xmax,
             func=options.func,
             dax=options.dax,
-            vline=3.):
+            vline=None,
+            vlabel=None):
     if options.bw:
         cmap = cm.Greys
     else:
@@ -434,8 +441,14 @@ def do_plot(x,
     if xmax is None and func is not None:
         xmax = x.max()
     if vline is not None:
-        for xvline in vline:
-            plt.axvline(x=xvline, color='grey', ls='--')
+        colors = cmap(numpy.linspace(0, 1, len(vline)))
+        for i, xvline in enumerate(vline):
+            if vlabel is not None:
+                vlabel_i = vlabel[i]
+            else:
+                vlabel_i = None
+            plt.axvline(x=xvline, color=colors[i], ls='--', label=vlabel_i)
+            plt.legend()
     if options.polyfit is not None:
         poly, polylabel = polyfit(x, y, options.polyfit)
         print(f"polyfit: {polylabel}")
@@ -855,7 +868,7 @@ if n > 1:
     if options.normalize == 'y':
         ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
         y = (y - ymin) / (ymax - ymin)
-    do_plot(x, y, z, e, vline=options.vline)
+    do_plot(x, y, z, e, vline=options.vline, vlabel=options.vlabel)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax])
     plt.show()
