@@ -87,10 +87,13 @@ parser.add_option("--polyfit",
 parser.add_option("--bw",
                   help='Plot in black and white using grey shade',
                   action='store_true')
-parser.add_option('--vline',
-                  help='Draw a vertical line at the given x',
-                  type=float,
-                  default=None)
+parser.add_option(
+    '--vline',
+    help=
+    'Draw a vertical line at the given x. --vline option can be given multiple time',
+    type=float,
+    default=None,
+    action='append')
 moving_average_options = OptionGroup(parser, "Moving average")
 moving_average_options.add_option(
     "--moving_average",
@@ -431,7 +434,8 @@ def do_plot(x,
     if xmax is None and func is not None:
         xmax = x.max()
     if vline is not None:
-        plt.axvline(x=vline, color='grey', ls='--')
+        for xvline in vline:
+            plt.axvline(x=xvline, color='grey', ls='--')
     if options.polyfit is not None:
         poly, polylabel = polyfit(x, y, options.polyfit)
         print(f"polyfit: {polylabel}")
