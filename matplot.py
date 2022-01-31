@@ -441,7 +441,10 @@ def do_plot(x,
     if xmax is None and func is not None:
         xmax = x.max()
     if vline is not None:
-        colors = cmap(numpy.linspace(0, 1, len(vline)))
+        if len(vline) == 1:
+            colors = cmap([0.5])
+        else:
+            colors = cmap(numpy.linspace(0, 1, len(vline)))
         for i, xvline in enumerate(vline):
             if vlabel is not None:
                 vlabel_i = vlabel[i]
