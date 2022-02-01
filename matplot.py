@@ -244,6 +244,10 @@ histogram_options.add_option("--cumulative",
                              dest="cumulative",
                              default=False,
                              help="Cumulative histogram")
+histogram_options.add_option('--cb',
+                             dest='centerbins',
+                             action='store_true',
+                             help='Center the bins of the histogram')
 if is_sklearn:
     histogram_options.add_option(
         "--gmm",
@@ -308,6 +312,17 @@ if is_sklearn:
         cs = [numpy.sqrt(c[0][0]) for c in cl]
         ws = [w for w in wl]
         return ms, cs, ws
+
+
+def bins_labels(bins, **kwargs):
+    """
+    Center bins for histogram (see: https://stackoverflow.com/a/42264525/1679629)
+    """
+    bin_w = (max(bins) - min(bins)) / (len(bins) - 1)
+    plt.xticks(numpy.arange(min(bins) + bin_w / 2,
+                            max(bins) + 1, bin_w), bins, **kwargs)
+    plt.xlim(bins[0], bins[-1])
+    plt.minorticks_off()
 
 
 def prettyprint(A):
@@ -772,6 +787,8 @@ def do_plot(x,
                              density=options.normed,
                              label=labels,
                              cumulative=options.cumulative)
+            if options.centerbins:
+                bins_labels(numpy.int_(bins))
         else:
             if data.ndim > 1:
                 for ndim_ in range(data.shape[1]):
