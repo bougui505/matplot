@@ -80,7 +80,9 @@ moving_average_options.add_option("--no_gray_plot",
                                   action="store_false",
                                   help="Do not plot original data in gray with moving_average option")
 moving_average_options.add_option(
-    "--slide", default='mean', help='Function to slide along the curve. Can be mean (same as moving_average), max, min')
+    "--slide",
+    default='mean',
+    help='Function to slide along the curve. Can be mean (same as moving_average), max, min, std')
 moving_average_options.add_option("--ws",
                                   default=None,
                                   type='int',
@@ -245,6 +247,8 @@ if options.slide == 'max':
     options.slide = numpy.max
 if options.slide == 'min':
     options.slide = numpy.min
+if options.slide == 'std':
+    options.slide = numpy.std
 
 if is_sklearn:
     # from: http://stackoverflow.com/a/19182915/1679629
