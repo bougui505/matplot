@@ -160,6 +160,9 @@ scatter_options.add_option("--histy",
                            dest="histy",
                            default=False,
                            help="Plot 1D histogram for the y axis")
+scatter_options.add_option("--cmap",
+                           help='colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html',
+                           default=None)
 parser.add_option_group(scatter_options)
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
@@ -520,7 +523,7 @@ def do_plot(x,
                     plt.scatter(x, y, s=z * options.size, alpha=options.alpha, facecolor='none', edgecolor='blue')
                 else:
                     if not options.plot3d:
-                        plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha)
+                        plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha, cmap=options.cmap)
                         plt.colorbar()
                     else:
                         ax = plt.axes(projection='3d')
