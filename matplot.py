@@ -39,6 +39,7 @@ import numexpr as ne
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
 parser.add_option("--title", help="Title of the plot", type=str)
+parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str', help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str', help="y axis label")
@@ -402,6 +403,8 @@ def do_plot(x,
             dax=options.dax,
             vline=None,
             vlabel=None):
+    if options.grid:
+        plt.grid()
     if options.bw:
         cmap = cm.Greys
     else:
