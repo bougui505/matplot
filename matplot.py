@@ -510,11 +510,19 @@ def do_plot(x,
                         plt.fill_between(x[:, i], y[:, i] - e[:, i], y[:, i] + e[:, i], facecolor='gray', alpha=.5)
         else:  # Moving average
             if options.gray_plot:
-                plt.plot(x.flatten(), y.flatten(), '-', color='gray', alpha=.25)
+                if y.ndim == 1:
+                    y = y[..., None]
+                for y_ in y.T:
+                    plt.plot(x.flatten(), y_.flatten(), '-', color='gray', alpha=.25, lw=1.)
             ws = options.moving_average  # window size
-            ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
-                                sliding_func(y.flatten(), ws, options.slide)[int(ws / 2):int(-ws / 2)]]
-            plt.plot(ma_array[:, 0], ma_array[:, 1], 'r', linewidth=1.5)
+            for i, y_ in enumerate(y.T):
+                if labels is not None:
+                    label = labels[i]
+                else:
+                    label = None
+                ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
+                                    sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
+                plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
     elif scatter:
         if len(x.shape) == 1:
             x = x[:, None]
