@@ -509,9 +509,9 @@ def do_plot(x,
                     for i, errror in enumerate(e.T):
                         plt.fill_between(x[:, i], y[:, i] - e[:, i], y[:, i] + e[:, i], facecolor='gray', alpha=.5)
         else:  # Moving average
+            if y.ndim == 1:
+                y = y[..., None]
             if options.gray_plot:
-                if y.ndim == 1:
-                    y = y[..., None]
                 for y_ in y.T:
                     plt.plot(x.flatten(), y_.flatten(), '-', color='gray', alpha=.25, lw=1.)
             ws = options.moving_average  # window size
