@@ -38,6 +38,7 @@ import numexpr as ne
 
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
+parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure", nargs=2, type=int)
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
@@ -403,6 +404,8 @@ def do_plot(x,
             dax=options.dax,
             vline=None,
             vlabel=None):
+    if options.aspect_ratio is not None:
+        plt.figure(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
     if options.grid:
         plt.grid()
     if options.bw:
