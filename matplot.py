@@ -573,7 +573,8 @@ def do_plot(x,
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
                 for i, xi in enumerate(x.T):
                     yi = y.T[i]
-                    zi = z.T[i]
+                    if z is not None:
+                        zi = z.T[i]
                     if labels is not None:
                         if options.line:
                             plt.plot(xi, yi, ',-', c=colors[i], label=labels[i])
