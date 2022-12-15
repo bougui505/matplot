@@ -736,7 +736,7 @@ def do_plot(x,
     set_x_lim(options.xmin, options.xmax)
     set_y_lim(options.ymin, options.ymax)
     if options.title is not None:
-        plt.title(options.title)
+        plt.suptitle(options.title)
     if options.labels is not None:
         plt.legend()
     if options.outfilename is None:
