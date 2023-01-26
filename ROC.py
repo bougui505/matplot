@@ -69,11 +69,13 @@ def ROC(positives, negatives):
     >>> y
     [0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 0.3, 0.3, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0]
     """
-    P = len(positives)
-    N = len(negatives)
     all_data = list(positives) + list(negatives)
     positives = np.asarray(positives)
     negatives = np.asarray(negatives)
+    positives = positives[~np.isnan(positives)]
+    negatives = negatives[~np.isnan(negatives)]
+    P = len(positives)
+    N = len(negatives)
     assert positives.ndim == 1
     assert negatives.ndim == 1
     thresholds = np.unique(all_data)
