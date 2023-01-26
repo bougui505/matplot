@@ -10,6 +10,7 @@ Thanks!
 """
 
 import sys
+from collections.abc import Iterable
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
 # reload(sys)
 # sys.setdefaultencoding('utf8')
@@ -742,7 +743,17 @@ def do_plot(x,
     if options.outfilename is None:
         plt.show()
     else:
-        plt.savefig(options.outfilename)
+        metadata = dict()
+        datastr = ''
+        for l in data:
+            if isinstance(l, Iterable):
+                for e in l:
+                    datastr += f"{e} "
+            else:
+                datastr += f"{l}"
+            datastr += '\n'
+        metadata['data'] = datastr
+        plt.savefig(options.outfilename, metadata=metadata)
 
 
 data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
