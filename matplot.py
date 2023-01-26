@@ -17,6 +17,7 @@ from PIL import Image
 # sys.setdefaultencoding('utf8')
 ##############################
 import sliding
+import ROC
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import matplotlib
@@ -62,6 +63,11 @@ parser.add_option("--polyfit",
                   type='int',
                   help="Least squares polynomial fit, with the given degree.")
 parser.add_option("--bw", help='Plot in black and white using grey shade', action='store_true')
+parser.add_option(
+    "--roc",
+    help=
+    'Plot a ROC curve from the given data. Two columns separated by a comma must be given. The first column gives the negative values, the second the positive values.',
+    action="store_true")
 parser.add_option('--vline',
                   help='Draw a vertical line at the given x. --vline option can be given multiple time',
                   type=float,
@@ -773,6 +779,8 @@ if options.read_data is not None:
     print(datastr)
     sys.exit()
 
+if options.roc:
+    options.delimiter = ','
 data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
 n = data.shape[0]
 if options.transpose:
@@ -815,6 +823,11 @@ if n > 1:
             if len(e) == 0:
                 e = None
         x = numpy.asarray(x)[:, None]
+    if options.roc:
+        negatives = data[:, 0]
+        positives = data[:, 1]
+        x, y, auc = ROC.ROC(positives, negatives)
+        print(f'AUC: {auc:.2f}')
     x = numpy.squeeze(x)
     y = numpy.squeeze(y)
     if x.shape == (0, ):  # If not x field is given with fields option
