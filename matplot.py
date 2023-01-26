@@ -11,6 +11,7 @@ Thanks!
 
 import sys
 from collections.abc import Iterable
+from PIL import Image
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
 # reload(sys)
 # sys.setdefaultencoding('utf8')
@@ -39,6 +40,7 @@ import numexpr as ne
 
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
+parser.add_option("--read_data", help="Read plot data from the given png saved image using the --save option")
 parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure", nargs=2, type=int)
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
@@ -755,6 +757,21 @@ def do_plot(x,
         metadata['data'] = datastr
         plt.savefig(options.outfilename, metadata=metadata)
 
+
+def read_metadata(filename):
+    """
+    Read metadata at least for a png file
+    """
+    im = Image.open(filename)
+    im.load()
+    datastr = im.info['data']
+    return datastr
+
+
+if options.read_data is not None:
+    datastr = read_metadata(options.read_data)
+    print(datastr)
+    sys.exit()
 
 data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
 n = data.shape[0]
