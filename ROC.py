@@ -78,18 +78,28 @@ def ROC(positives, negatives):
     N = len(negatives)
     assert positives.ndim == 1
     assert negatives.ndim == 1
-    thresholds = np.unique(all_data)
+    alldata = np.concatenate((positives, negatives))
+    sorter = alldata.argsort()
+    positive_labels = np.ones(P, dtype=bool)
+    negative_labels = np.zeros(N, dtype=bool)
+    all_labels = np.concatenate((positive_labels, negative_labels))
+    all_labels = all_labels[sorter]
     x, y = [0.], [0.]
     auc = 0.
-    for threshold in thresholds:
-        if not np.isnan(threshold):
-            TP = (positives <= threshold).sum()
-            FP = (negatives <= threshold).sum()
-            TPR = TP / P
-            FPR = FP / N
-            x.append(FPR)
-            y.append(TPR)
-            auc += (x[-1] - x[-2]) * y[-1]
+    TP = 0
+    FP = 0
+    for label in all_labels:
+        if label:
+            # positive
+            TP += 1
+        else:
+            # negative
+            FP += 1
+        TPR = TP / P
+        FPR = FP / N
+        x.append(FPR)
+        y.append(TPR)
+        auc += (x[-1] - x[-2]) * y[-1]
     return x, y, auc
 
 
