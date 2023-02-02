@@ -152,6 +152,7 @@ scatter_options.add_option("--fields",
 If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
+If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
 If --fields='*' is given all the columns are considered as y values.")
 scatter_options.add_option("-s",
                            "--size",
@@ -750,7 +751,7 @@ def do_plot(x,
     if options.labels is not None:
         plt.legend()
     if xticklabels is not None:
-        plt.xticks(ticks=x, labels=xticklabels)
+        plt.xticks(ticks=x, labels=xticklabels, rotation=90)
     if options.outfilename is None:
         plt.show()
     else:
@@ -784,8 +785,13 @@ if options.read_data is not None:
 
 if options.roc:
     options.delimiter = ','
-data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=None)
-data = numpy.asarray(data.tolist())  # For formatting arrays with both data and text
+if options.fields is None:
+    dtype = numpy.float
+else:
+    dtype = None  # to be able to read also text
+data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=dtype)
+if options.fields is not None:
+    data = numpy.asarray(data.tolist())  # For formatting arrays with both data and text
 xticklabels = None
 n = data.shape[0]
 if options.transpose:
@@ -824,7 +830,8 @@ if n > 1:
                 xticklabels = None
             else:
                 xticklabels = [e.decode() for e in xticklabels]
-            x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T, numpy.asarray(e).T
+            x, y, z, e = numpy.asarray(x, dtype=float).T, numpy.asarray(y, dtype=float).T, numpy.asarray(
+                z, dtype=float).T, numpy.asarray(e, dtype=float).T
             if len(z) == 0:
                 z = None
             # else:
