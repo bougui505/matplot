@@ -711,7 +711,8 @@ def do_plot(x,
                              histtype=options.histtype,
                              density=options.normed,
                              label=labels,
-                             cumulative=options.cumulative)
+                             cumulative=options.cumulative,
+                             alpha=options.alpha)
             if options.centerbins:
                 bins_labels(numpy.int_(bins))
         else:
