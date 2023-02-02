@@ -791,7 +791,7 @@ else:
     dtype = None  # to be able to read also text
 data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=dtype)
 if options.fields is not None:
-    data = numpy.asarray(data.tolist())  # For formatting arrays with both data and text
+    data = numpy.asarray(data.tolist(), dtype='U13')  # For formatting arrays with both data and text
 xticklabels = None
 n = data.shape[0]
 if options.transpose:
@@ -828,8 +828,6 @@ if n > 1:
                     y = data.T
             if len(xticklabels) == 0:
                 xticklabels = None
-            else:
-                xticklabels = [e.decode() for e in xticklabels]
             x, y, z, e = numpy.asarray(x, dtype=float).T, numpy.asarray(y, dtype=float).T, numpy.asarray(
                 z, dtype=float).T, numpy.asarray(e, dtype=float).T
             if len(z) == 0:
