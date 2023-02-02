@@ -412,7 +412,8 @@ def do_plot(x,
             func=options.func,
             dax=options.dax,
             vline=None,
-            vlabel=None):
+            vlabel=None,
+            xticklabels=None):
     if options.aspect_ratio is not None:
         plt.figure(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
     if options.grid:
@@ -748,6 +749,8 @@ def do_plot(x,
         plt.suptitle(options.title)
     if options.labels is not None:
         plt.legend()
+    if xticklabels is not None:
+        plt.xticks(ticks=x, labels=xticklabels)
     if options.outfilename is None:
         plt.show()
     else:
@@ -781,7 +784,9 @@ if options.read_data is not None:
 
 if options.roc:
     options.delimiter = ','
-data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter)
+data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=None)
+data = numpy.asarray(data.tolist())  # For formatting arrays with both data and text
+xticklabels = None
 n = data.shape[0]
 if options.transpose:
     data = data.T
@@ -800,7 +805,7 @@ if n > 1:
             z = None
             e = None
         else:
-            x, y, z, e = [], [], [], []
+            x, y, z, e, xticklabels = [], [], [], [], []
             for i, field in enumerate(options.fields):
                 if field == 'x':
                     x.append(data[:, i])
@@ -810,8 +815,15 @@ if n > 1:
                     z.append(data[:, i])
                 elif field == 'e':
                     e.append(data[:, i])
+                elif field == 'l':  # label for bar plot
+                    # xticklabels.extend(data[:, i])
+                    xticklabels.extend(data[:, i])
                 elif field == '*':
                     y = data.T
+            if len(xticklabels) == 0:
+                xticklabels = None
+            else:
+                xticklabels = [e.decode() for e in xticklabels]
             x, y, z, e = numpy.asarray(x).T, numpy.asarray(y).T, numpy.asarray(z).T, numpy.asarray(e).T
             if len(z) == 0:
                 z = None
@@ -839,7 +851,7 @@ if n > 1:
     if options.normalize == 'y':
         ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
         y = (y - ymin) / (ymax - ymin)
-    do_plot(x, y, z, e, vline=options.vline, vlabel=options.vlabel)
+    do_plot(x, y, z, e, vline=options.vline, vlabel=options.vlabel, xticklabels=xticklabels)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax])
     plt.show()
