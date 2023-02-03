@@ -95,8 +95,14 @@ def ROC(positives, negatives):
         else:
             # negative
             FP += 1
-        TPR = TP / P
-        FPR = FP / N
+        if P > 0:
+            TPR = TP / P
+        else:
+            TPR = 0.
+        if N > 0:
+            FPR = FP / N
+        else:
+            FPR = 0.
         x.append(FPR)
         y.append(TPR)
         auc += (x[-1] - x[-2]) * y[-1]
