@@ -40,6 +40,7 @@ except ImportError:
     is_sklearn = False
 from prettytable import PrettyTable
 import numexpr as ne
+import os
 
 # To read large metadata from a png image file
 # See: https://stackoverflow.com/a/61466412/1679629
@@ -783,6 +784,7 @@ def add_metadata(filename, datastr, key='data'):
     """
     metadata = PngInfo()
     metadata.add_text(key, datastr, zip=True)
+    metadata.add_text('cwd', os.getcwd())
     targetImage = Image.open(filename)
     targetImage.save(filename, pnginfo=metadata)
 
@@ -793,7 +795,8 @@ def read_metadata(filename):
     """
     im = Image.open(filename)
     im.load()
-    datastr = im.info['data']
+    datastr = f'#cwd:{im.info["cwd"]}\n'
+    datastr += im.info['data']
     return datastr
 
 
