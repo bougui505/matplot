@@ -12,6 +12,8 @@ Thanks!
 import sys
 from collections.abc import Iterable
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
+from PIL import PngImagePlugin
 # Allow to print unicode text (see: http://stackoverflow.com/a/21190382/1679629)
 # reload(sys)
 # sys.setdefaultencoding('utf8')
@@ -38,6 +40,11 @@ except ImportError:
     is_sklearn = False
 from prettytable import PrettyTable
 import numexpr as ne
+
+# To read large metadata from a png image file
+# See: https://stackoverflow.com/a/61466412/1679629
+LARGE_ENOUGH_NUMBER = 100
+PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
@@ -766,8 +773,18 @@ def do_plot(x,
             else:
                 datastr += f"{l}"
             datastr += '\n'
-        metadata['data'] = datastr
-        plt.savefig(options.outfilename, metadata=metadata)
+        plt.savefig(options.outfilename)
+        add_metadata(options.outfilename, datastr)
+
+
+def add_metadata(filename, datastr, key='data'):
+    """
+    Add metadata to a png file
+    """
+    metadata = PngInfo()
+    metadata.add_text(key, datastr, zip=True)
+    targetImage = Image.open(filename)
+    targetImage.save(filename, pnginfo=metadata)
 
 
 def read_metadata(filename):
