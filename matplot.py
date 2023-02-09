@@ -787,6 +787,8 @@ def add_metadata(filename, datastr, key='data'):
     metadata.add_text(key, datastr, zip=True)
     metadata.add_text('cwd', os.getcwd())
     metadata.add_text('hostname', socket.gethostname())
+    if options.labels is not None:
+        metadata.add_text('labels', options.labels)
     targetImage = Image.open(filename)
     targetImage.save(filename, pnginfo=metadata)
 
@@ -799,6 +801,8 @@ def read_metadata(filename):
     im.load()
     datastr = f'#hostname:{im.info["hostname"]}\n'
     datastr += f'#cwd:{im.info["cwd"]}\n'
+    if "labels" in im.info:
+        datastr += f'#labels:{im.info["labels"]}\n'
     datastr += im.info['data']
     return datastr
 
