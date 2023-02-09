@@ -693,9 +693,9 @@ def do_plot(x,
         ax2 = ax1.twinx()
         for datai, daxi in enumerate(dax):
             if daxi == 1:
-                ax1.plot(data[:, datai], 'g-')
+                ax1.plot(x, y[:, datai], 'g-')
             else:
-                ax2.plot(data[:, datai], 'b-')
+                ax2.plot(x, y[:, datai], 'b-')
         if options.xlabel is not None:
             ax1.set_xlabel(options.xlabel)
         if options.ylabel is not None:
