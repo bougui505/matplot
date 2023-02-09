@@ -608,7 +608,7 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
-                                plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha)
+                                plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha, s=options.size)
                     else:
                         if options.line:
                             plt.plot(xi, yi, ',-', c=colors[i])
@@ -621,7 +621,7 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
-                                plt.scatter(xi, yi, c=colors[i], alpha=options.alpha)
+                                plt.scatter(xi, yi, c=colors[i], alpha=options.alpha, s=options.size)
             elif y.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, y.shape[1]))
                 for i, yi in enumerate(y.T):
