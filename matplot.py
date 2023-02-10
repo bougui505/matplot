@@ -66,6 +66,8 @@ parser.add_option("--xmin", dest="xmin", default=None, type='float', help="Minim
 parser.add_option("--xmax", dest="xmax", default=None, type='float', help="Maximum x-value")
 parser.add_option("--ymin", dest="ymin", default=None, type='float', help="Lower limit for y-axis")
 parser.add_option("--ymax", dest="ymax", default=None, type='float', help="Upper limit for y-axis")
+parser.add_option("--ymin1", dest="ymin1", default=None, type='float', help="Lower limit for first y-axis see --dax")
+parser.add_option("--ymax1", dest="ymax1", default=None, type='float', help="Upper limit for first y-axis see --dax")
 parser.add_option("--ymin2", dest="ymin2", default=None, type='float', help="Lower limit for second y-axis see --dax")
 parser.add_option("--ymax2", dest="ymax2", default=None, type='float', help="Upper limit for second y-axis see --dax")
 parser.add_option("--polyfit",
@@ -701,11 +703,17 @@ def do_plot(x,
                 ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha)
             else:
                 ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha)
+        _, _, ymin1, ymax1 = ax1.axis()
         _, _, ymin2, ymax2 = ax2.axis()
+        if options.ymin1 is not None:
+            ymin1 = options.ymin1
+        if options.ymax1 is not None:
+            ymax1 = options.ymax1
         if options.ymin2 is not None:
             ymin2 = options.ymin2
         if options.ymax2 is not None:
             ymax2 = options.ymax2
+        ax1.set_ylim([ymin1, ymax1])
         ax2.set_ylim([ymin2, ymax2])
         if options.xlabel is not None:
             ax1.set_xlabel(options.xlabel)
