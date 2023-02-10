@@ -689,7 +689,10 @@ def do_plot(x,
     elif dax is not None:
         dax = numpy.asarray([int(e) for e in dax])
         plt.close()
-        fig, ax1 = plt.subplots()
+        if options.aspect_ratio is None:
+            fig, ax1 = plt.subplots()
+        else:
+            fig, ax1 = plt.subplots(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
         ax2 = ax1.twinx()
         for datai, daxi in enumerate(dax):
             if daxi == 1:
