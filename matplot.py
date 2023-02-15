@@ -21,6 +21,7 @@ from PIL import PngImagePlugin
 import sliding
 import ROC
 import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
 from mpl_toolkits import mplot3d
 import matplotlib
 import matplotlib.cm as cm
@@ -70,6 +71,11 @@ parser.add_option("--ymin1", dest="ymin1", default=None, type='float', help="Low
 parser.add_option("--ymax1", dest="ymax1", default=None, type='float', help="Upper limit for first y-axis see --dax")
 parser.add_option("--ymin2", dest="ymin2", default=None, type='float', help="Lower limit for second y-axis see --dax")
 parser.add_option("--ymax2", dest="ymax2", default=None, type='float', help="Upper limit for second y-axis see --dax")
+parser.add_option("--yticklabelformat",
+                  dest="yticklabelformat",
+                  default=None,
+                  type='str',
+                  help="Format of the y-ticks labels. E.g.: '{x:.2f}'")
 parser.add_option("--polyfit",
                   dest="polyfit",
                   default=None,
@@ -427,9 +433,14 @@ def do_plot(x,
             dax=options.dax,
             vline=None,
             vlabel=None,
-            xticklabels=None):
+            xticklabels=None,
+            yticklabelformat=None):
+    if yticklabelformat is not None:
+        plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.aspect_ratio is not None:
         plt.figure(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
+        if yticklabelformat is not None:
+            plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.grid:
         plt.grid()
     if options.bw:
@@ -904,7 +915,14 @@ if n > 1:
     if options.normalize == 'y':
         ymin, ymax = numpy.min(y, axis=0), numpy.max(y, axis=0)
         y = (y - ymin) / (ymax - ymin)
-    do_plot(x, y, z, e, vline=options.vline, vlabel=options.vlabel, xticklabels=xticklabels)
+    do_plot(x,
+            y,
+            z,
+            e,
+            vline=options.vline,
+            vlabel=options.vlabel,
+            xticklabels=xticklabels,
+            yticklabelformat=options.yticklabelformat)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax])
     plt.show()
