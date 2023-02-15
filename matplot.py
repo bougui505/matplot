@@ -398,10 +398,12 @@ def plot_function(expression_string, xlims, npts=100, color=None, label=None):
     """
     Plot a function given as an expression string
     """
-    x = numpy.linspace(xlims[0], xlims[1], num=npts)
-    y = ne.evaluate(expression_string)
     if label is None:
         label = expression_string
+    if 'x' not in expression_string:
+        expression_string = expression_string + "+0*x"
+    x = numpy.linspace(xlims[0], xlims[1], num=npts)
+    y = ne.evaluate(expression_string)
     plt.plot(x, y, label=label, color=color)
     plt.legend()
     return x, y
