@@ -472,8 +472,12 @@ def do_plot(x,
     if options.semilog is not None:
         if options.semilog == "x":
             plt.xscale('log')
+            if yticklabelformat is not None:
+                plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
         elif options.semilog == 'y':
             plt.yscale('log')
+            if yticklabelformat is not None:
+                plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.labels is not None:
         labels = options.labels.split(',')
     else:
