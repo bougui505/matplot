@@ -421,8 +421,11 @@ def polyfit(x, y, degree):
 
 
 def plot_minval(y):
-    minval = min(y)
-    plt.axhline(y=minval, color='blue', linestyle='--')
+    if y.ndim == 1:
+        y = y[:, None]
+    minval = y.min(axis=0)
+    for v in minval:
+        plt.axhline(y=v, color='blue', linestyle='--')
 
 
 def do_plot(x,
