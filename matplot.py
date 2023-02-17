@@ -425,7 +425,8 @@ def plot_minval(y):
         y = y[:, None]
     minval = y.min(axis=0)
     for v in minval:
-        plt.axhline(y=v, color='blue', linestyle='--')
+        plt.axhline(y=v, color='blue', linestyle='--', label=f'min={v:.2g}')
+    plt.legend()
 
 
 def do_plot(x,
