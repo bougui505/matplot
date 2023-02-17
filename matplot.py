@@ -258,6 +258,7 @@ histogram2d_options.add_option("--projection1d",
                                default=False,
                                help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
+parser.add_option("--minval", action="store_true", help='Plot an horizontal line at the minimum y-value')
 
 function_options = OptionGroup(parser, "Plotting functions")
 function_options.add_option(
@@ -419,6 +420,11 @@ def polyfit(x, y, degree):
     return poly, label
 
 
+def plot_minval(y):
+    minval = min(y)
+    plt.axhline(y=minval, color='blue', linestyle='--')
+
+
 def do_plot(x,
             y,
             z=None,
@@ -516,6 +522,8 @@ def do_plot(x,
         plt.show()
         return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d and not dax:
+        if options.minval:
+            plot_minval(y)
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
                 if not options.bar:
