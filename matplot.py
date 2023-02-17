@@ -525,7 +525,7 @@ def do_plot(x,
         plt.show()
         return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d and not dax:
-        if options.minval:
+        if options.minval and options.moving_average is None:
             plot_minval(y)
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
@@ -578,6 +578,8 @@ def do_plot(x,
                 ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
+                if options.minval:
+                    plot_minval(ma_array[:, 1])
     elif scatter:
         if len(x.shape) == 1:
             x = x[:, None]
