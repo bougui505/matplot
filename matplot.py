@@ -39,7 +39,6 @@ try:
 except ImportError:
     print("sklearn is not installed you cannot use the Gaussian Mixture Model option")
     is_sklearn = False
-from prettytable import PrettyTable
 import numexpr as ne
 import os
 import socket
@@ -307,16 +306,6 @@ def bins_labels(bins, **kwargs):
     plt.xticks(numpy.arange(min(bins) + bin_w / 2, max(bins) + 1, bin_w), bins, **kwargs)
     plt.xlim(bins[0], bins[-1])
     plt.minorticks_off()
-
-
-def prettyprint(A):
-    """
-    Pretty print of an array (A)
-    """
-    x = PrettyTable(A.dtype.names, header=False, border=False)
-    for row in A:
-        x.add_row(row)
-    print(x)
 
 
 def movingaverage(data, window_size):
