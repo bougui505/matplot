@@ -269,6 +269,11 @@ function_options.add_option(
     help=
     "Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'. Multiple functions can be plotted at the same time by giving multiple expression with multiple -f option passed. Numpy functions can be used and given without np prefix (e.g. exp)"
 )
+function_options.add_option("--func_label",
+                            type=str,
+                            default=None,
+                            action='append',
+                            help="optional label for the function")
 parser.add_option_group(function_options)
 
 (options, args) = parser.parse_args()
@@ -376,12 +381,14 @@ def set_x_lim(xmin, xmax):
     axes.set_xlim([xmin, xmax])
 
 
-def plot_functions(expression_strings, xlims, npts=100):
+def plot_functions(expression_strings, xlims, npts=100, func_label=None):
     """
     Plot a list of functions given as a list of expression strings
     """
-    for expression_string in expression_strings:
-        plot_function(expression_string, xlims, npts=npts)
+    if func_label is None:
+        func_label = [None] * len(expression_strings)
+    for expression_string, label in zip(expression_strings, func_label):
+        plot_function(expression_string, xlims, npts=npts, label=label)
 
 
 def plot_function(expression_string, xlims, npts=100, color=None, label=None):
@@ -788,7 +795,7 @@ def do_plot(x,
                     fitting += w * matplotlib.mlab.normpdf(histo[1], m, c)
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
-        plot_functions(func, [xmin, xmax])
+        plot_functions(func, [xmin, xmax], func_label=options.func_label)
     if not projection1d and not options.histy:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
@@ -933,5 +940,5 @@ if n > 1:
             xticklabels=xticklabels,
             yticklabelformat=options.yticklabelformat)
 else:
-    plot_functions(options.func, xlims=[options.xmin, options.xmax])
+    plot_functions(options.func, xlims=[options.xmin, options.xmax], func_label=options.func_label)
     plt.show()
