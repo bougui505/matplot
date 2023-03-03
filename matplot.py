@@ -258,6 +258,10 @@ histogram2d_options.add_option("--projection1d",
                                help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
 parser.add_option("--minval", action="store_true", help='Plot an horizontal line at the minimum y-value')
+parser.add_option(
+    "--mamin",
+    action="store_true",
+    help='Plot an horizontal line at the minimum y-value on the moving average (see: moving_average option)')
 
 function_options = OptionGroup(parser, "Plotting functions")
 function_options.add_option(
@@ -576,7 +580,10 @@ def do_plot(x,
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
                 if options.minval:
-                    plot_minval(ma_array[:, 1])
+                    if options.mamin:  # plot min value of the moving average
+                        plot_minval(ma_array[:, 1])
+                    else:
+                        plot_minval(y_)
     elif scatter:
         if len(x.shape) == 1:
             x = x[:, None]
