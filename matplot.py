@@ -769,7 +769,7 @@ def do_plot(x,
             n_bins = freedman_diaconis_rule(y)
         if not options.kde:
             bins = numpy.linspace(xmin, xmax, n_bins)
-            print(f"bins: {bins}")
+            # print(f"bins: {bins}")
             if len(weights) == 0:
                 weights = None
             histo = plt.hist(y,
@@ -879,7 +879,7 @@ else:
     dtype = None  # to be able to read also text
 data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=dtype)
 if options.fields is not None:
-    data = numpy.asarray(data.tolist(), dtype='U13')  # For formatting arrays with both data and text
+    data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
 xticklabels = None
 n = data.shape[0]
 if options.transpose:
