@@ -164,6 +164,7 @@ scatter_options.add_option("--alpha", type=float, default=1., help='Transparency
 scatter_options.add_option("--fields",
                            dest="fields",
                            default=None,
+                           metavar='xy*zelw',
                            type='str',
                            help="Fields for the data; e.g. 'xyxy'. By default\
                            the first column is for x data and the other for y data. \
@@ -171,6 +172,7 @@ If a 'z' field is given, this field is used to color \
 the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
 If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
+If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
 If --fields='*' is given all the columns are considered as y values.")
 scatter_options.add_option("-s",
                            "--size",
@@ -446,7 +448,8 @@ def do_plot(x,
             vline=None,
             vlabel=None,
             xticklabels=None,
-            yticklabelformat=None):
+            yticklabelformat=None,
+            weights=None):
     if yticklabelformat is not None:
         plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.aspect_ratio is not None:
@@ -767,6 +770,8 @@ def do_plot(x,
         if not options.kde:
             bins = numpy.linspace(xmin, xmax, n_bins)
             print(f"bins: {bins}")
+            if len(weights) == 0:
+                weights = None
             histo = plt.hist(y,
                              bins=bins,
                              range=(xmin, xmax),
@@ -775,7 +780,8 @@ def do_plot(x,
                              label=labels,
                              cumulative=options.cumulative,
                              alpha=options.alpha,
-                             edgecolor='black')
+                             edgecolor='black',
+                             weights=weights)
             if options.centerbins:
                 bins_labels(numpy.int_(bins))
         else:
@@ -878,6 +884,7 @@ xticklabels = None
 n = data.shape[0]
 if options.transpose:
     data = data.T
+weights = []  # optional weights for histogram
 if n > 1:
     if len(data.shape) == 1:
         x = range(n)
@@ -893,7 +900,7 @@ if n > 1:
             z = None
             e = None
         else:
-            x, y, z, e, xticklabels = [], [], [], [], []
+            x, y, z, e, xticklabels, weights = [], [], [], [], [], []
             for i, field in enumerate(options.fields):
                 if field == 'x':
                     x.append(data[:, i])
@@ -906,12 +913,15 @@ if n > 1:
                 elif field == 'l':  # label for bar plot
                     # xticklabels.extend(data[:, i])
                     xticklabels.extend(data[:, i])
+                elif field == 'w':  # weight for weighted histogram
+                    weights.extend(data[:, i])
                 elif field == '*':
                     y = data.T
             if len(xticklabels) == 0:
                 xticklabels = None
             x, y, z, e = numpy.asarray(x, dtype=float).T, numpy.asarray(y, dtype=float).T, numpy.asarray(
                 z, dtype=float).T, numpy.asarray(e, dtype=float).T
+            weights = numpy.asarray(weights, dtype=float)
             if len(z) == 0:
                 z = None
             # else:
@@ -945,7 +955,8 @@ if n > 1:
             vline=options.vline,
             vlabel=options.vlabel,
             xticklabels=xticklabels,
-            yticklabelformat=options.yticklabelformat)
+            yticklabelformat=options.yticklabelformat,
+            weights=weights)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax], func_label=options.func_label)
     plt.show()
