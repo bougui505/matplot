@@ -744,6 +744,18 @@ def do_plot(x,
             fig, ax1 = plt.subplots()
         else:
             fig, ax1 = plt.subplots(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
+        if vline is not None:
+            if len(vline) == 1:
+                colors = cmap([0.5])
+            else:
+                colors = cmap(numpy.linspace(0, 1, len(vline)))
+            for i, xvline in enumerate(vline):
+                if vlabel is not None:
+                    vlabel_i = vlabel[i]
+                else:
+                    vlabel_i = None
+                plt.axvline(x=xvline, color=colors[i], ls='--', label=vlabel_i)
+                plt.legend()
         ax2 = ax1.twinx()
         for datai, daxi in enumerate(dax):
             if daxi == 1:
