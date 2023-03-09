@@ -145,6 +145,16 @@ parser.add_option("--dax",
                   help="Double axis plot. Can plot multiple dataset.\
     Give the 1 or 2 label to select the axis to plot on, e.g. 12 to plot the first dataset on axis 1 and the second on axis 2",
                   metavar='12')
+parser.add_option("--daxma1",
+                  default=None,
+                  help='Optional moving average window for first y-axis',
+                  type=int,
+                  metavar=10)
+parser.add_option("--daxma2",
+                  default=None,
+                  help='Optional moving average window for second y-axis',
+                  type=int,
+                  metavar=10)
 parser.add_option("--subplot",
                   dest="subplot",
                   nargs=2,
@@ -737,9 +747,19 @@ def do_plot(x,
         ax2 = ax1.twinx()
         for datai, daxi in enumerate(dax):
             if daxi == 1:
-                ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha)
+                if options.daxma1 is None:
+                    ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha)
+                else:
+                    yma = movingaverage(y[:, datai], options.daxma1)
+                    ax1.plot(x, y[:, datai], 'gray', alpha=0.25)
+                    ax1.plot(x, yma, 'g-', alpha=options.alpha)
             else:
-                ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha)
+                if options.daxma2 is None:
+                    ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha)
+                else:
+                    yma = movingaverage(y[:, datai], options.daxma2)
+                    ax2.plot(x, y[:, datai], 'gray', alpha=0.25)
+                    ax2.plot(x, yma, 'b-', alpha=options.alpha)
         _, _, ymin1, ymax1 = ax1.axis()
         _, _, ymin2, ymax2 = ax2.axis()
         if options.ymin1 is not None:
