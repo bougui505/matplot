@@ -744,6 +744,8 @@ def do_plot(x,
             fig, ax1 = plt.subplots()
         else:
             fig, ax1 = plt.subplots(figsize=(options.aspect_ratio[0], options.aspect_ratio[1]))
+        if func is not None:
+            plot_functions(func, [xmin, xmax], func_label=options.func_label)
         if vline is not None:
             if len(vline) == 1:
                 colors = cmap([0.5])
@@ -840,7 +842,8 @@ def do_plot(x,
                     fitting += w * matplotlib.mlab.normpdf(histo[1], m, c)
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
-        plot_functions(func, [xmin, xmax], func_label=options.func_label)
+        if dax is None:
+            plot_functions(func, [xmin, xmax], func_label=options.func_label)
     if not projection1d and not options.histy:
         if options.xlabel is not None:
             plt.xlabel(options.xlabel)
