@@ -10,6 +10,7 @@ Thanks!
 """
 
 import sys
+from inspect import currentframe, getframeinfo
 from collections.abc import Iterable
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -418,6 +419,7 @@ def plot_function(expression_string, xlims, npts=100, color=None, label=None):
         expression_string = expression_string + "+0*x"
     x = numpy.linspace(xlims[0], xlims[1], num=npts)
     y = ne.evaluate(expression_string)
+    print(f">>> plot {getframeinfo(currentframe()).lineno}")
     plt.plot(x, y, label=label, color=color)
     plt.legend()
     return x, y
@@ -522,16 +524,20 @@ def do_plot(x,
                 plt.title(labels[i])
             if options.semilog is not None:
                 if options.semilog == "x":
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.semilogx(xdata, ydata)
                 elif options.semilog == 'y':
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.semilogy(xdata, ydata)
             else:
                 if options.scatter:
-                    print('>>> Scatter plot 1')
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.scatter(xdata, ydata, alpha=options.alpha)
                 elif options.histogram2d:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.hist2d(xdata, ydata, bins=n_bins)
                 else:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.plot(xdata, ydata)
             if i < n * p - p:  # Not last row
                 # Hide xtick labels:
@@ -547,8 +553,10 @@ def do_plot(x,
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
                 if not options.bar:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.plot(x, y)
                 else:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.bar(x, y, align='center')
             else:
                 if len(x.shape) == 1:
@@ -561,6 +569,7 @@ def do_plot(x,
                         else:
                             label = None
                         yi = y.T[i]
+                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
                         plt.plot(xi.flatten(), yi.flatten(), c=colors[i], label=label)
                 elif y.shape[1] > 1:
                     colors = cmap(numpy.linspace(0, 1, y.shape[1]))
@@ -569,9 +578,11 @@ def do_plot(x,
                             label = labels[i]
                         else:
                             label = None
+                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
                         plt.plot(x.flatten(), yi.flatten(), c=colors[i], label=label)
             if e is not None:
                 if len(y.shape) == 1:  # No more than 1 curve
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.fill_between(x.flatten(),
                                      y.flatten() - e.flatten(),
                                      y.flatten() + e.flatten(),
@@ -579,12 +590,14 @@ def do_plot(x,
                                      alpha=.5)
                 else:
                     for i, errror in enumerate(e.T):
+                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
                         plt.fill_between(x[:, i], y[:, i] - e[:, i], y[:, i] + e[:, i], facecolor='gray', alpha=.5)
         else:  # Moving average
             if y.ndim == 1:
                 y = y[..., None]
             if options.gray_plot:
                 for y_ in y.T:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.plot(x.flatten(), y_.flatten(), '-', color='gray', alpha=.25, lw=1.)
             ws = options.moving_average  # window size
             for i, y_ in enumerate(y.T):
@@ -594,6 +607,7 @@ def do_plot(x,
                     label = None
                 ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
                 if options.minval:
                     if options.mamin:  # plot min value of the moving average
@@ -608,11 +622,11 @@ def do_plot(x,
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 if options.sizez:
-                    print('>>> Scatter plot 2')
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.scatter(x, y, s=z * options.size, alpha=options.alpha, facecolor='none', edgecolor='blue')
                 else:
                     if not options.plot3d:
-                        print('>>> Scatter plot 3')
+                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha, cmap=options.cmap)
                         plt.colorbar()
                     else:
@@ -620,6 +634,7 @@ def do_plot(x,
                         ax.scatter3D(x, y, z, s=options.size)
             else:
                 if options.line:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.plot(x, y, ',-')
                 else:
                     if options.histy:
@@ -643,7 +658,7 @@ def do_plot(x,
                         axScatter.scatter(x, y, s=options.size, alpha=options.alpha)
                         axHisty.hist(y, bins=n_bins, orientation='horizontal')
                     else:
-                        print('>>> Scatter plot 4')
+                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
                         if len(text) > 0:
                             for i, (x_, y_) in enumerate(zip(x, y)):
@@ -657,10 +672,11 @@ def do_plot(x,
                         zi = z.T[i]
                     if labels is not None:
                         if options.line:
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.plot(xi, yi, ',-', c=colors[i], label=labels[i])
                         else:
                             if options.sizez:
-                                print('>>> Scatter plot 5')
+                                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                                 plt.scatter(xi,
                                             yi,
                                             label=labels[i],
@@ -669,14 +685,15 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
-                                print('>>> Scatter plot 6')
+                                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                                 plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha, s=options.size)
                     else:
                         if options.line:
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.plot(xi, yi, ',-', c=colors[i])
                         else:
                             if options.sizez:
-                                print('>>> Scatter plot 7')
+                                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                                 plt.scatter(xi,
                                             yi,
                                             s=zi * options.size,
@@ -684,27 +701,31 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
-                                print('>>> Scatter plot 8')
+                                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                                 plt.scatter(xi, yi, c=colors[i], alpha=options.alpha, s=options.size)
             elif y.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, y.shape[1]))
                 for i, yi in enumerate(y.T):
                     if options.line:
                         if labels is not None:
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.plot(x, yi, ',-', c=colors[i], label=labels[i])
                         else:
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.plot(x, yi, ',-', c=colors[i])
                     else:
                         if labels is not None:
-                            print('>>> Scatter plot 9')
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.scatter(x, yi, c=colors[i], label=labels[i], alpha=options.alpha)
                         else:
-                            print('>>> Scatter plot 10')
+                            print(f">>> plot {getframeinfo(currentframe()).lineno}")
                             plt.scatter(x, yi, c=colors[i], alpha=options.alpha)
         if e is not None:
             if y.shape[1] == 1:
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.errorbar(x.flatten(), y.flatten(), yerr=e.flatten(), markersize=0.)
             else:
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 for i, yi in enumerate(y.T):
                     plt.errorbar(x[:, i].flatten(), yi, yerr=e[:, i], markersize=0., c=colors[i])
     elif histogram2d:
@@ -748,8 +769,10 @@ def do_plot(x,
             axHistx.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
         else:
             if logscale:
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.hist2d(x, y, bins=n_bins, norm=matplotlib.colors.LogNorm())
             else:
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.hist2d(x, y, bins=n_bins)
             plt.colorbar()
     elif dax is not None:
@@ -821,6 +844,7 @@ def do_plot(x,
             # print(f"bins: {bins}")
             if len(weights) == 0:
                 weights = None
+            print(f">>> plot {getframeinfo(currentframe()).lineno}")
             histo = plt.hist(y,
                              bins=bins,
                              range=(xmin, xmax),
@@ -855,6 +879,7 @@ def do_plot(x,
                 fitting = numpy.zeros_like(histo[1])
                 for w, m, c in zip(ws, ms, cs):
                     fitting += w * matplotlib.mlab.normpdf(histo[1], m, c)
+                print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.plot(histo[1], fitting, linewidth=3)
     if func is not None:
         if dax is None:
