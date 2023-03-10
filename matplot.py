@@ -273,6 +273,12 @@ histogram2d_options.add_option("--projection1d",
 parser.add_option_group(histogram2d_options)
 parser.add_option("--minval", action="store_true", help='Plot an horizontal line at the minimum y-value')
 parser.add_option("--maxval", action="store_true", help='Plot an horizontal line at the maximum y-value')
+parser.add_option("--minval2",
+                  action="store_true",
+                  help='Plot an horizontal line at the minimum y-value for axis 2 (see: --dax)')
+parser.add_option("--maxval2",
+                  action="store_true",
+                  help='Plot an horizontal line at the maximum y-value for axis 2 (see: --dax)')
 parser.add_option(
     "--mamin",
     action="store_true",
@@ -440,18 +446,27 @@ def polyfit(x, y, degree):
     return poly, label
 
 
-def plot_extrema(y, minval=True, maxval=False):
+def plot_extrema(y, minval=True, maxval=False, ax=None, color='blue'):
     if y.ndim == 1:
         y = y[:, None]
     if minval:
         minima = y.min(axis=0)
         for v in minima:
-            plt.axhline(y=v, color='blue', linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+            if ax is None:
+                plt.axhline(y=v, color=color, linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+            else:
+                ax.axhline(y=v, color=color, linestyle='--', label=f'min={v:.3g}', linewidth=1.)
     if maxval:
         maxima = y.max(axis=0)
         for v in maxima:
-            plt.axhline(y=v, color='blue', linestyle='--', label=f'max={v:.3g}', linewidth=1.)
-    plt.legend()
+            if ax is None:
+                plt.axhline(y=v, color=color, linestyle='--', label=f'max={v:.3g}', linewidth=1.)
+            else:
+                ax.axhline(y=v, color=color, linestyle='--', label=f'max={v:.3g}', linewidth=1.)
+    if ax is None:
+        plt.legend()
+    else:
+        ax.legend()
 
 
 def do_plot(x,
@@ -814,16 +829,24 @@ def do_plot(x,
         for datai, daxi in enumerate(dax):
             if daxi == 1:
                 if options.daxma1 is None:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha)
+                    if (options.minval or options.maxval):
+                        plot_extrema(y[:, datai], minval=options.minval, maxval=options.maxval, ax=ax1, color='g')
                 else:
                     yma = movingaverage(y[:, datai], options.daxma1)
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax1.plot(x, y[:, datai], 'gray', alpha=0.25)
                     ax1.plot(x, yma, 'g-', alpha=options.alpha)
             else:
                 if options.daxma2 is None:
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha)
+                    if (options.minval2 or options.maxval2):
+                        plot_extrema(y[:, datai], minval=options.minval2, maxval=options.maxval2, ax=ax2, color='b')
                 else:
                     yma = movingaverage(y[:, datai], options.daxma2)
+                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax2.plot(x, y[:, datai], 'gray', alpha=0.25)
                     ax2.plot(x, yma, 'b-', alpha=options.alpha)
         _, _, ymin1, ymax1 = ax1.axis()
