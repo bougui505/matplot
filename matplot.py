@@ -174,7 +174,7 @@ scatter_options.add_option("--alpha", type=float, default=1., help='Transparency
 scatter_options.add_option("--fields",
                            dest="fields",
                            default=None,
-                           metavar='xy*zelw',
+                           metavar='xy*zelwt',
                            type='str',
                            help="Fields for the data; e.g. 'xyxy'. By default\
                            the first column is for x data and the other for y data. \
@@ -183,6 +183,7 @@ the scatter dots. \
 If a 'e' field is given it is used to plot the error. \
 If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
 If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
+If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text.\
 If --fields='*' is given all the columns are considered as y values.")
 scatter_options.add_option("-s",
                            "--size",
@@ -459,7 +460,8 @@ def do_plot(x,
             vlabel=None,
             xticklabels=None,
             yticklabelformat=None,
-            weights=None):
+            weights=None,
+            text=None):
     if yticklabelformat is not None:
         plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.aspect_ratio is not None:
@@ -525,6 +527,7 @@ def do_plot(x,
                     plt.semilogy(xdata, ydata)
             else:
                 if options.scatter:
+                    print('>>> Scatter plot 1')
                     plt.scatter(xdata, ydata, alpha=options.alpha)
                 elif options.histogram2d:
                     plt.hist2d(xdata, ydata, bins=n_bins)
@@ -605,9 +608,11 @@ def do_plot(x,
         if x.shape[1] == 1 and y.shape[1] == 1:
             if z is not None:
                 if options.sizez:
+                    print('>>> Scatter plot 2')
                     plt.scatter(x, y, s=z * options.size, alpha=options.alpha, facecolor='none', edgecolor='blue')
                 else:
                     if not options.plot3d:
+                        print('>>> Scatter plot 3')
                         plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha, cmap=options.cmap)
                         plt.colorbar()
                     else:
@@ -638,7 +643,11 @@ def do_plot(x,
                         axScatter.scatter(x, y, s=options.size, alpha=options.alpha)
                         axHisty.hist(y, bins=n_bins, orientation='horizontal')
                     else:
+                        print('>>> Scatter plot 4')
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
+                        if len(text) > 0:
+                            for i, (x_, y_) in enumerate(zip(x, y)):
+                                plt.text(x_, y_, text[i])
         else:
             if x.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
@@ -651,6 +660,7 @@ def do_plot(x,
                             plt.plot(xi, yi, ',-', c=colors[i], label=labels[i])
                         else:
                             if options.sizez:
+                                print('>>> Scatter plot 5')
                                 plt.scatter(xi,
                                             yi,
                                             label=labels[i],
@@ -659,12 +669,14 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
+                                print('>>> Scatter plot 6')
                                 plt.scatter(xi, yi, c=colors[i], label=labels[i], alpha=options.alpha, s=options.size)
                     else:
                         if options.line:
                             plt.plot(xi, yi, ',-', c=colors[i])
                         else:
                             if options.sizez:
+                                print('>>> Scatter plot 7')
                                 plt.scatter(xi,
                                             yi,
                                             s=zi * options.size,
@@ -672,6 +684,7 @@ def do_plot(x,
                                             facecolor='none',
                                             edgecolor=colors[i])
                             else:
+                                print('>>> Scatter plot 8')
                                 plt.scatter(xi, yi, c=colors[i], alpha=options.alpha, s=options.size)
             elif y.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, y.shape[1]))
@@ -683,8 +696,10 @@ def do_plot(x,
                             plt.plot(x, yi, ',-', c=colors[i])
                     else:
                         if labels is not None:
+                            print('>>> Scatter plot 9')
                             plt.scatter(x, yi, c=colors[i], label=labels[i], alpha=options.alpha)
                         else:
+                            print('>>> Scatter plot 10')
                             plt.scatter(x, yi, c=colors[i], alpha=options.alpha)
         if e is not None:
             if y.shape[1] == 1:
@@ -911,7 +926,7 @@ if options.roc:
 if options.fields is None:
     dtype = numpy.float
 else:
-    if "l" in options.fields:
+    if "l" in options.fields or "t" in options.fields:
         dtype = None  # to be able to read also text
     else:
         dtype = numpy.float
@@ -921,13 +936,14 @@ data = numpy.genfromtxt(sys.stdin,
                         dtype=dtype,
                         filling_values=numpy.nan)
 if options.fields is not None:
-    if "l" in options.fields:
+    if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
 xticklabels = None
 n = data.shape[0]
 if options.transpose:
     data = data.T
 weights = []  # optional weights for histogram
+text = []
 if n > 1:
     if len(data.shape) == 1:
         x = range(n)
@@ -943,7 +959,7 @@ if n > 1:
             z = None
             e = None
         else:
-            x, y, z, e, xticklabels, weights = [], [], [], [], [], []
+            x, y, z, e, xticklabels, weights, text = [], [], [], [], [], [], []
             for i, field in enumerate(options.fields):
                 if field == 'x':
                     x.append(data[:, i])
@@ -956,6 +972,8 @@ if n > 1:
                 elif field == 'l':  # label for bar plot
                     # xticklabels.extend(data[:, i])
                     xticklabels.extend(data[:, i])
+                elif field == 't':  # plot text with plt.text
+                    text.extend(data[:, i])
                 elif field == 'w':  # weight for weighted histogram
                     weights.extend(data[:, i])
                 elif field == '*':
@@ -999,7 +1017,8 @@ if n > 1:
             vlabel=options.vlabel,
             xticklabels=xticklabels,
             yticklabelformat=options.yticklabelformat,
-            weights=weights)
+            weights=weights,
+            text=text)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax], func_label=options.func_label)
     plt.show()
