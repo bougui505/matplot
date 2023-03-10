@@ -911,10 +911,18 @@ if options.roc:
 if options.fields is None:
     dtype = numpy.float
 else:
-    dtype = None  # to be able to read also text
-data = numpy.genfromtxt(sys.stdin, invalid_raise=False, delimiter=options.delimiter, dtype=dtype)
+    if "l" in options.fields:
+        dtype = None  # to be able to read also text
+    else:
+        dtype = numpy.float
+data = numpy.genfromtxt(sys.stdin,
+                        invalid_raise=False,
+                        delimiter=options.delimiter,
+                        dtype=dtype,
+                        filling_values=numpy.nan)
 if options.fields is not None:
-    data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
+    if "l" in options.fields:
+        data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
 xticklabels = None
 n = data.shape[0]
 if options.transpose:
