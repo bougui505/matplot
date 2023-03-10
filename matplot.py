@@ -449,27 +449,20 @@ def polyfit(x, y, degree):
 def plot_extrema(y, minval=True, maxval=False, ax=None, color='blue'):
     if y.ndim == 1:
         y = y[:, None]
-    textfontsize = 'x-small'
     if minval:
         minima = y.min(axis=0)
-        xpos = x[y.argmin(axis=0)]
         for i, v in enumerate(minima):
             if ax is None:
                 plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-                plt.text(xpos[i], v, f'min={v:.3g}', fontsize=textfontsize)
             else:
                 ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-                ax.text(xpos[i], v, f'min={v:.3g}', fontsize=textfontsize)
     if maxval:
         maxima = y.max(axis=0)
-        xpos = x[y.argmax(axis=0)]
         for i, v in enumerate(maxima):
             if ax is None:
                 plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-                plt.text(xpos[i], v, f'max={v:.3g}', fontsize=textfontsize)
             else:
                 ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-                ax.text(xpos[i], v, f'max={v:.3g}', fontsize=textfontsize)
 
 
 def do_plot(x,
@@ -583,6 +576,10 @@ def do_plot(x,
                 if not options.bar:
                     if labels is not None:
                         label = labels[0]
+                        if options.minval:
+                            label = label + f" min={y.min():.3g}"
+                        if options.maxval:
+                            label = label + f" max={y.max():.3g}"
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -608,6 +605,10 @@ def do_plot(x,
                     for i, yi in enumerate(y.T):
                         if labels is not None:
                             label = labels[i]
+                            if options.minval:
+                                label = label + f" min={yi.min():.3g}"
+                            if options.maxval:
+                                label = label + f" max={yi.max():.3g}"
                         else:
                             label = None
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -633,12 +634,16 @@ def do_plot(x,
                     plt.plot(x.flatten(), y_.flatten(), '-', color='gray', alpha=.25, lw=1.)
             ws = options.moving_average  # window size
             for i, y_ in enumerate(y.T):
-                if labels is not None:
-                    label = labels[i]
-                else:
-                    label = None
                 ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
+                if labels is not None:
+                    label = labels[i]
+                    if options.minval:
+                        label = label + f" min={ma_array[:, 1].min():.3g}"
+                    if options.maxval:
+                        label = label + f" max={ma_array[:, 1].max():.3g}"
+                else:
+                    label = None
                 print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
                 if options.minval or options.maxval:
@@ -832,8 +837,18 @@ def do_plot(x,
         for datai, daxi in enumerate(dax):
             if daxi == 1:
                 if options.daxma1 is None:
+                    if labels is not None:
+                        label = labels[datai]
+                        if options.minval:
+                            label = label + f" min={y[:, datai].min():.3g}"
+                        if options.maxval:
+                            label = label + f" max={y[:, datai].max():.3g}"
+                    else:
+                        label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha)
+                    ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha, label=label)
+                    if label is not None:
+                        ax1.legend()
                     if (options.minval or options.maxval):
                         plot_extrema(y[:, datai], minval=options.minval, maxval=options.maxval, ax=ax1, color='g')
                 else:
@@ -843,8 +858,18 @@ def do_plot(x,
                     ax1.plot(x, yma, 'g-', alpha=options.alpha)
             else:
                 if options.daxma2 is None:
+                    if labels is not None:
+                        label = labels[datai]
+                        if options.minval2:
+                            label = label + f" min={y[:, datai].min():.3g}"
+                        if options.maxval2:
+                            label = label + f" max={y[:, datai].max():.3g}"
+                    else:
+                        label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha)
+                    ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha, label=label)
+                    if label is not None:
+                        ax2.legend()
                     if (options.minval2 or options.maxval2):
                         plot_extrema(y[:, datai], minval=options.minval2, maxval=options.maxval2, ax=ax2, color='b')
                 else:
