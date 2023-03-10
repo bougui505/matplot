@@ -272,10 +272,15 @@ histogram2d_options.add_option("--projection1d",
                                help="Plot 1D histogram for the x and y axis")
 parser.add_option_group(histogram2d_options)
 parser.add_option("--minval", action="store_true", help='Plot an horizontal line at the minimum y-value')
+parser.add_option("--maxval", action="store_true", help='Plot an horizontal line at the maximum y-value')
 parser.add_option(
     "--mamin",
     action="store_true",
     help='Plot an horizontal line at the minimum y-value on the moving average (see: moving_average option)')
+parser.add_option(
+    "--mamax",
+    action="store_true",
+    help='Plot an horizontal line at the maximum y-value on the moving average (see: moving_average option)')
 
 function_options = OptionGroup(parser, "Plotting functions")
 function_options.add_option(
@@ -435,12 +440,17 @@ def polyfit(x, y, degree):
     return poly, label
 
 
-def plot_minval(y):
+def plot_extrema(y, minval=True, maxval=False):
     if y.ndim == 1:
         y = y[:, None]
-    minval = y.min(axis=0)
-    for v in minval:
-        plt.axhline(y=v, color='blue', linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+    if minval:
+        minima = y.min(axis=0)
+        for v in minima:
+            plt.axhline(y=v, color='blue', linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+    if maxval:
+        maxima = y.max(axis=0)
+        for v in maxima:
+            plt.axhline(y=v, color='blue', linestyle='--', label=f'max={v:.3g}', linewidth=1.)
     plt.legend()
 
 
@@ -548,8 +558,8 @@ def do_plot(x,
         plt.show()
         return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d and not dax:
-        if options.minval and options.moving_average is None:
-            plot_minval(y)
+        if (options.minval or options.maxval) and options.moving_average is None:
+            plot_extrema(y, minval=options.minval, maxval=options.maxval)
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
                 if not options.bar:
@@ -613,11 +623,11 @@ def do_plot(x,
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
                 print(f">>> plot {getframeinfo(currentframe()).lineno}")
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
-                if options.minval:
-                    if options.mamin:  # plot min value of the moving average
-                        plot_minval(ma_array[:, 1])
+                if options.minval or options.maxval:
+                    if options.mamin or options.mamax:  # plot min value of the moving average
+                        plot_extrema(ma_array[:, 1], minval=options.minval, maxval=options.maxval)
                     else:
-                        plot_minval(y_)
+                        plot_extrema(y_, minval=options.minval, maxval=options.maxval)
     elif scatter:
         if len(x.shape) == 1:
             x = x[:, None]
