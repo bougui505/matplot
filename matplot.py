@@ -553,8 +553,12 @@ def do_plot(x,
         if options.moving_average is None:
             if len(x.shape) == 1 and len(y.shape) == 1:
                 if not options.bar:
+                    if labels is not None:
+                        label = labels[0]
+                    else:
+                        label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.plot(x, y)
+                    plt.plot(x, y, label=label)
                 else:
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.bar(x, y, align='center')
