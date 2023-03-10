@@ -449,24 +449,27 @@ def polyfit(x, y, degree):
 def plot_extrema(y, minval=True, maxval=False, ax=None, color='blue'):
     if y.ndim == 1:
         y = y[:, None]
+    textfontsize = 'x-small'
     if minval:
         minima = y.min(axis=0)
-        for v in minima:
+        xpos = x[y.argmin(axis=0)]
+        for i, v in enumerate(minima):
             if ax is None:
-                plt.axhline(y=v, color=color, linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+                plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                plt.text(xpos[i], v, f'min={v:.3g}', fontsize=textfontsize)
             else:
-                ax.axhline(y=v, color=color, linestyle='--', label=f'min={v:.3g}', linewidth=1.)
+                ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                ax.text(xpos[i], v, f'min={v:.3g}', fontsize=textfontsize)
     if maxval:
         maxima = y.max(axis=0)
-        for v in maxima:
+        xpos = x[y.argmax(axis=0)]
+        for i, v in enumerate(maxima):
             if ax is None:
-                plt.axhline(y=v, color=color, linestyle='--', label=f'max={v:.3g}', linewidth=1.)
+                plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                plt.text(xpos[i], v, f'max={v:.3g}', fontsize=textfontsize)
             else:
-                ax.axhline(y=v, color=color, linestyle='--', label=f'max={v:.3g}', linewidth=1.)
-    if ax is None:
-        plt.legend()
-    else:
-        ax.legend()
+                ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                ax.text(xpos[i], v, f'max={v:.3g}', fontsize=textfontsize)
 
 
 def do_plot(x,
