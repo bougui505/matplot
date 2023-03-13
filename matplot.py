@@ -583,9 +583,9 @@ def do_plot(x,
                     if labels is not None:
                         label = labels[0]
                         if options.minval:
-                            label = label + f" min={y.min():.3g}"
+                            label = label + f" min={y.min():.3g} (x={x[y.argmin()]})"
                         if options.maxval:
-                            label = label + f" max={y.max():.3g}"
+                            label = label + f" max={y.max():.3g} (x={x[y.argmax()]})"
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -612,9 +612,9 @@ def do_plot(x,
                         if labels is not None:
                             label = labels[i]
                             if options.minval:
-                                label = label + f" min={yi.min():.3g}"
+                                label = label + f" min={yi.min():.3g} (x={x[yi.argmin()]})"
                             if options.maxval:
-                                label = label + f" max={yi.max():.3g}"
+                                label = label + f" max={yi.max():.3g} (x={x[yi.argmax()]})"
                         else:
                             label = None
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -645,9 +645,9 @@ def do_plot(x,
                 if labels is not None:
                     label = labels[i]
                     if options.minval:
-                        label = label + f" min={ma_array[:, 1].min():.3g}"
+                        label = label + f" min={ma_array[:, 1].min():.3g} (x={ma_array[:, 0][ma_array[:, 1].argmin()]})"
                     if options.maxval:
-                        label = label + f" max={ma_array[:, 1].max():.3g}"
+                        label = label + f" max={ma_array[:, 1].max():.3g (x={ma_array[:, 0][ma_array[:, 1].argmax()]})}"
                 else:
                     label = None
                 print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -846,9 +846,9 @@ def do_plot(x,
                     if labels is not None:
                         label = labels[datai]
                         if options.minval:
-                            label = label + f" min={y[:, datai].min():.3g}"
+                            label = label + f" min={y[:, datai].min():.3g} (x={x[y[:, datai].argmin()]})"
                         if options.maxval:
-                            label = label + f" max={y[:, datai].max():.3g}"
+                            label = label + f" max={y[:, datai].max():.3g (x={x[y[:, datai].argmax()]})}"
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -867,9 +867,9 @@ def do_plot(x,
                     if labels is not None:
                         label = labels[datai]
                         if options.minval2:
-                            label = label + f" min={y[:, datai].min():.3g}"
+                            label = label + f" min={y[:, datai].min():.3g} (x={x[y[:, datai].argmin()]})"
                         if options.maxval2:
-                            label = label + f" max={y[:, datai].max():.3g}"
+                            label = label + f" max={y[:, datai].max():.3g} (x={x[y[:, datai].argmax()]})"
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
