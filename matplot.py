@@ -287,6 +287,7 @@ parser.add_option(
     "--mamax",
     action="store_true",
     help='Plot an horizontal line at the maximum y-value on the moving average (see: moving_average option)')
+parser.add_option('--corrcoef', help='Return Pearson product-moment correlation coefficients', action='store_true')
 
 function_options = OptionGroup(parser, "Plotting functions")
 function_options.add_option(
@@ -485,6 +486,11 @@ def do_plot(x,
             yticklabelformat=None,
             weights=None,
             text=None):
+    if options.corrcoef:
+        corr = numpy.corrcoef(x, y)[0, 1]  # x (0) vs y (1)
+        print(f'Pearson correlation coefficient: {corr:.5g}')
+        poly, polylabel = polyfit(x, y, 1)
+        plot_function(poly, (x.min(), x.max()), color='red', label=f'corr: {corr:.5g}')
     if yticklabelformat is not None:
         plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.aspect_ratio is not None:
