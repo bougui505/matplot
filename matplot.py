@@ -488,9 +488,9 @@ def do_plot(x,
             text=None):
     if options.corrcoef:
         corr = numpy.corrcoef(x, y)[0, 1]  # x (0) vs y (1)
-        print(f'Pearson correlation coefficient: {corr:.5g}')
+        print(f'Pearson correlation coefficient: {corr:.3g}')
         poly, polylabel = polyfit(x, y, 1)
-        plot_function(poly, (x.min(), x.max()), color='red', label=f'corr: {corr:.5g}')
+        plot_function(poly, (x.min(), x.max()), color='red', label=f'corr: {corr:.3g}')
     if yticklabelformat is not None:
         plt.gca().yaxis.set_major_formatter(StrMethodFormatter(yticklabelformat))
     if options.aspect_ratio is not None:
