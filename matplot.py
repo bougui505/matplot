@@ -205,6 +205,13 @@ parser.add_option(
     help=
     "Location of the legend. Can be: 'upper left', 'upper right', 'lower left', 'lower right', 'upper center', 'lower center', 'center left', 'center right', 'center'. Default: 'best'"
 )
+parser.add_option(
+    '--fontsize',
+    default='medium',
+    type='str',
+    help=
+    "The font size of the legend. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'"
+)
 scatter_options.add_option("--line", dest='line', default=False, action="store_true", help="Plot line between points")
 scatter_options.add_option("--histy",
                            action="store_true",
@@ -440,7 +447,7 @@ def plot_function(expression_string, xlims, npts=100, color=None, label=None):
     y = ne.evaluate(expression_string)
     print(f">>> plot {getframeinfo(currentframe()).lineno}")
     plt.plot(x, y, label=label, color=color)
-    plt.legend(loc=options.loc)
+    plt.legend(loc=options.loc, fontsize=options.fontsize)
     return x, y
 
 
@@ -525,7 +532,7 @@ def do_plot(x,
             else:
                 vlabel_i = None
             plt.axvline(x=xvline, color=colors[i], ls='--', label=vlabel_i)
-            plt.legend(loc=options.loc)
+            plt.legend(loc=options.loc, fontsize=options.fontsize)
     if options.polyfit is not None:
         poly, polylabel = polyfit(x, y, options.polyfit)
         print(f"polyfit: {polylabel}")
@@ -845,7 +852,7 @@ def do_plot(x,
                 else:
                     vlabel_i = None
                 plt.axvline(x=xvline, color=colors[i], ls='--', label=vlabel_i)
-                plt.legend(loc=options.loc)
+                plt.legend(loc=options.loc, fontsize=options.fontsize)
         ax2 = ax1.twinx()
         for datai, daxi in enumerate(dax):
             if daxi == 1:
@@ -861,7 +868,7 @@ def do_plot(x,
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax1.plot(x, y[:, datai], 'g-', alpha=options.alpha, label=label)
                     if label is not None:
-                        ax1.legend(loc=options.loc)
+                        ax1.legend(loc=options.loc, fontsize=options.fontsize)
                     if (options.minval or options.maxval):
                         plot_extrema(y[:, datai], minval=options.minval, maxval=options.maxval, ax=ax1, color='g')
                 else:
@@ -882,7 +889,7 @@ def do_plot(x,
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     ax2.plot(x, y[:, datai], 'b-', alpha=options.alpha, label=label)
                     if label is not None:
-                        ax2.legend(loc=options.loc)
+                        ax2.legend(loc=options.loc, fontsize=options.fontsize)
                     if (options.minval2 or options.maxval2):
                         plot_extrema(y[:, datai], minval=options.minval2, maxval=options.maxval2, ax=ax2, color='b')
                 else:
@@ -944,7 +951,7 @@ def do_plot(x,
                     else:
                         label = 'col %d' % (ndim_ + 1)
                     sns.distplot(data[:, ndim_][sel], label=label)
-                plt.legend(loc=options.loc)
+                plt.legend(loc=options.loc, fontsize=options.fontsize)
             else:
                 sns.distplot(y)
         if is_sklearn:
@@ -972,7 +979,7 @@ def do_plot(x,
     if options.title is not None:
         plt.suptitle(options.title)
     if options.labels is not None:
-        plt.legend(loc=options.loc)
+        plt.legend(loc=options.loc, fontsize=options.fontsize)
     if xticklabels is not None:
         plt.xticks(ticks=x, labels=xticklabels, rotation=90)
     if options.outfilename is None:
