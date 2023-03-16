@@ -51,6 +51,11 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
+parser.add_option(
+    "--subsample",
+    help="Subsample randomly the point. The given number between 0 and 1 give the ratio of points to keep",
+    type=float,
+    default=None)
 parser.add_option("--read_data", help="Read plot data from the given png saved image using the --save option")
 parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure", nargs=2, type=int)
 parser.add_option("--title", help="Title of the plot", type=str)
@@ -499,7 +504,17 @@ def do_plot(x,
             xticklabels=None,
             yticklabelformat=None,
             weights=None,
-            text=None):
+            text=None,
+            data=None):
+    if options.subsample is not None:
+        n = x.shape[0]
+        n_sub = int(options.subsample * n)
+        print(f"Subsampling {n_sub} points over {n} ({options.subsample})")
+        sel = numpy.random.choice(n, size=n_sub, replace=False)
+        sel = numpy.sort(sel)
+        x = x[sel]
+        y = y[sel]
+        data = data[sel]
     if options.corrcoef:
         corr = numpy.corrcoef(x, y)[0, 1]  # x (0) vs y (1)
         print(f'Pearson correlation coefficient: {corr:.3g}')
@@ -1128,7 +1143,8 @@ if n > 1:
             xticklabels=xticklabels,
             yticklabelformat=options.yticklabelformat,
             weights=weights,
-            text=text)
+            text=text,
+            data=data)
 else:
     plot_functions(options.func, xlims=[options.xmin, options.xmax], func_label=options.func_label)
     plt.show()
