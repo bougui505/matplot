@@ -510,11 +510,11 @@ def do_plot(x,
         n = x.shape[0]
         n_sub = int(options.subsample * n)
         print(f"Subsampling {n_sub} points over {n} ({options.subsample})")
-        sel = numpy.random.choice(n, size=n_sub, replace=False)
-        sel = numpy.sort(sel)
-        x = x[sel]
-        y = y[sel]
-        data = data[sel]
+        subsampling = numpy.random.choice(n, size=n_sub, replace=False)
+        subsampling = numpy.sort(subsampling)
+        x = x[subsampling]
+        y = y[subsampling]
+        data = data[subsampling]
     if options.corrcoef:
         corr = numpy.corrcoef(x, y)[0, 1]  # x (0) vs y (1)
         print(f'Pearson correlation coefficient: {corr:.3g}')
@@ -960,12 +960,12 @@ def do_plot(x,
         else:
             if data.ndim > 1:
                 for ndim_ in range(data.shape[1]):
-                    sel = ~numpy.isnan(data[:, ndim_])
+                    subsampling = ~numpy.isnan(data[:, ndim_])
                     if labels is not None:
                         label = labels[ndim_]
                     else:
                         label = 'col %d' % (ndim_ + 1)
-                    sns.distplot(data[:, ndim_][sel], label=label)
+                    sns.distplot(data[:, ndim_][subsampling], label=label)
                 plt.legend(loc=options.loc, fontsize=options.fontsize)
             else:
                 sns.distplot(y)
@@ -1002,7 +1002,9 @@ def do_plot(x,
     else:
         metadata = dict()
         datastr = ''
-        for l in data:
+        for i, l in enumerate(data):
+            if options.subsample is not None:
+                datastr += f"{subsampling[i]} "
             if isinstance(l, Iterable):
                 for e in l:
                     datastr += f"{e} "
@@ -1021,6 +1023,9 @@ def add_metadata(filename, datastr, key='data'):
     metadata.add_text(key, datastr, zip=True)
     metadata.add_text('cwd', os.getcwd())
     metadata.add_text('hostname', socket.gethostname())
+    if options.subsample is not None:
+        print('# Adding subsampling metadata')
+        metadata.add_text('subsampling', '1st-column')
     if options.labels is not None:
         metadata.add_text('labels', options.labels)
     targetImage = Image.open(filename)
@@ -1035,6 +1040,8 @@ def read_metadata(filename):
     im.load()
     datastr = f'#hostname:{im.info["hostname"]}\n'
     datastr += f'#cwd:{im.info["cwd"]}\n'
+    if "subsampling" in im.info:
+        datastr += f'#subsampling:{im.info["subsampling"]}\n'
     if "labels" in im.info:
         datastr += f'#labels:{im.info["labels"]}\n'
     datastr += im.info['data']
