@@ -469,20 +469,32 @@ def polyfit(x, y, degree):
 def plot_extrema(y, minval=True, maxval=False, ax=None, color='blue'):
     if y.ndim == 1:
         y = y[:, None]
-    if minval:
-        minima = y.min(axis=0)
-        for i, v in enumerate(minima):
-            if ax is None:
-                plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-            else:
-                ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-    if maxval:
-        maxima = y.max(axis=0)
-        for i, v in enumerate(maxima):
-            if ax is None:
-                plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
-            else:
-                ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+    if (~numpy.isnan(y)).any():
+        if minval:
+            minima = numpy.nanmin(y, axis=0)
+            for i, v in enumerate(minima):
+                if ax is None:
+                    plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                else:
+                    ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+        if maxval:
+            maxima = numpy.nanmax(y, axis=0)
+            for i, v in enumerate(maxima):
+                if ax is None:
+                    plt.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+                else:
+                    ax.axhline(y=v, color=color, linestyle='--', linewidth=1.)
+
+
+def add_extrema_to_label(x, y, label, minval=True, maxval=False):
+    if (~numpy.isnan(y)).any():
+        if minval:
+            imin = numpy.nanargmin(y)
+            label = label + f" min={y[imin]:.3g} (x={x[imin]})"
+        if maxval:
+            imax = numpy.nanargmax(y)
+            label = label + f" max={y[imax]:.3g} (x={x[imax]})"
+    return label
 
 
 def do_plot(x,
@@ -611,10 +623,7 @@ def do_plot(x,
                 if not options.bar:
                     if labels is not None:
                         label = labels[0]
-                        if options.minval:
-                            label = label + f" min={y.min():.3g} (x={x[y.argmin()]})"
-                        if options.maxval:
-                            label = label + f" max={y.max():.3g} (x={x[y.argmax()]})"
+                        label = add_extrema_to_label(x, y, label, minval=options.minval, maxval=options.maxval)
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -640,10 +649,7 @@ def do_plot(x,
                     for i, yi in enumerate(y.T):
                         if labels is not None:
                             label = labels[i]
-                            if options.minval:
-                                label = label + f" min={yi.min():.3g} (x={x[yi.argmin()]})"
-                            if options.maxval:
-                                label = label + f" max={yi.max():.3g} (x={x[yi.argmax()]})"
+                            label = add_extrema_to_label(x, yi, label, minval=options.minval, maxval=options.maxval)
                         else:
                             label = None
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -673,13 +679,14 @@ def do_plot(x,
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
                 if labels is not None:
                     label = labels[i]
-                    if options.minval:
-                        label = label + f" min={ma_array[:, 1].min():.3g} (x={ma_array[:, 0][ma_array[:, 1].argmin()]})"
-                    if options.maxval:
-                        label = label + f" max={ma_array[:, 1].max():.3g (x={ma_array[:, 0][ma_array[:, 1].argmax()]})}"
+                    label = add_extrema_to_label(ma_array[:, 0],
+                                                 ma_array[:, 1],
+                                                 label,
+                                                 minval=options.minval,
+                                                 maxval=options.maxval)
                 else:
                     label = None
-                print(f">>> plot {getframeinfo(currentframe()).lineno}")
+                print(f">>> plotting moving average {getframeinfo(currentframe()).lineno}")
                 plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
                 if options.minval or options.maxval:
                     if options.mamin or options.mamax:  # plot min value of the moving average
@@ -874,10 +881,11 @@ def do_plot(x,
                 if options.daxma1 is None:
                     if labels is not None:
                         label = labels[datai]
-                        if options.minval:
-                            label = label + f" min={y[:, datai].min():.3g} (x={x[y[:, datai].argmin()]})"
-                        if options.maxval:
-                            label = label + f" max={y[:, datai].max():.3g (x={x[y[:, datai].argmax()]})}"
+                        label = add_extrema_to_label(x,
+                                                     y[:, datai],
+                                                     label,
+                                                     minval=options.minval,
+                                                     maxval=options.maxval)
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
@@ -895,10 +903,11 @@ def do_plot(x,
                 if options.daxma2 is None:
                     if labels is not None:
                         label = labels[datai]
-                        if options.minval2:
-                            label = label + f" min={y[:, datai].min():.3g} (x={x[y[:, datai].argmin()]})"
-                        if options.maxval2:
-                            label = label + f" max={y[:, datai].max():.3g} (x={x[y[:, datai].argmax()]})"
+                        label = add_extrema_to_label(x,
+                                                     y[:, datai],
+                                                     label,
+                                                     minval=options.minval2,
+                                                     maxval=options.maxval2)
                     else:
                         label = None
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
