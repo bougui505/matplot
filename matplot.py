@@ -509,7 +509,7 @@ def do_plot(x,
     if options.subsample is not None:
         n = x.shape[0]
         n_sub = int(options.subsample * n)
-        print(f"Subsampling {n_sub} points over {n} ({options.subsample})")
+        print(f"# Subsampling {n_sub} points over {n} ({options.subsample})")
         subsampling = numpy.random.choice(n, size=n_sub, replace=False)
         subsampling = numpy.sort(subsampling)
         x = x[subsampling]
