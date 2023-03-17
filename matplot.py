@@ -497,6 +497,12 @@ def add_extrema_to_label(x, y, label, minval=True, maxval=False):
     return label
 
 
+def get_current_limits():
+    x_min, x_max = plt.gca().get_xlim()
+    y_min, y_max = plt.gca().get_ylim()
+    return x_min, x_max, y_min, y_max
+
+
 def do_plot(x,
             y,
             z=None,
@@ -740,9 +746,14 @@ def do_plot(x,
                         print(f">>> plotting scatter {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
                         if len(text) > 0:
-                            print(f">>> plotting text {getframeinfo(currentframe()).lineno}")
+                            set_x_lim(options.xmin, options.xmax)
+                            set_y_lim(options.ymin, options.ymax)
+                            current_limits = get_current_limits()
+                            print(f">>> plotting text in frame {current_limits} {getframeinfo(currentframe()).lineno}")
                             for i, (x_, y_) in enumerate(zip(x, y)):
-                                plt.text(x_, y_, text[i], fontsize=options.fontsize)
+                                if x_ >= current_limits[0] and x_ <= current_limits[1] and y_ >= current_limits[
+                                        2] and y_ <= current_limits[3]:
+                                    plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
         else:
             if x.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
