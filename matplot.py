@@ -215,7 +215,7 @@ parser.add_option(
     default='medium',
     type='str',
     help=
-    "The font size of the legend. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'"
+    "The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'"
 )
 scatter_options.add_option("--line", dest='line', default=False, action="store_true", help="Plot line between points")
 scatter_options.add_option("--histy",
@@ -737,11 +737,12 @@ def do_plot(x,
                         axScatter.scatter(x, y, s=options.size, alpha=options.alpha)
                         axHisty.hist(y, bins=n_bins, orientation='horizontal')
                     else:
-                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
+                        print(f">>> plotting scatter {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
                         if len(text) > 0:
+                            print(f">>> plotting text {getframeinfo(currentframe()).lineno}")
                             for i, (x_, y_) in enumerate(zip(x, y)):
-                                plt.text(x_, y_, text[i])
+                                plt.text(x_, y_, text[i], fontsize=options.fontsize)
         else:
             if x.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
