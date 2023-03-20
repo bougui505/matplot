@@ -191,6 +191,11 @@ If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
 If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
 If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text.\
 If --fields='*' is given all the columns are considered as y values.")
+scatter_options.add_option(
+    "--mintextdist",
+    help='minimal distance between plotted text label in scatter plot (see t-field in fields option).',
+    type=float,
+    default=None)
 scatter_options.add_option("-s",
                            "--size",
                            default=2.,
@@ -750,10 +755,22 @@ def do_plot(x,
                             set_y_lim(options.ymin, options.ymax)
                             current_limits = get_current_limits()
                             print(f">>> plotting text in frame {current_limits} {getframeinfo(currentframe()).lineno}")
+                            plotted = []
+                            distmin = numpy.inf
+                            if options.mintextdist is None:
+                                options.mintextdist = 0.
+                            else:
+                                print(
+                                    f">>> plotting text skipping labels with inter-distances >= {options.mintextdist}")
                             for i, (x_, y_) in enumerate(zip(x, y)):
                                 if x_ >= current_limits[0] and x_ <= current_limits[1] and y_ >= current_limits[
                                         2] and y_ <= current_limits[3]:
-                                    plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
+                                    if i > 0:
+                                        distmin = numpy.sqrt(
+                                            ((numpy.asarray(plotted) - numpy.asarray([x_, y_]))**2).sum(axis=1)).min()
+                                    if distmin >= options.mintextdist:
+                                        plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
+                                        plotted.append([x_, y_])
         else:
             if x.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
