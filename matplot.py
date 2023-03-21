@@ -508,6 +508,23 @@ def get_current_limits():
     return x_min, x_max, y_min, y_max
 
 
+def plot_text(x, y, text):
+    current_limits = get_current_limits()
+    set_x_lim(options.xmin, options.xmax)
+    set_y_lim(options.ymin, options.ymax)
+    plotted = []
+    distmin = numpy.inf
+    if options.mintextdist is None:
+        options.mintextdist = 0.
+    for i, (x_, y_) in enumerate(zip(x, y)):
+        if x_ >= current_limits[0] and x_ <= current_limits[1] and y_ >= current_limits[2] and y_ <= current_limits[3]:
+            if i > 0:
+                distmin = numpy.sqrt(((numpy.asarray(plotted) - numpy.asarray([x_, y_]))**2).sum(axis=1)).min()
+            if distmin >= options.mintextdist:
+                plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
+                plotted.append([x_, y_])
+
+
 def do_plot(x,
             y,
             z=None,
@@ -716,9 +733,12 @@ def do_plot(x,
                     plt.scatter(x, y, s=z * options.size, alpha=options.alpha, facecolor='none', edgecolor='blue')
                 else:
                     if not options.plot3d:
-                        print(f">>> plot {getframeinfo(currentframe()).lineno}")
+                        print(f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, c=z, s=options.size, alpha=options.alpha, cmap=options.cmap)
                         plt.colorbar()
+                        if len(text) > 0:
+                            print(f">>> plotting text {getframeinfo(currentframe()).lineno}")
+                            plot_text(x, y, text)
                     else:
                         ax = plt.axes(projection='3d')
                         ax.scatter3D(x, y, z, s=options.size)
@@ -751,26 +771,8 @@ def do_plot(x,
                         print(f">>> plotting scatter {getframeinfo(currentframe()).lineno}")
                         plt.scatter(x, y, s=options.size, alpha=options.alpha)
                         if len(text) > 0:
-                            set_x_lim(options.xmin, options.xmax)
-                            set_y_lim(options.ymin, options.ymax)
-                            current_limits = get_current_limits()
-                            print(f">>> plotting text in frame {current_limits} {getframeinfo(currentframe()).lineno}")
-                            plotted = []
-                            distmin = numpy.inf
-                            if options.mintextdist is None:
-                                options.mintextdist = 0.
-                            else:
-                                print(
-                                    f">>> plotting text skipping labels with inter-distances >= {options.mintextdist}")
-                            for i, (x_, y_) in enumerate(zip(x, y)):
-                                if x_ >= current_limits[0] and x_ <= current_limits[1] and y_ >= current_limits[
-                                        2] and y_ <= current_limits[3]:
-                                    if i > 0:
-                                        distmin = numpy.sqrt(
-                                            ((numpy.asarray(plotted) - numpy.asarray([x_, y_]))**2).sum(axis=1)).min()
-                                    if distmin >= options.mintextdist:
-                                        plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
-                                        plotted.append([x_, y_])
+                            print(f">>> plotting text {getframeinfo(currentframe()).lineno}")
+                            plot_text(x, y, text)
         else:
             if x.shape[1] > 1:
                 colors = cmap(numpy.linspace(0, 1, x.shape[1]))
