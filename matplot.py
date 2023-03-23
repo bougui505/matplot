@@ -659,6 +659,9 @@ def do_plot(x,
                 else:
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.bar(x, y, align='center')
+                    if len(text) > 0:
+                        print(f">>> plotting text {getframeinfo(currentframe()).lineno}")
+                        plot_text(x, y, text)
             else:
                 if len(x.shape) == 1:
                     x = x[:, None]
