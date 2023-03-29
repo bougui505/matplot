@@ -43,12 +43,14 @@ except ImportError:
 import numexpr as ne
 import os
 import socket
+from scipy.cluster import hierarchy
 
 # To read large metadata from a png image file
 # See: https://stackoverflow.com/a/61466412/1679629
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
+print(f">>> parsing options {getframeinfo(currentframe()).lineno}")
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
 parser.add_option(
@@ -60,6 +62,10 @@ parser.add_option("--read_data", help="Read plot data from the given png saved i
 parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure", nargs=2, type=int)
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
+parser.add_option("--heatmap", help="Plot an heatmap from the given matrix", action='store_true')
+parser.add_option("--ward",
+                  help="Sort the heatmap (see --heatmap) using ward hierarchical clustering",
+                  action='store_true')
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str', help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str', help="y axis label")
@@ -523,6 +529,32 @@ def plot_text(x, y, text):
             if distmin >= options.mintextdist:
                 plt.text(x_, y_, text[i], fontsize=options.fontsize, in_layout=True)
                 plotted.append([x_, y_])
+
+
+def hierarchy_sort(pmat):
+    Z = hierarchy.ward(pmat)
+    order = hierarchy.leaves_list(Z)
+    return pmat[order][:, order]
+
+
+def plot_heatmap(mat):
+    if options.ward:
+        n, p = mat.shape
+        if n == p:
+            print(f">>> ward hierarchical sort {getframeinfo(currentframe()).lineno}")
+            mat = hierarchy_sort(mat)
+        else:
+            print(
+                f">>> cannot apply ward hierarchical sort as the matrix is not a square matrix ({n}, {p}) {getframeinfo(currentframe()).lineno}"
+            )
+    print(f">>> plotting heatmap {getframeinfo(currentframe()).lineno}")
+    plt.matshow(mat, cmap=options.cmap)
+    if options.xlabel is not None:
+        plt.xlabel(options.xlabel)
+    if options.ylabel is not None:
+        plt.ylabel(options.ylabel)
+    plt.colorbar()
+    plt.show()
 
 
 def do_plot(x,
@@ -1130,13 +1162,17 @@ if n > 1:
         x = numpy.asarray(x)[:, None]
         y = numpy.asarray(y)[:, None]
     else:
+        if options.heatmap:
+            print(f">>> reading 2-dimensional data as heatmap {getframeinfo(currentframe()).lineno}")
+            plot_heatmap(data)
+            sys.exit()
         if options.fields is None:
             print(f">>> reading 2-dimensional data {getframeinfo(currentframe()).lineno}")
             x = data[:, 0]
             y = data[:, 1:]
             z = None
             e = None
-        else:
+        if options.fields is not None:
             print(f">>> reading data from fields {getframeinfo(currentframe()).lineno}")
             x, y, z, e, xticklabels, weights, text = [], [], [], [], [], [], []
             for i, field in enumerate(options.fields):
