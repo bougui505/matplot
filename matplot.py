@@ -50,7 +50,7 @@ from scipy.cluster import hierarchy
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
-print(f">>> parsing options {getframeinfo(currentframe()).lineno}")
+print(f"# >>> parsing options {getframeinfo(currentframe()).lineno}")
 parser = OptionParser()
 parser.add_option("--save", help="Save the file", type=str, dest='outfilename')
 parser.add_option(
@@ -62,7 +62,11 @@ parser.add_option("--read_data", help="Read plot data from the given png saved i
 parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure", nargs=2, type=int)
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
-parser.add_option("--heatmap", help="Plot an heatmap from the given matrix", action='store_true')
+parser.add_option(
+    "--heatmap",
+    help="Plot an heatmap from the given matrix. To give the first column as xticklabels use the option --fields 'l*'",
+    action='store_true')
+parser.add_option("--header", help='Read the first line as y-ticks labels with option --heatmap', action='store_true')
 parser.add_option("--ward",
                   help="Sort the heatmap (see --heatmap) using ward hierarchical clustering",
                   action='store_true')
@@ -1074,6 +1078,10 @@ def do_plot(x,
         plt.legend(loc=options.loc, fontsize=options.fontsize)
     if xticklabels is not None:
         plt.xticks(ticks=x, labels=xticklabels, rotation=90)
+    display_or_save()
+
+
+def display_or_save():
     if options.outfilename is None:
         plt.show()
     else:
@@ -1140,11 +1148,16 @@ else:
     else:
         dtype = numpy.float
 print(f">>> reading data from stdin {getframeinfo(currentframe()).lineno}")
+if options.header:
+    skip_header = 1
+else:
+    skip_header = 0
 data = numpy.genfromtxt(sys.stdin,
                         invalid_raise=False,
                         delimiter=options.delimiter,
                         dtype=dtype,
-                        filling_values=numpy.nan)
+                        filling_values=numpy.nan,
+                        skip_header=skip_header)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
