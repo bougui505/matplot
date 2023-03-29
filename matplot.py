@@ -568,7 +568,7 @@ def plot_heatmap(mat, xticklabels=None, yticklabels=None):
     if options.ylabel is not None:
         plt.ylabel(options.ylabel)
     plt.colorbar()
-    display_or_save()
+    display_or_save(data)
 
 
 def do_plot(x,
@@ -1086,10 +1086,12 @@ def do_plot(x,
         plt.legend(loc=options.loc, fontsize=options.fontsize)
     if xticklabels is not None:
         plt.xticks(ticks=x, labels=xticklabels, rotation=90)
-    display_or_save()
+    if options.subsample is None:
+        subsampling = None
+    display_or_save(data, subsampling)
 
 
-def display_or_save():
+def display_or_save(data, subsampling=None):
     if options.outfilename is None:
         plt.show()
     else:
