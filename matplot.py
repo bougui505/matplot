@@ -67,9 +67,11 @@ parser.add_option(
     help="Plot an heatmap from the given matrix. To give the first column as yticklabels use the option --fields 'l*'",
     action='store_true')
 parser.add_option("--header", help='Read the first line as xticklabels with option --heatmap', action='store_true')
-parser.add_option("--ward",
-                  help="Sort the heatmap (see --heatmap) using ward hierarchical clustering",
-                  action='store_true')
+parser.add_option(
+    "--linkage",
+    help=
+    "Sort the heatmap (see --heatmap) with hierarchical clustering using the given method (one of: single, complete, average, weighted, centroid, median, ward, see: https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html#scipy.cluster.hierarchy.linkage)",
+    type=str)
 parser.add_option("-d", "--delimiter", help="Delimiter to use to read the data", default=None)
 parser.add_option("--xlabel", dest="xlabel", default=None, type='str', help="x axis label")
 parser.add_option("--ylabel", dest="ylabel", default=None, type='str', help="y axis label")
@@ -536,29 +538,29 @@ def plot_text(x, y, text):
 
 
 def hierarchy_sort(pmat):
-    Z = hierarchy.ward(pmat)
+    Z = hierarchy.linkage(pmat, method='complete')
     order = hierarchy.leaves_list(Z)
     return pmat[order][:, order], order
 
 
 def plot_heatmap(mat, xticklabels=None, yticklabels=None):
     n, p = mat.shape
-    if options.ward:
+    if options.linkage is not None:
         if n == p:
-            print(f">>> ward hierarchical sort {getframeinfo(currentframe()).lineno}")
+            print(f">>> linkage hierarchical sort {getframeinfo(currentframe()).lineno}")
             mat, order = hierarchy_sort(mat)
         else:
             print(
-                f">>> cannot apply ward hierarchical sort as the matrix is not a square matrix ({n}, {p}) {getframeinfo(currentframe()).lineno}"
+                f">>> cannot apply linkage hierarchical sort as the matrix is not a square matrix ({n}, {p}) {getframeinfo(currentframe()).lineno}"
             )
     print(f">>> plotting heatmap {getframeinfo(currentframe()).lineno}")
     plt.matshow(mat, cmap=options.cmap)
     if xticklabels is not None:
-        if options.ward and xticklabels is not None:
+        if options.linkage is not None and xticklabels is not None:
             xticklabels = numpy.asarray(xticklabels)[order]
         plt.xticks(ticks=range(p), labels=xticklabels, rotation=90, fontsize=options.fontsize)
     if yticklabels is not None:
-        if options.ward and yticklabels is not None:
+        if options.linkage is not None and yticklabels is not None:
             yticklabels = numpy.asarray(yticklabels)[order]
         plt.yticks(ticks=range(n), labels=yticklabels, fontsize=options.fontsize)
     if options.xlabel is not None:
