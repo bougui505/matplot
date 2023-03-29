@@ -1154,6 +1154,7 @@ else:
     else:
         dtype = numpy.float
 print(f">>> reading data from stdin {getframeinfo(currentframe()).lineno}")
+header = None
 if options.header:
     print(f">>> reading header from stdin {getframeinfo(currentframe()).lineno}")
     header = sys.stdin.readline().strip().split()
