@@ -538,7 +538,7 @@ def plot_text(x, y, text):
 
 
 def hierarchy_sort(pmat):
-    Z = hierarchy.linkage(pmat, method='complete')
+    Z = hierarchy.linkage(pmat, method=options.linkage)
     order = hierarchy.leaves_list(Z)
     return pmat[order][:, order], order
 
