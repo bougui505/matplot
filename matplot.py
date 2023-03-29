@@ -64,9 +64,9 @@ parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
 parser.add_option(
     "--heatmap",
-    help="Plot an heatmap from the given matrix. To give the first column as xticklabels use the option --fields 'l*'",
+    help="Plot an heatmap from the given matrix. To give the first column as yticklabels use the option --fields 'l*'",
     action='store_true')
-parser.add_option("--header", help='Read the first line as y-ticks labels with option --heatmap', action='store_true')
+parser.add_option("--header", help='Read the first line as xticklabels with option --heatmap', action='store_true')
 parser.add_option("--ward",
                   help="Sort the heatmap (see --heatmap) using ward hierarchical clustering",
                   action='store_true')
@@ -538,15 +538,15 @@ def plot_text(x, y, text):
 def hierarchy_sort(pmat):
     Z = hierarchy.ward(pmat)
     order = hierarchy.leaves_list(Z)
-    return pmat[order][:, order]
+    return pmat[order][:, order], order
 
 
-def plot_heatmap(mat, xticklabels=None):
+def plot_heatmap(mat, xticklabels=None, yticklabels=None):
     n, p = mat.shape
     if options.ward:
         if n == p:
             print(f">>> ward hierarchical sort {getframeinfo(currentframe()).lineno}")
-            mat = hierarchy_sort(mat)
+            mat, order = hierarchy_sort(mat)
         else:
             print(
                 f">>> cannot apply ward hierarchical sort as the matrix is not a square matrix ({n}, {p}) {getframeinfo(currentframe()).lineno}"
@@ -554,13 +554,19 @@ def plot_heatmap(mat, xticklabels=None):
     print(f">>> plotting heatmap {getframeinfo(currentframe()).lineno}")
     plt.matshow(mat, cmap=options.cmap)
     if xticklabels is not None:
-        plt.xticks(ticks=range(n), labels=xticklabels, rotation=90)
+        if options.ward and xticklabels is not None:
+            xticklabels = numpy.asarray(xticklabels)[order]
+        plt.xticks(ticks=range(p), labels=xticklabels, rotation=90)
+    if yticklabels is not None:
+        if options.ward and yticklabels is not None:
+            yticklabels = numpy.asarray(yticklabels)[order]
+        plt.yticks(ticks=range(n), labels=yticklabels)
     if options.xlabel is not None:
         plt.xlabel(options.xlabel)
     if options.ylabel is not None:
         plt.ylabel(options.ylabel)
     plt.colorbar()
-    plt.show()
+    display_or_save()
 
 
 def do_plot(x,
@@ -1149,15 +1155,15 @@ else:
         dtype = numpy.float
 print(f">>> reading data from stdin {getframeinfo(currentframe()).lineno}")
 if options.header:
-    skip_header = 1
-else:
-    skip_header = 0
+    print(f">>> reading header from stdin {getframeinfo(currentframe()).lineno}")
+    header = sys.stdin.readline().strip().split()
+    if options.fields.startswith('l'):
+        header = header[1:]
 data = numpy.genfromtxt(sys.stdin,
                         invalid_raise=False,
                         delimiter=options.delimiter,
                         dtype=dtype,
-                        filling_values=numpy.nan,
-                        skip_header=skip_header)
+                        filling_values=numpy.nan)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
@@ -1224,7 +1230,7 @@ if n > 1:
                 e = None
             if options.heatmap:
                 print(f">>> sending y-data to heatmap {getframeinfo(currentframe()).lineno}")
-                plot_heatmap(y, xticklabels=xticklabels)
+                plot_heatmap(y, xticklabels=header, yticklabels=xticklabels)
                 sys.exit()
         x = numpy.asarray(x)[:, None]
     if options.roc:
