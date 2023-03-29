@@ -1105,6 +1105,7 @@ else:
         dtype = None  # to be able to read also text
     else:
         dtype = numpy.float
+print(f">>> reading data from stdin {getframeinfo(currentframe()).lineno}")
 data = numpy.genfromtxt(sys.stdin,
                         invalid_raise=False,
                         delimiter=options.delimiter,
@@ -1121,6 +1122,7 @@ weights = []  # optional weights for histogram
 text = []
 if n > 1:
     if len(data.shape) == 1:
+        print(f">>> reading 1-dimensional data {getframeinfo(currentframe()).lineno}")
         x = range(n)
         y = data
         z = None
@@ -1129,11 +1131,13 @@ if n > 1:
         y = numpy.asarray(y)[:, None]
     else:
         if options.fields is None:
+            print(f">>> reading 2-dimensional data {getframeinfo(currentframe()).lineno}")
             x = data[:, 0]
             y = data[:, 1:]
             z = None
             e = None
         else:
+            print(f">>> reading data from fields {getframeinfo(currentframe()).lineno}")
             x, y, z, e, xticklabels, weights, text = [], [], [], [], [], [], []
             for i, field in enumerate(options.fields):
                 if field == 'x':
