@@ -537,9 +537,9 @@ def hierarchy_sort(pmat):
     return pmat[order][:, order]
 
 
-def plot_heatmap(mat):
+def plot_heatmap(mat, xticklabels=None):
+    n, p = mat.shape
     if options.ward:
-        n, p = mat.shape
         if n == p:
             print(f">>> ward hierarchical sort {getframeinfo(currentframe()).lineno}")
             mat = hierarchy_sort(mat)
@@ -549,6 +549,8 @@ def plot_heatmap(mat):
             )
     print(f">>> plotting heatmap {getframeinfo(currentframe()).lineno}")
     plt.matshow(mat, cmap=options.cmap)
+    if xticklabels is not None:
+        plt.xticks(ticks=range(n), labels=xticklabels, rotation=90)
     if options.xlabel is not None:
         plt.xlabel(options.xlabel)
     if options.ylabel is not None:
@@ -1162,7 +1164,7 @@ if n > 1:
         x = numpy.asarray(x)[:, None]
         y = numpy.asarray(y)[:, None]
     else:
-        if options.heatmap:
+        if options.heatmap and options.fields is None:
             print(f">>> reading 2-dimensional data as heatmap {getframeinfo(currentframe()).lineno}")
             plot_heatmap(data)
             sys.exit()
@@ -1192,7 +1194,7 @@ if n > 1:
                 elif field == 'w':  # weight for weighted histogram
                     weights.extend(data[:, i])
                 elif field == '*':
-                    y = data.T
+                    y = data[:, i:].T
             if len(xticklabels) == 0:
                 xticklabels = None
             x, y, z, e = numpy.asarray(x, dtype=float).T, numpy.asarray(y, dtype=float).T, numpy.asarray(
@@ -1207,6 +1209,10 @@ if n > 1:
             #     z = data_sorted[:,2]
             if len(e) == 0:
                 e = None
+            if options.heatmap:
+                print(f">>> sending y-data to heatmap {getframeinfo(currentframe()).lineno}")
+                plot_heatmap(y, xticklabels=xticklabels)
+                sys.exit()
         x = numpy.asarray(x)[:, None]
     if options.roc:
         negatives = data[:, 0]
