@@ -556,11 +556,11 @@ def plot_heatmap(mat, xticklabels=None, yticklabels=None):
     if xticklabels is not None:
         if options.ward and xticklabels is not None:
             xticklabels = numpy.asarray(xticklabels)[order]
-        plt.xticks(ticks=range(p), labels=xticklabels, rotation=90)
+        plt.xticks(ticks=range(p), labels=xticklabels, rotation=90, fontsize=options.fontsize)
     if yticklabels is not None:
         if options.ward and yticklabels is not None:
             yticklabels = numpy.asarray(yticklabels)[order]
-        plt.yticks(ticks=range(n), labels=yticklabels)
+        plt.yticks(ticks=range(n), labels=yticklabels, fontsize=options.fontsize)
     if options.xlabel is not None:
         plt.xlabel(options.xlabel)
     if options.ylabel is not None:
