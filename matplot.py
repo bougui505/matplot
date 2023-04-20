@@ -720,6 +720,11 @@ def do_plot(x,
                             label = None
                         yi = y.T[i]
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
+                        label = add_extrema_to_label(xi.flatten(),
+                                                     yi.flatten(),
+                                                     label,
+                                                     minval=options.minval,
+                                                     maxval=options.maxval)
                         plt.plot(xi.flatten(), yi.flatten(), c=colors[i], label=label)
                 elif y.shape[1] > 1:
                     colors = cmap(numpy.linspace(0, 1, y.shape[1]))
