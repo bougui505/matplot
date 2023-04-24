@@ -617,7 +617,10 @@ def do_plot(x,
     if options.bw:
         cmap = cm.Greys
     else:
-        cmap = cm.rainbow
+        if options.cmap is None:
+            cmap = cm.rainbow
+        else:
+            cmap = matplotlib.cm.get_cmap(name=options.cmap)
     if xmin is None and func is not None:
         xmin = x.min()
     if xmax is None and func is not None:
