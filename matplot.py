@@ -738,7 +738,7 @@ def do_plot(x,
                         else:
                             label = None
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                        plt.plot(x.flatten(), yi.flatten(), c=colors[i], label=label)
+                        plt.plot(x.flatten(), yi.flatten(), c=colors[i], label=label, alpha=options.alpha)
             if e is not None:
                 if len(y.shape) == 1:  # No more than 1 curve
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
