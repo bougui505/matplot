@@ -777,6 +777,10 @@ def do_plot(x,
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
                     plt.plot(x.flatten(), y_.flatten(), '-', color='gray', alpha=.25, lw=1.)
             ws = options.moving_average  # window size
+            if options.fix_overlap:
+                linewidth = y.shape[1] + 1
+            else:
+                linewidth = 2.
             for i, y_ in enumerate(y.T):
                 ma_array = numpy.c_[x.flatten()[int(ws / 2):int(-ws / 2)],
                                     sliding_func(y_, ws, options.slide)[int(ws / 2):int(-ws / 2)]]
@@ -790,7 +794,9 @@ def do_plot(x,
                 else:
                     label = None
                 print(f">>> plotting moving average {getframeinfo(currentframe()).lineno}")
-                plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=2., label=label)
+                if options.fix_overlap:
+                    linewidth -= 1
+                plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=linewidth, label=label)
                 if options.minval or options.maxval:
                     if options.mamin or options.mamax:  # plot min value of the moving average
                         plot_extrema(ma_array[:, 1], minval=options.minval, maxval=options.maxval)
