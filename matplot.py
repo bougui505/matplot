@@ -63,6 +63,11 @@ parser.add_option("--aspect_ratio", help="Change the aspect ratio of the figure"
 parser.add_option("--title", help="Title of the plot", type=str)
 parser.add_option("--grid", help="Display a grid on the plot", action='store_true')
 parser.add_option(
+    "--fix_overlap",
+    help=
+    "Change the linewidth of curves to set a larger linewidth in curves below an other one. Useful to be able to see overlapping curves",
+    action='store_true')
+parser.add_option(
     "--heatmap",
     help="Plot an heatmap from the given matrix. To give the first column as yticklabels use the option --fields 'l*'",
     action='store_true')
@@ -731,6 +736,12 @@ def do_plot(x,
                         plt.plot(xi.flatten(), yi.flatten(), c=colors[i], label=label)
                 elif y.shape[1] > 1:
                     colors = cmap(numpy.linspace(0, 1, y.shape[1]))
+                    if options.fix_overlap:
+                        # Options to change the linewidth to be able to see overlapping curves if any
+                        # The curve below has a larger linewidth
+                        linewidth = y.shape[1] + 1
+                    else:
+                        linewidth = None
                     for i, yi in enumerate(y.T):
                         if labels is not None:
                             label = labels[i]
@@ -738,7 +749,14 @@ def do_plot(x,
                         else:
                             label = None
                         print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                        plt.plot(x.flatten(), yi.flatten(), c=colors[i], label=label, alpha=options.alpha)
+                        if options.fix_overlap:
+                            linewidth -= 1
+                        plt.plot(x.flatten(),
+                                 yi.flatten(),
+                                 c=colors[i],
+                                 label=label,
+                                 alpha=options.alpha,
+                                 linewidth=linewidth)
             if e is not None:
                 if len(y.shape) == 1:  # No more than 1 curve
                     print(f">>> plot {getframeinfo(currentframe()).lineno}")
