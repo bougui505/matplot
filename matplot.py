@@ -796,7 +796,10 @@ def do_plot(x,
                 print(f">>> plotting moving average {getframeinfo(currentframe()).lineno}")
                 if options.fix_overlap:
                     linewidth -= 1
-                plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=linewidth, label=label)
+                if ws > 1:
+                    plt.plot(ma_array[:, 0], ma_array[:, 1], linewidth=linewidth, label=label)
+                else:
+                    plt.plot(x.flatten(), y_, linewidth=linewidth, label=label)
                 if options.minval or options.maxval:
                     if options.mamin or options.mamax:  # plot min value of the moving average
                         plot_extrema(ma_array[:, 1], minval=options.minval, maxval=options.maxval)
