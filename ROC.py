@@ -69,7 +69,6 @@ def ROC(positives, negatives):
     >>> y
     [0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 0.3, 0.3, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0]
     """
-    all_data = list(positives) + list(negatives)
     positives = np.asarray(positives)
     negatives = np.asarray(negatives)
     positives = positives[~np.isnan(positives)]
@@ -86,6 +85,8 @@ def ROC(positives, negatives):
     all_labels = all_labels[sorter]
     x, y = [0.], [0.]
     auc = 0.
+    # pROC: compute the pROC as explained in https://link.springer.com/article/10.1007/s10822-008-9181-z#Sec2
+    pROC_auc = 0.
     TP = 0
     FP = 0
     for label in all_labels:
@@ -106,7 +107,17 @@ def ROC(positives, negatives):
         x.append(FPR)
         y.append(TPR)
         auc += (x[-1] - x[-2]) * y[-1]
-    return x, y, auc
+        if x[-1] > 0 and x[-2] > 0:
+            pROC_auc += -np.log10(x[-2] / x[-1]) * y[-1]
+    return x, y, auc, pROC_auc
+
+
+def print_roc(x, y, auc, pROC_auc):
+    print(f'#AUC: {auc:.2f}')
+    print(f'#pROC_AUC: {pROC_auc:.2f}')
+    print('#FPR #TPR')
+    for xval, yval in zip(x, y):
+        print(f'{xval:.2f} {yval:.2f}')
 
 
 if __name__ == '__main__':
@@ -129,6 +140,7 @@ if __name__ == '__main__':
     )
     # parser.add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
     parser.add_argument('--test', help='Test the code', action='store_true')
+    parser.add_argument('--test_random', help='Test with random data for positives and negatives', action='store_true')
     parser.add_argument('--func', help='Test only the given function(s)', nargs='+')
     args = parser.parse_args()
 
@@ -147,11 +159,16 @@ if __name__ == '__main__':
                                                globals(),
                                                optionflags=doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE)
         sys.exit()
+    if args.test_random:
+        # positives = np.random.uniform(size=500)
+        # negatives = np.random.uniform(size=49900)
+        positives = np.random.normal(size=50000, loc=1)
+        negatives = np.random.normal(size=49900, loc=2)
+        x, y, auc, pROC_auc = ROC(positives, negatives)
+        print_roc(x, y, auc, pROC_auc)
+        sys.exit()
     data = np.genfromtxt(sys.stdin, invalid_raise=False, delimiter=',')
     negatives = data[:, 0]
     positives = data[:, 1]
-    x, y, auc = ROC(positives, negatives)
-    print(f'#AUC: {auc:.2f}')
-    print('#FPR #TPR')
-    for xval, yval in zip(x, y):
-        print(f'{xval:.2f} {yval:.2f}')
+    x, y, auc, pROC_auc = ROC(positives, negatives)
+    print_roc(x, y, auc, pROC_auc)
