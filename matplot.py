@@ -21,6 +21,7 @@ from PIL import PngImagePlugin
 ##############################
 import sliding
 import ROC
+from violin import Violin
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from mpl_toolkits import mplot3d
@@ -244,6 +245,10 @@ scatter_options.add_option("--cmap",
 parser.add_option_group(scatter_options)
 
 parser.add_option("--violin", help='Violin plot', action="store_true")
+parser.add_option("--violincolors",
+                  help='Comma separated list of colors for each violin of the violins plot',
+                  default=None,
+                  type=str)
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H",
@@ -654,7 +659,7 @@ def do_plot(x,
         labels = options.labels.split(',')
     else:
         labels = None
-    if not histogram and not scatter and not histogram2d and not dax:
+    if not histogram and not scatter and not histogram2d and not dax and not options.violin:
         if (options.minval or options.maxval) and options.moving_average is None:
             plot_extrema(y, minval=options.minval, maxval=options.maxval)
         if options.moving_average is None:
@@ -762,6 +767,15 @@ def do_plot(x,
                         plot_extrema(ma_array[:, 1], minval=options.minval, maxval=options.maxval)
                     else:
                         plot_extrema(y_, minval=options.minval, maxval=options.maxval)
+    elif options.violin:
+        if options.violincolors is not None:
+            violincolors = options.violincolors.split(',')
+        else:
+            violincolors = None
+        violin = Violin(y, labels, colors=violincolors)
+        print(f">>> plotting violins {getframeinfo(currentframe()).lineno}")
+        violin.plot()
+        options.labels = None
     elif scatter:
         if len(x.shape) == 1:
             x = x[:, None]
