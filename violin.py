@@ -58,7 +58,7 @@ class Violin(object):
         if self.colors is not None:
             for i, pc in enumerate(violins['bodies']):
                 pc.set_facecolor(self.colors[i])
-                pc.set_edgecolor(self.colors[i])
+                # pc.set_edgecolor(self.colors[i])
 
 
 def log(msg):
