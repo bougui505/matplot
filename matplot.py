@@ -178,13 +178,6 @@ parser.add_option("--daxma2",
                   help='Optional moving average window for second y-axis',
                   type=int,
                   metavar=10)
-parser.add_option("--subplot",
-                  dest="subplot",
-                  nargs=2,
-                  action='append',
-                  default=None,
-                  help="Arrange multiple plot on a grid of shape n×p, given by \
-                  arguments: --subplot n p")
 
 scatter_options = OptionGroup(parser, "Scatter plot")
 scatter_options.add_option("--scatter",
@@ -249,6 +242,8 @@ scatter_options.add_option("--cmap",
                            help='colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html',
                            default=None)
 parser.add_option_group(scatter_options)
+
+parser.add_option("--violin", help='Violin plot', action="store_true")
 
 histogram_options = OptionGroup(parser, "Plotting histogram")
 histogram_options.add_option("-H",
@@ -659,44 +654,6 @@ def do_plot(x,
         labels = options.labels.split(',')
     else:
         labels = None
-    if options.subplot is not None:
-        n, p = int(options.subplot[0][0]), int(options.subplot[0][1])
-        # n: number of row
-        # p: numper of column
-        gs = matplotlib.gridspec.GridSpec(n, p)
-        for i, ydata in enumerate(y.T):
-            print(f"Subplot {i} from {y.T.shape}")
-            xdata = x.T[i]
-            plt.subplot(gs[i])
-            # Set the same scale for all axis
-            plt.axis((x.min(), x.max(), y.min(), y.max()))
-            if labels is not None:
-                plt.title(labels[i])
-            if options.semilog is not None:
-                if options.semilog == "x":
-                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.semilogx(xdata, ydata)
-                elif options.semilog == 'y':
-                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.semilogy(xdata, ydata)
-            else:
-                if options.scatter:
-                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.scatter(xdata, ydata, alpha=options.alpha)
-                elif options.histogram2d:
-                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.hist2d(xdata, ydata, bins=n_bins)
-                else:
-                    print(f">>> plot {getframeinfo(currentframe()).lineno}")
-                    plt.plot(xdata, ydata)
-            if i < n * p - p:  # Not last row
-                # Hide xtick labels:
-                plt.tick_params(labelbottom='off')
-            if i % p != 0:  # Not first column
-                # Hide y labels:
-                plt.tick_params(labelleft='off')
-        plt.show()
-        return None  # This exits the function now (see: http://stackoverflow.com/a/6190798/1679629)
     if not histogram and not scatter and not histogram2d and not dax:
         if (options.minval or options.maxval) and options.moving_average is None:
             plot_extrema(y, minval=options.minval, maxval=options.maxval)
