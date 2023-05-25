@@ -1247,8 +1247,9 @@ if n > 1:
     if options.roc:
         negatives = data[:, 0]
         positives = data[:, 1]
-        x, y, auc = ROC.ROC(positives, negatives)
+        x, y, auc, pROC_auc = ROC.ROC(positives, negatives)
         print(f'AUC: {auc:.2f}')
+        print(f'pROC_AUC: {pROC_auc:.2f}')
     x = numpy.squeeze(x)
     y = numpy.squeeze(y)
     if x.shape == (0, ):  # If not x field is given with fields option
