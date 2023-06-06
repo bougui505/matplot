@@ -1157,7 +1157,7 @@ if options.read_data is not None:
 if options.roc:
     options.delimiter = ','
 if options.fields is None:
-    dtype = numpy.float
+    dtype = float
 else:
     if "l" in options.fields or "t" in options.fields:
         dtype = None  # to be able to read also text
