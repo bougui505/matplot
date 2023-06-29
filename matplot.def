@@ -1,0 +1,11 @@
+BOOTSTRAP: docker
+FROM: debian:11.5
+
+%post
+apt-get update
+apt-get install -y python3-pip
+pip3 install scipy
+pip3 install numexpr
+pip3 install numpy
+pip3 install pillow
+pip3 install matplotlib
