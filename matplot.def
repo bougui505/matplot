@@ -1,9 +1,17 @@
 BOOTSTRAP: docker
 FROM: debian:11.5
 
+%files
+ROC.py /usr/local/lib/python3.9/dist-packages/
+sliding.py /usr/local/lib/python3.9/dist-packages/
+violin.py /usr/local/lib/python3.9/dist-packages/
+matplot.py /usr/local/bin/plot
+
 %post
 apt-get update
+apt-get install -y python3-tk
 apt-get install -y python3-pip
+pip3 install scikit-learn
 pip3 install scipy
 pip3 install numexpr
 pip3 install numpy
