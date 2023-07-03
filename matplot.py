@@ -609,6 +609,11 @@ def do_plot(x,
         x = x[subsampling]
         y = y[subsampling]
         data = data[subsampling]
+    if options.tsne:
+        print(f">>> computing TSNE {getframeinfo(currentframe()).lineno}")
+        data = tsne_embed(data, perplexity=options.perplexity)
+        x = data[:, 0]
+        y = data[:, 1]
     if options.corrcoef:
         corr = numpy.corrcoef(x, y)[0, 1]  # x (0) vs y (1)
         print(f'Pearson correlation coefficient: {corr:.3g}')
@@ -1178,9 +1183,6 @@ data = numpy.genfromtxt(sys.stdin,
                         delimiter=options.delimiter,
                         dtype=dtype,
                         filling_values=numpy.nan)
-if options.tsne:
-    print(f">>> computing TSNE {getframeinfo(currentframe()).lineno}")
-    data = tsne_embed(data, perplexity=options.perplexity)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
