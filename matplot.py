@@ -106,6 +106,7 @@ parser.add_option("--polyfit",
                   type='int',
                   help="Least squares polynomial fit, with the given degree.")
 parser.add_option("--tsne", action="store_true", help="Embed the multidimensional data in 2D using TSNE")
+parser.add_option("--perplexity", help="perplexity parameter for the TSNE (default=30)", type=int, default=30)
 parser.add_option("--bw", help='Plot in black and white using grey shade', action='store_true')
 parser.add_option(
     "--roc",
@@ -1179,7 +1180,7 @@ data = numpy.genfromtxt(sys.stdin,
                         filling_values=numpy.nan)
 if options.tsne:
     print(f">>> computing TSNE {getframeinfo(currentframe()).lineno}")
-    data = tsne_embed(data)
+    data = tsne_embed(data, perplexity=options.perplexity)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
