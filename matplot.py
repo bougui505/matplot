@@ -22,6 +22,7 @@ from PIL import PngImagePlugin
 import sliding
 import ROC
 from violin import Violin
+from tsne import tsne_embed
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from mpl_toolkits import mplot3d
@@ -104,6 +105,7 @@ parser.add_option("--polyfit",
                   default=None,
                   type='int',
                   help="Least squares polynomial fit, with the given degree.")
+parser.add_option("--tsne", action="store_true", help="Embed the multidimensional data in 2D using TSNE")
 parser.add_option("--bw", help='Plot in black and white using grey shade', action='store_true')
 parser.add_option(
     "--roc",
@@ -1175,6 +1177,8 @@ data = numpy.genfromtxt(sys.stdin,
                         delimiter=options.delimiter,
                         dtype=dtype,
                         filling_values=numpy.nan)
+if options.tsne:
+    data = tsne_embed(data)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
         data = numpy.asarray(data.tolist(), dtype='U22')  # For formatting arrays with both data and text
