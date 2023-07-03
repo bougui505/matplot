@@ -1178,6 +1178,7 @@ data = numpy.genfromtxt(sys.stdin,
                         dtype=dtype,
                         filling_values=numpy.nan)
 if options.tsne:
+    print(f">>> computing TSNE {getframeinfo(currentframe()).lineno}")
     data = tsne_embed(data)
 if options.fields is not None:
     if "l" in options.fields or "t" in options.fields:
