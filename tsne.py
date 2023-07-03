@@ -36,24 +36,10 @@
 #                                                                           #
 #############################################################################
 import os
-
-try:
-    import torch
-except ImportError:
-    print("Cannot import torch")
-    print("TSNE embedding unavailable")
-
-try:
-    from tsne_torch import TorchTSNE as TSNE
-except ImportError:
-    print("Cannot import tsne_torch (see: https://pypi.org/project/tsne-torch/)")
-    print("TSNE embedding unavailable")
-    pass
+from sklearn.manifold import TSNE
 
 
 def tsne_embed(X, perplexity=30):
-    X = torch.from_numpy(X)
-    X = X.float()
     tsne = TSNE(n_components=2, perplexity=perplexity)
     X_embedded = tsne.fit_transform(X)
     return X_embedded
