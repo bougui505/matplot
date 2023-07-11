@@ -1464,7 +1464,7 @@ else:
     if "l" in options.fields or "t" in options.fields:
         dtype = None  # to be able to read also text
     else:
-        dtype = numpy.float
+        dtype = float
 print(f">>> reading data from stdin {getframeinfo(currentframe()).lineno}")
 header = None
 if options.header:
