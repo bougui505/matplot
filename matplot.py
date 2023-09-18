@@ -316,6 +316,7 @@ If a 'w' field is given it is used as weights for weighted hostogram plotting (s
 If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text.\
 If a 'm' field is given, use it as markers (see: https://matplotlib.org/stable/api/markers_api.html).\
 If a 's' field is given, use it as a list of sizes for the markers.\
+If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
 If --fields='*' is given all the columns are considered as y values.",
 )
 scatter_options.add_option(
@@ -779,6 +780,7 @@ def do_plot(
     e=None,
     markers=None,
     sizes=None,
+    colors=None,
     histogram=options.histogram,
     scatter=options.scatter,
     histogram2d=options.histogram2d,
@@ -1158,7 +1160,7 @@ def do_plot(
                         print(
                             f">>> plotting scatter {getframeinfo(currentframe()).lineno}"
                         )
-                        plt.scatter(x, y, s=options.size, alpha=options.alpha)
+                        plt.scatter(x, y, s=options.size, alpha=options.alpha, c=colors)
                         if len(text) > 0:
                             print(
                                 f">>> plotting text {getframeinfo(currentframe()).lineno}"
@@ -1536,7 +1538,12 @@ if options.roc:
 if options.fields is None:
     dtype = float
 else:
-    if "l" in options.fields or "t" in options.fields or "m" in options.fields:
+    if (
+        "l" in options.fields
+        or "t" in options.fields
+        or "m" in options.fields
+        or "c" in options.fields
+    ):
         dtype = None  # to be able to read also text
     else:
         dtype = float
@@ -1555,7 +1562,12 @@ data = numpy.genfromtxt(
     filling_values=numpy.nan,
 )
 if options.fields is not None:
-    if "l" in options.fields or "t" in options.fields or "m" in options.fields:
+    if (
+        "l" in options.fields
+        or "t" in options.fields
+        or "m" in options.fields
+        or "c" in options.fields
+    ):
         data = numpy.asarray(
             data.tolist(), dtype="U22"
         )  # For formatting arrays with both data and text
@@ -1591,7 +1603,8 @@ if n > 1:
             e = None
         if options.fields is not None:
             print(f">>> reading data from fields {getframeinfo(currentframe()).lineno}")
-            x, y, z, e, xticklabels, weights, text, markers, sizes = (
+            x, y, z, e, xticklabels, weights, text, markers, sizes, colors = (
+                [],
                 [],
                 [],
                 [],
@@ -1622,6 +1635,8 @@ if n > 1:
                     weights.extend(data[:, i])
                 elif field == "s":  # weight for weighted histogram
                     sizes.extend(data[:, i])
+                elif field == "c":  # weight for weighted histogram
+                    colors.extend(data[:, i])
                 elif field == "*":
                     y = data[:, i:].T
             if len(xticklabels) == 0:
@@ -1673,6 +1688,7 @@ if n > 1:
         e,
         markers=markers,
         sizes=sizes,
+        colors=colors,
         vline=options.vline,
         vlabel=options.vlabel,
         xticklabels=xticklabels,
