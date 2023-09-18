@@ -1060,7 +1060,6 @@ def do_plot(
                             coldict = dict(zip(keys, mesh[1].flatten()))
                             keys = list(rowdict.keys())
                             sel = numpy.isin(z[:, 0], keys)
-                            print(sizes)
                             if len(sizes) == 0:
                                 s = numpy.ones_like(x[:, 0][sel]) * options.size
                             else:
