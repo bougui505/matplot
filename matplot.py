@@ -1570,6 +1570,9 @@ data = numpy.genfromtxt(
     dtype=dtype,
     filling_values=numpy.nan,
 )
+markers = None
+sizes = None
+colors = None
 if options.fields is not None:
     if (
         "l" in options.fields
