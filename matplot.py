@@ -777,6 +777,7 @@ def do_plot(
     z=None,
     e=None,
     markers=None,
+    sizes=None,
     histogram=options.histogram,
     scatter=options.scatter,
     histogram2d=options.histogram2d,
@@ -1085,11 +1086,15 @@ def do_plot(
                                 print(
                                     f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}"
                                 )
+                                if sizes == []:
+                                    s = options.size
+                                else:
+                                    s = numpy.asarray(sizes) * options.size
                                 plt.scatter(
                                     x,
                                     y,
                                     c=z,
-                                    s=options.size,
+                                    s=s,
                                     alpha=options.alpha,
                                     cmap=options.cmap,
                                 )
@@ -1581,7 +1586,8 @@ if n > 1:
             e = None
         if options.fields is not None:
             print(f">>> reading data from fields {getframeinfo(currentframe()).lineno}")
-            x, y, z, e, xticklabels, weights, text, markers = (
+            x, y, z, e, xticklabels, weights, text, markers, sizes = (
+                [],
                 [],
                 [],
                 [],
@@ -1609,6 +1615,8 @@ if n > 1:
                     markers.extend(data[:, i])
                 elif field == "w":  # weight for weighted histogram
                     weights.extend(data[:, i])
+                elif field == "s":  # weight for weighted histogram
+                    sizes.extend(data[:, i])
                 elif field == "*":
                     y = data[:, i:].T
             if len(xticklabels) == 0:
@@ -1659,6 +1667,7 @@ if n > 1:
         z,
         e,
         markers=markers,
+        sizes=sizes,
         vline=options.vline,
         vlabel=options.vlabel,
         xticklabels=xticklabels,
