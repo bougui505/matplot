@@ -30,11 +30,15 @@ from mpl_toolkits import mplot3d
 import matplotlib
 import matplotlib.cm as cm
 
-# try:
-#     import seaborn as sns
+try:
+    import seaborn as sns
 #     sns.set_context('paper')
-# except ImportError:
-#     print("seaborn not installed")
+except ImportError:
+    print("seaborn is not installed")
+try:
+    import pandas as pd
+except ImportError:
+    print("pandas is not installed")
 import numpy
 from optparse import OptionParser
 from optparse import OptionGroup
@@ -327,6 +331,12 @@ scatter_options.add_option(
 )
 scatter_options.add_option(
     "--sizez", action="store_true", help="Use a variable size given by the z-field"
+)
+parser.add_option(
+    "--facetGrid",
+    nargs=2,
+    type=int,
+    help="Seaborn scatter FacetGrid (see: https://seaborn.pydata.org/generated/seaborn.FacetGrid.html). 'xyz' fields must be given (--fields). Give th number of rows and columns wanted (e.g. 10 10)",
 )
 parser.add_option(
     "--labels",
@@ -1034,18 +1044,53 @@ def do_plot(
                     )
                 else:
                     if not options.plot3d:
-                        print(
-                            f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}"
-                        )
-                        plt.scatter(
-                            x,
-                            y,
-                            c=z,
-                            s=options.size,
-                            alpha=options.alpha,
-                            cmap=options.cmap,
-                        )
-                        plt.colorbar()
+                        if options.facetGrid is not None:
+                            print(
+                                f">>> plotting FacetGrid {getframeinfo(currentframe()).lineno}"
+                            )
+                            mesh = numpy.meshgrid(
+                                range(options.facetGrid[0]), range(options.facetGrid[1])
+                            )
+                            keys = numpy.unique(z)
+                            rowdict = dict(zip(keys, mesh[0].flatten()))
+                            coldict = dict(zip(keys, mesh[1].flatten()))
+                            keys = list(rowdict.keys())
+                            sel = numpy.isin(z[:, 0], keys)
+                            g = sns.FacetGrid(
+                                pd.DataFrame(
+                                    {
+                                        "x": x[:, 0][sel],
+                                        "y": y[:, 0][sel],
+                                        "z": z[:, 0][sel],
+                                        "row": [rowdict[e] for e in z[:, 0][sel]],
+                                        "col": [coldict[e] for e in z[:, 0][sel]],
+                                    }
+                                ),
+                                row="row",
+                                col="col",
+                                hue="z",
+                                palette=options.cmap,
+                            )
+                            g = g.map(
+                                plt.scatter,
+                                "x",
+                                "y",
+                                s=options.size,
+                                alpha=options.alpha,
+                            )
+                        else:
+                            print(
+                                f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}"
+                            )
+                            plt.scatter(
+                                x,
+                                y,
+                                c=z,
+                                s=options.size,
+                                alpha=options.alpha,
+                                cmap=options.cmap,
+                            )
+                            plt.colorbar()
                         if len(text) > 0:
                             print(
                                 f">>> plotting text {getframeinfo(currentframe()).lineno}"
