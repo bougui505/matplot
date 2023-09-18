@@ -314,6 +314,7 @@ If a 'e' field is given it is used to plot the error. \
 If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
 If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
 If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text.\
+If a 'm' field is given, use it as markers (see: https://matplotlib.org/stable/api/markers_api.html).\
 If --fields='*' is given all the columns are considered as y values.",
 )
 scatter_options.add_option(
@@ -775,6 +776,7 @@ def do_plot(
     y,
     z=None,
     e=None,
+    markers=None,
     histogram=options.histogram,
     scatter=options.scatter,
     histogram2d=options.histogram2d,
@@ -1079,17 +1081,35 @@ def do_plot(
                                 alpha=options.alpha,
                             )
                         else:
-                            print(
-                                f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}"
-                            )
-                            plt.scatter(
-                                x,
-                                y,
-                                c=z,
-                                s=options.size,
-                                alpha=options.alpha,
-                                cmap=options.cmap,
-                            )
+                            if markers == []:
+                                print(
+                                    f">>> plotting scatter with z-colormap {getframeinfo(currentframe()).lineno}"
+                                )
+                                plt.scatter(
+                                    x,
+                                    y,
+                                    c=z,
+                                    s=options.size,
+                                    alpha=options.alpha,
+                                    cmap=options.cmap,
+                                )
+                            else:
+                                print(
+                                    f">>> plotting scatter with z-colormap and markers {getframeinfo(currentframe()).lineno}"
+                                )
+                                markers_unique = numpy.unique(markers)
+                                markers = numpy.asarray(markers)
+                                for marker in markers_unique:
+                                    sel = markers == marker
+                                    plt.scatter(
+                                        x[sel],
+                                        y[sel],
+                                        c=z[sel],
+                                        s=options.size,
+                                        alpha=options.alpha,
+                                        cmap=options.cmap,
+                                        marker=marker,
+                                    )
                             plt.colorbar()
                         if len(text) > 0:
                             print(
@@ -1506,7 +1526,7 @@ if options.roc:
 if options.fields is None:
     dtype = float
 else:
-    if "l" in options.fields or "t" in options.fields:
+    if "l" in options.fields or "t" in options.fields or "m" in options.fields:
         dtype = None  # to be able to read also text
     else:
         dtype = float
@@ -1525,7 +1545,7 @@ data = numpy.genfromtxt(
     filling_values=numpy.nan,
 )
 if options.fields is not None:
-    if "l" in options.fields or "t" in options.fields:
+    if "l" in options.fields or "t" in options.fields or "m" in options.fields:
         data = numpy.asarray(
             data.tolist(), dtype="U22"
         )  # For formatting arrays with both data and text
@@ -1561,7 +1581,16 @@ if n > 1:
             e = None
         if options.fields is not None:
             print(f">>> reading data from fields {getframeinfo(currentframe()).lineno}")
-            x, y, z, e, xticklabels, weights, text = [], [], [], [], [], [], []
+            x, y, z, e, xticklabels, weights, text, markers = (
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+            )
             for i, field in enumerate(options.fields):
                 if field == "x":
                     x.append(data[:, i])
@@ -1576,6 +1605,8 @@ if n > 1:
                     xticklabels.extend(data[:, i])
                 elif field == "t":  # plot text with plt.text
                     text.extend(data[:, i])
+                elif field == "m":  # plot text with plt.text
+                    markers.extend(data[:, i])
                 elif field == "w":  # weight for weighted histogram
                     weights.extend(data[:, i])
                 elif field == "*":
@@ -1627,6 +1658,7 @@ if n > 1:
         y,
         z,
         e,
+        markers=markers,
         vline=options.vline,
         vlabel=options.vlabel,
         xticklabels=xticklabels,
