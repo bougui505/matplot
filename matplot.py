@@ -1065,7 +1065,10 @@ def do_plot(
                             if len(sizes) == 0:
                                 s = numpy.ones_like(x[:, 0][sel]) * options.size
                             else:
-                                s = numpy.asarray(sizes)[sel] * options.size
+                                s = (
+                                    numpy.asarray(sizes, dtype=float)[sel]
+                                    * options.size
+                                )
                             hue_kws = {"s": s}
                             if len(colors) == 0:
                                 hueval = z[:, 0][sel]
