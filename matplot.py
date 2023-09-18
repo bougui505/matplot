@@ -1066,6 +1066,14 @@ def do_plot(
                                 s = numpy.ones_like(x[:, 0][sel]) * options.size
                             else:
                                 s = numpy.asarray(sizes)[sel] * options.size
+                            hue_kws = {"s": s}
+                            if len(colors) == 0:
+                                hueval = z[:, 0][sel]
+                            else:
+                                colors = numpy.asarray(colors)
+                                hueval = [
+                                    matplotlib.colors.to_rgb(e) for e in colors[sel]
+                                ]
                             g = sns.FacetGrid(
                                 pd.DataFrame(
                                     {
@@ -1074,12 +1082,13 @@ def do_plot(
                                         "z": z[:, 0][sel],
                                         "row": [rowdict[e] for e in z[:, 0][sel]],
                                         "col": [coldict[e] for e in z[:, 0][sel]],
+                                        "hue": hueval,
                                     }
                                 ),
                                 row="row",
                                 col="col",
-                                hue="z",
-                                hue_kws={"s": s},
+                                hue="hue",
+                                hue_kws=hue_kws,
                                 palette=options.cmap,
                             )
                             g = g.map(
