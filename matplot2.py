@@ -71,6 +71,7 @@ def renumber_fields(fields):
 
 
 def read_data(fields, delimiter):
+    print("######## read_data ########")
     inp = np.genfromtxt(
         sys.stdin,
         dtype=str,
@@ -91,6 +92,7 @@ def read_data(fields, delimiter):
     for i, field in enumerate(fields):
         data[field] = inp[:, i]
         print(f"data['{field}']={data[field][:10]}...")
+    print("###########################")
     return data, ndataset
 
 

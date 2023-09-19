@@ -18,3 +18,7 @@ test_plot2_simple () {
 test_plot2_scatter () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y --scatter -d,
 }
+
+test_plot2_moving_average () {
+    paste -d, =(seq 1000) =(seq 1000|shuf) =(seq 500) =(seq 500|shuf) | plot2 -d, --fields x y x y --mov 10
+}
