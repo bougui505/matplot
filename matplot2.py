@@ -38,11 +38,13 @@
 import sys
 import os
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 import numpy as np
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 import socket
 from sliding import Sliding_op
+from numpy import linalg
 
 
 def log(msg):
@@ -187,6 +189,83 @@ def moving_average(data, ndataset, window_size):
     print("#########################")
 
 
+def get_ellipse(center, width, height, angle):
+    """
+    see: https://stackoverflow.com/a/48409811/1679629
+    center: x, y center of the ellipse
+    width: first radius
+    height: second radius
+    angle: angle of the ellipse in degree
+    """
+    angle = np.deg2rad(angle)
+    t = np.linspace(0, 2 * np.pi, 100)
+    Ell = np.array([width * np.cos(t), height * np.sin(t)])
+    R_rot = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    Ell_rot = np.zeros((2, Ell.shape[1]))
+    for i in range(Ell.shape[1]):
+        Ell_rot[:, i] = np.dot(R_rot, Ell[:, i])
+    Ell = (center[0] + Ell_rot[0, :], center[1] + Ell_rot[1, :])
+    return Ell
+
+
+def plot_pca(data, ndataset):
+    """
+    Compute the pca for each dataset
+    """
+    print("######## plot_pca ########")
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
+        x = tofloat(x)
+        print(f"{x.shape=}")
+        y = tofloat(y)
+        print(f"{y.shape=}")
+        if f"z{dataset}" in data:
+            z = data[f"z{dataset}"]
+            z = tofloat(z)
+            print(f"{z.shape=}")
+        else:
+            z = None
+        X = np.vstack((x, y)).T
+        print(f"{X.shape=}")
+        eigenvalues, eigenvectors, center, anglex = pca(X)
+        width = 2 * np.sqrt(eigenvalues[0])
+        height = 2 * np.sqrt(eigenvalues[1])
+        ellipse = get_ellipse(center, width, height, anglex)
+        plt.scatter(x, y, c=z)
+        plt.scatter(center[0], center[1], marker="P", s=100, c="k", edgecolors="w")
+        plt.plot(
+            ellipse[0],
+            ellipse[1],
+            path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
+        )
+        # see: https://stackoverflow.com/a/35762000/1679629
+    print("##########################")
+
+
+def pca(X, outfilename=None):
+    """
+    >>> X = np.random.normal(size=(10, 512))
+    >>> proj = compute_pca(X)
+    >>> proj.shape
+    (10, 2)
+    """
+    center = X.mean(axis=0)
+    cov = (X - center).T.dot(X - center) / X.shape[0]
+    eigenvalues, eigenvectors = linalg.eigh(cov)
+    sorter = np.argsort(eigenvalues)[::-1]
+    eigenvalues, eigenvectors = eigenvalues[sorter], eigenvectors[:, sorter]
+    print(f"{eigenvectors.shape=}")
+    anglex = np.rad2deg(np.arccos(eigenvectors[:, 0].dot(np.asarray([1, 0]))))
+    print(f"{anglex=:.4g}")
+    # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
+    # print(f"{angley=:.4g}")
+    if outfilename is not None:
+        np.savez(outfilename, eigenvalues=eigenvalues, eigenvectors=eigenvectors)
+    return eigenvalues, eigenvectors, center, anglex
+
+
 def get_datastr(data):
     n = len(data["x0"])
     keys = data.keys()
@@ -252,9 +331,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--moving_average",
-        dest="moving_average",
         type=int,
         help="Plot a moving average on the data with the given window size",
+    )
+    parser.add_argument(
+        "--pca",
+        help="Compute and plot the Principal Component Analysis for each dataset and/or each z",
+        action="store_true",
     )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
@@ -278,6 +361,8 @@ if __name__ == "__main__":
             scatter(DATA, NDATASET)
         elif args.moving_average is not None:
             moving_average(DATA, NDATASET, window_size=args.moving_average)
+        elif args.pca:
+            plot_pca(DATA, NDATASET)
         else:
             plot(DATA, NDATASET)
 
