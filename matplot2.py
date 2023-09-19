@@ -57,15 +57,40 @@ def GetScriptDir():
     return scriptdir
 
 
-def read_data(fields):
-    inp = np.genfromtxt(sys.stdin, dtype=str)
+def renumber_fields(fields):
+    outfields = []
+    for field in fields:
+        i = 0
+        while f"{field}{i}" in outfields:
+            i += 1
+        outfields.append(f"{field}{i}")
+    ndataset = i + 1
+    print(f"{ndataset=}")
+    return outfields, ndataset
+
+
+def read_data(fields, delimiter):
+    inp = np.genfromtxt(
+        sys.stdin,
+        dtype=str,
+        delimiter=delimiter,
+    )
+
+    # Add the x data if not present
+    if "x" not in fields:
+        inp = np.vstack((np.arange(len(inp)), inp)).T
+        fields = ["x"] + fields
+
+    fields, ndataset = renumber_fields(fields)
+    print(f"{fields=}")
     print(f"{inp.ndim=}")
     print(f"{len(inp)=}")
     data = dict()
-    if inp.ndim == 1:
-        data["x"] = np.arange(len(inp))
-        data["y"] = inp
-    return data
+    print(f"{inp.shape=}")
+    for i, field in enumerate(fields):
+        data[field] = inp[:, i]
+        print(f"data['{field}']={data[field][:10]}...")
+    return data, ndataset
 
 
 def add_metadata(filename, datastr, key="data"):
@@ -101,30 +126,38 @@ def read_metadata(filename):
     return datastr
 
 
-def plot(data):
+def tofloat(arr):
+    out = arr.copy()
+    out = np.asarray([float(e) for e in out if e != ""])
+    return out
+
+
+def plot(data, ndataset):
     """
     Simple plot
     """
-    assert "x" in data
-    assert "y" in data
-    x = data["x"].astype(float)
-    y = data["y"].astype(float)
-    plt.plot(x, y)
+    for i in range(ndataset):
+        x = data[f"x{i}"]
+        y = data[f"y{i}"]
+        x = tofloat(x)
+        y = tofloat(y)
+        plt.plot(x, y)
 
 
-def scatter(data):
+def scatter(data, ndataset):
     """
     Simple plot
     """
-    assert "x" in data
-    assert "y" in data
-    x = data["x"].astype(float)
-    y = data["y"].astype(float)
-    plt.scatter(x, y)
+    for i in range(ndataset):
+        x = data[f"x{i}"]
+        y = data[f"y{i}"]
+        x = tofloat(x)
+        y = tofloat(y)
+        plt.scatter(x, y)
 
 
 def get_datastr(data):
-    n = len(data["x"])
+    n = len(data["x0"])
     keys = data.keys()
     outstr = ""
     for k in keys:
@@ -134,6 +167,7 @@ def get_datastr(data):
         for k in keys:
             outstr += f"{data[k][i]} "
         outstr += "\n"
+    print(f"{outstr[:80]=}...")
     return outstr
 
 
@@ -153,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-f",
         "--fields",
-        help="Fields for the data; e.g. 'xyxy'.\
+        help="Fields for the data; e.g. 'x y x y'.\
         By default the first column is for x data and the other for y data.\
         If a 'z' field is given, this field is used to color the scatter dots.\
         If a 'e' field is given it is used to plot the error.\
@@ -164,7 +198,8 @@ if __name__ == "__main__":
         If a 's' field is given, use it as a list of sizes for the markers.\
         If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
         If --fields='*' is given all the columns are considered as y values.",
-        default="xy",
+        default=["y"],
+        nargs="+",
     )
     parser.add_argument(
         "--scatter",
@@ -176,6 +211,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--ylabel", dest="ylabel", default=None, type=str, help="y axis label"
+    )
+    parser.add_argument(
+        "-d", "--delimiter", help="Delimiter to use to read the data", default=None
     )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
@@ -190,12 +228,12 @@ if __name__ == "__main__":
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
-        DATA = read_data(args.fields)
+        DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
-            scatter(DATA)
+            scatter(DATA, NDATASET)
         else:
-            plot(DATA)
+            plot(DATA, NDATASET)
 
         if args.xlabel is not None:
             plt.xlabel(args.xlabel)
