@@ -326,7 +326,13 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             else:
                 color = cmap(zval / zmax)
             plt.scatter(
-                center[0], center[1], marker="P", s=100, color=color, edgecolors="w"
+                center[0],
+                center[1],
+                marker="P",
+                s=100,
+                color=color,
+                edgecolors="w",
+                zorder=np.inf,
             )
             plt.plot(
                 ellipse[0],
