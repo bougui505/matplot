@@ -146,17 +146,25 @@ def plot(data, ndataset):
 
 def scatter(data, ndataset):
     """
-    Simple plot
+    Scatter plot
     """
+    print("######## scatter ########")
     for dataset in range(ndataset):
+        print(f"{dataset=}")
         x = data[f"x{dataset}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
-        y = tofloat(y)
-        print(f"{dataset=}")
         print(f"{x.shape=}")
+        y = tofloat(y)
         print(f"{y.shape=}")
-        plt.scatter(x, y)
+        if f"z{dataset}" in data:
+            z = data[f"z{dataset}"]
+            z = tofloat(z)
+            print(f"{z.shape=}")
+        else:
+            z = None
+        plt.scatter(x, y, c=z)
+    print("#########################")
 
 
 def get_datastr(data):
