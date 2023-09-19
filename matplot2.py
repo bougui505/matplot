@@ -151,7 +151,7 @@ def plot(data, ndataset):
         plt.plot(x, y)
 
 
-def scatter(data, ndataset):
+def scatter(data, ndataset, size=20):
     """
     Scatter plot
     """
@@ -170,7 +170,7 @@ def scatter(data, ndataset):
             print(f"{z.shape=}")
         else:
             z = None
-        plt.scatter(x, y, c=z)
+        plt.scatter(x, y, c=z, s=size)
     print("#########################")
 
 
@@ -254,7 +254,7 @@ def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
     return Sigma_A
 
 
-def plot_pca(data, ndataset, plot_overlap=True, scale=1.0):
+def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
     """
     Compute the pca for each dataset
     scale: scale of the ellipses
@@ -305,13 +305,15 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0):
             print(f"{intersect=}")
             if not plot_overlap:
                 if intersect:
-                    plt.scatter(x[sel], y[sel], color="gray", alpha=0.25, zorder=-1)
+                    plt.scatter(
+                        x[sel], y[sel], color="gray", alpha=0.25, zorder=-1, s=size
+                    )
                     continue
             if z is None:
                 color = None
             else:
                 color = cmap(zval / zmax)
-            scatter_obj = plt.scatter(x[sel], y[sel], color=color)
+            scatter_obj = plt.scatter(x[sel], y[sel], color=color, s=size)
             Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
             if not plot_overlap:
@@ -410,6 +412,13 @@ if __name__ == "__main__":
         help="Scatter plot of the (x,y) data",
     )
     parser.add_argument(
+        "-s",
+        "--size",
+        default=20.0,
+        type=float,
+        help="size of the dots for the scatter plot (default: 20.0)",
+    )
+    parser.add_argument(
         "--xlabel", dest="xlabel", default=None, type=str, help="x axis label"
     )
     parser.add_argument(
@@ -462,13 +471,17 @@ if __name__ == "__main__":
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
-            scatter(DATA, NDATASET)
+            scatter(DATA, NDATASET, size=args.size)
         elif args.moving_average is not None:
             moving_average(DATA, NDATASET, window_size=args.moving_average)
         elif args.pca:
-            plot_pca(DATA, NDATASET, plot_overlap=True, scale=args.scale)
+            plot_pca(
+                DATA, NDATASET, plot_overlap=True, scale=args.scale, size=args.size
+            )
         elif args.no_overlap:
-            plot_pca(DATA, NDATASET, plot_overlap=False, scale=args.scale)
+            plot_pca(
+                DATA, NDATASET, plot_overlap=False, scale=args.scale, size=args.size
+            )
         else:
             plot(DATA, NDATASET)
 
