@@ -304,7 +304,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
             print(f"{intersect=}")
             if not plot_overlap:
                 if intersect:
-                    plt.scatter(x[sel], y[sel], color="gray", alpha=0.25)
+                    plt.scatter(x[sel], y[sel], color="gray", alpha=0.25, zorder=-1)
                     continue
             if z is None:
                 color = None
