@@ -148,11 +148,14 @@ def scatter(data, ndataset):
     """
     Simple plot
     """
-    for i in range(ndataset):
-        x = data[f"x{i}"]
-        y = data[f"y{i}"]
+    for dataset in range(ndataset):
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
         x = tofloat(x)
         y = tofloat(y)
+        print(f"{dataset=}")
+        print(f"{x.shape=}")
+        print(f"{y.shape=}")
         plt.scatter(x, y)
 
 
