@@ -180,6 +180,7 @@ def scatter(data, ndataset, size=20):
 
 def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     markers_unique = np.unique(markers)
+    size_ori = size
     for marker in markers_unique:
         sel = markers == marker
         if len(marker) > 1:
@@ -191,7 +192,24 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
             c = None
         if color is not None:
             c = None
-        out = plt.scatter(x[sel], y[sel], c=c, s=size, marker=marker, color=color)
+        if marker != "o":
+            zorder = 100
+            edgecolors = "w"
+            size = 100
+        else:
+            zorder = None
+            edgecolors = None
+            size = size_ori
+        out = plt.scatter(
+            x[sel],
+            y[sel],
+            c=c,
+            s=size,
+            marker=marker,
+            color=color,
+            zorder=zorder,
+            edgecolors=edgecolors,
+        )
     return out
 
 
@@ -359,7 +377,7 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
                 s=100,
                 color=color,
                 edgecolors="w",
-                zorder=np.inf,
+                zorder=99,
             )
             plt.plot(
                 ellipse[0],
