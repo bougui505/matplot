@@ -45,6 +45,8 @@ from PIL.PngImagePlugin import PngInfo
 import socket
 from sliding import Sliding_op
 from numpy import linalg
+from scipy.optimize import minimize_scalar
+from scipy.linalg import eigh
 
 
 def log(msg):
@@ -208,11 +210,56 @@ def get_ellipse(center, width, height, angle):
     return Ell
 
 
-def plot_pca(data, ndataset):
+def ellipsoid_intersection_test(Sigma_A, Sigma_B, mu_A, mu_B, tau=1.0):
+    """
+    Test if two ellipses intersect
+    Adapted from: https://math.stackexchange.com/a/3678498/192193
+    """
+    lambdas, Phi = eigh(Sigma_A, b=Sigma_B)
+    v_squared = np.dot(Phi.T, mu_A - mu_B) ** 2
+    res = minimize_scalar(
+        K_function, bracket=[0.0, 0.5, 1.0], args=(lambdas, v_squared, tau)
+    )
+    print(f"{res.fun=}")
+    return res.fun >= 0
+
+
+def batch_ellipsoid_intersection_test(Sigma_A, Sigma_B_list, mu_A, mu_B_list):
+    n = len(Sigma_B_list)
+    for i in range(n):
+        Sigma_B = Sigma_B_list[i]
+        mu_B = mu_B_list[i]
+        intersect = ellipsoid_intersection_test(Sigma_A, Sigma_B, mu_A, mu_B)
+        if intersect:
+            return True
+    return False
+
+
+def K_function(s, lambdas, v_squared, tau):
+    return 1.0 - (1.0 / tau**2) * np.sum(
+        v_squared * ((s * (1.0 - s)) / (1.0 + s * (lambdas - 1.0)))
+    )
+
+
+def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
+    """
+    Get the sigma matrix from the ellipse
+    See: https://math.stackexchange.com/a/3678498/192193
+    """
+    S = np.eye(2)
+    S[0, 0] = 1.0 / sigma1**2
+    S[1, 1] = 1.0 / sigma2**2
+    A = u1u2.dot(S).dot(u1u2.T)
+    return A
+
+
+def plot_pca(data, ndataset, plot_overlap=True):
     """
     Compute the pca for each dataset
     """
     print("######## plot_pca ########")
+    Alist = []
+    centerlist = []
     for dataset in range(ndataset):
         print(f"{dataset=}")
         x = data[f"x{dataset}"]
@@ -242,6 +289,16 @@ def plot_pca(data, ndataset):
             height = 2 * np.sqrt(eigenvalues[1])
             print(f"{width=}")
             print(f"{height=}")
+            A = get_ellipse_sigma_mat(eigenvectors, width, height)
+            intersect = batch_ellipsoid_intersection_test(
+                Sigma_A=A, Sigma_B_list=Alist, mu_A=center, mu_B_list=centerlist
+            )
+            print(f"{intersect=}")
+            Alist.append(A)
+            centerlist.append(center)
+            if not plot_overlap:
+                if intersect:
+                    continue
             ellipse = get_ellipse(center, width, height, anglex)
             if z is None:
                 # color of the last scatter
@@ -258,6 +315,7 @@ def plot_pca(data, ndataset):
                 color=color,
                 path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
             )
+            print("--")
             # see: https://stackoverflow.com/a/35762000/1679629
     print("##########################")
 
