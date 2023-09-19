@@ -12,7 +12,7 @@ precmd() {
 }
 
 test_plot2_simple () {
-    seq 10 |shuf | plot2
+    seq 10 |shuf | plot2 --title "Simple plot"
 }
 
 test_plot2_scatter () {

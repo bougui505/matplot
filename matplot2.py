@@ -458,6 +458,7 @@ if __name__ == "__main__":
         type=float,
         default=1.0,
     )
+    parser.add_argument("--title", help="Title of the plot", type=str)
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -474,6 +475,9 @@ if __name__ == "__main__":
         if args.cmap is not None:
             print(f"{args.cmap=}")
             plt.set_cmap(args.cmap)
+        if args.title is not None:
+            print(f"{args.title=}")
+            plt.title(args.title)
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
