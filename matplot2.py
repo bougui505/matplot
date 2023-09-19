@@ -174,15 +174,20 @@ def scatter(data, ndataset, size=20):
             plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
-            scatter_markers(x, y, z, markers, size)
+            scatter_markers(x=x, y=y, z=z, markers=markers, size=size)
     print("#########################")
 
 
-def scatter_markers(x, y, z, markers, size):
+def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     markers_unique = np.unique(markers)
     for marker in markers_unique:
         sel = markers == marker
-        plt.scatter(x[sel], y[sel], c=z[sel], s=size, marker=marker)
+        if z is not None:
+            c = z[sel]
+        else:
+            c = None
+        out = plt.scatter(x[sel], y[sel], c=c, s=size, marker=marker, color=color)
+    return out
 
 
 def moving_average(data, ndataset, window_size):
@@ -324,7 +329,13 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
                 color = None
             else:
                 color = cmap(zval / zmax)
-            scatter_obj = plt.scatter(x[sel], y[sel], color=color, s=size)
+            if f"m{dataset}" not in data:
+                scatter_obj = plt.scatter(x[sel], y[sel], color=color, s=size)
+            else:
+                markers = data[f"m{dataset}"][sel]
+                scatter_obj = scatter_markers(
+                    x=x[sel], y=y[sel], markers=markers, color=color, size=size
+                )
             Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
             if not plot_overlap:

@@ -33,6 +33,12 @@ test_plot2_pca () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y -d, --pca
 }
 
+test_plot2_pca_markers () {
+    paste =(seq 100|shuf) =(seq 100|shuf) \
+        | awk '{if (NR<50){print $0,"0","^"}else{print $0,"1","*"}}' \
+        | plot2 --fields x y z m --pca
+}
+
 test_plot2_pca_z () {
     paste -d, =(seq 1000|shuf) =(seq 1000|shuf) | awk -F"," 'BEGIN{OFS=","}{print $1,$2,NR<500}' | plot2 -d, --fields x y z --pca --cmap jet
 }
