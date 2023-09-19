@@ -19,6 +19,12 @@ test_plot2_scatter () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y --scatter -d,
 }
 
+test_plot2_scatter_markers () {
+    paste =(seq 100|shuf) =(seq 100|shuf) =(seq 100) \
+        | awk '{if (NR<50){print $0,"^"}else{print $0,"*"}}' \
+        | plot2 --fields x y z m --scatter
+}
+
 test_plot2_moving_average () {
     paste -d, =(seq 1000) =(seq 1000|shuf) =(seq 500) =(seq 500|shuf) | plot2 -d, --fields x y x y --mov 10
 }

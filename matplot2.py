@@ -170,8 +170,19 @@ def scatter(data, ndataset, size=20):
             print(f"{z.shape=}")
         else:
             z = None
-        plt.scatter(x, y, c=z, s=size)
+        if f"m{dataset}" not in data:
+            plt.scatter(x, y, c=z, s=size)
+        else:
+            markers = data[f"m{dataset}"]
+            scatter_markers(x, y, z, markers, size)
     print("#########################")
+
+
+def scatter_markers(x, y, z, markers, size):
+    markers_unique = np.unique(markers)
+    for marker in markers_unique:
+        sel = markers == marker
+        plt.scatter(x[sel], y[sel], c=z[sel], s=size, marker=marker)
 
 
 def moving_average(data, ndataset, window_size):
