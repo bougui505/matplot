@@ -281,6 +281,9 @@ def plot_pca(data, ndataset, plot_overlap=True):
             zlist = np.zeros(x.shape[0], dtype=int)
         else:
             zlist = z
+        zmax = zlist.max()
+        if zmax == 0:
+            zmax = 1
         for zval in np.unique(zlist):
             print(f"{zval=}")
             sel = zlist == zval
@@ -306,7 +309,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
             if z is None:
                 color = None
             else:
-                color = cmap(zval)
+                color = cmap(zval / zmax)
             scatter_obj = plt.scatter(x[sel], y[sel], color=color)
             Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
@@ -318,7 +321,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
                 # color of the last scatter
                 color = scatter_obj.get_facecolor()[0]
             else:
-                color = cmap(zval)
+                color = cmap(zval / zmax)
             plt.scatter(
                 center[0], center[1], marker="P", s=100, color=color, edgecolors="w"
             )
