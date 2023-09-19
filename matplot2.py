@@ -42,6 +42,7 @@ import numpy as np
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 import socket
+from sliding import Sliding_op
 
 
 def log(msg):
@@ -167,6 +168,23 @@ def scatter(data, ndataset):
     print("#########################")
 
 
+def moving_average(data, ndataset, window_size):
+    print("######## moving_average ########")
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
+        x = tofloat(x)
+        print(f"{x.shape=}")
+        y = tofloat(y)
+        print(f"{y.shape=}")
+        plt.plot(x, y, color="gray", alpha=0.25)
+        slmean = Sliding_op(y, window_size, np.mean, padding=True)
+        ma = slmean.transform()
+        plt.plot(x, ma)
+    print("#########################")
+
+
 def get_datastr(data):
     n = len(data["x0"])
     keys = data.keys()
@@ -230,6 +248,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--delimiter", help="Delimiter to use to read the data", default=None
     )
+    parser.add_argument(
+        "--moving_average",
+        dest="moving_average",
+        type=int,
+        help="Plot a moving average on the data with the given window size",
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -250,6 +274,8 @@ if __name__ == "__main__":
         DATASTR = get_datastr(DATA)
         if args.scatter:
             scatter(DATA, NDATASET)
+        elif args.moving_average is not None:
+            moving_average(DATA, NDATASET, window_size=args.moving_average)
         else:
             plot(DATA, NDATASET)
 
