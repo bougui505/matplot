@@ -227,20 +227,36 @@ def plot_pca(data, ndataset):
             print(f"{z.shape=}")
         else:
             z = None
-        X = np.vstack((x, y)).T
-        print(f"{X.shape=}")
-        eigenvalues, eigenvectors, center, anglex = pca(X)
-        width = 2 * np.sqrt(eigenvalues[0])
-        height = 2 * np.sqrt(eigenvalues[1])
-        ellipse = get_ellipse(center, width, height, anglex)
-        plt.scatter(x, y, c=z)
-        plt.scatter(center[0], center[1], marker="P", s=100, c="k", edgecolors="w")
-        plt.plot(
-            ellipse[0],
-            ellipse[1],
-            path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
-        )
-        # see: https://stackoverflow.com/a/35762000/1679629
+        scatter_obj = plt.scatter(x, y, c=z)
+        if z is None:
+            zlist = np.zeros(x.shape[0], dtype=int)
+        else:
+            zlist = z
+        for zval in np.unique(zlist):
+            print(f"{zval=}")
+            sel = zlist == zval
+            X = np.vstack((x[sel], y[sel])).T
+            print(f"{X.shape=}")
+            eigenvalues, eigenvectors, center, anglex = pca(X)
+            width = 2 * np.sqrt(eigenvalues[0])
+            height = 2 * np.sqrt(eigenvalues[1])
+            print(f"{width=}")
+            print(f"{height=}")
+            ellipse = get_ellipse(center, width, height, anglex)
+            plt.scatter(center[0], center[1], marker="P", s=100, c="k", edgecolors="w")
+            if z is None:
+                # color of the last scatter
+                color = scatter_obj.get_facecolor()[0]
+            else:
+                cmap = plt.get_cmap(plt.get_cmap().name)
+                color = cmap(zval)
+            plt.plot(
+                ellipse[0],
+                ellipse[1],
+                color=color,
+                path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
+            )
+            # see: https://stackoverflow.com/a/35762000/1679629
     print("##########################")
 
 
