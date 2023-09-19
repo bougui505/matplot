@@ -250,7 +250,7 @@ def plot_pca(data, ndataset):
                 cmap = plt.get_cmap(plt.get_cmap().name)
                 color = cmap(zval)
             plt.scatter(
-                center[0], center[1], marker="P", s=100, c=color, edgecolors="w"
+                center[0], center[1], marker="P", s=100, color=color, edgecolors="w"
             )
             plt.plot(
                 ellipse[0],
