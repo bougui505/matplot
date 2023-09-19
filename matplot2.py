@@ -250,7 +250,8 @@ def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
     S[0, 0] = 1.0 / sigma1**2
     S[1, 1] = 1.0 / sigma2**2
     A = u1u2.dot(S).dot(u1u2.T)
-    return A
+    Sigma_A = linalg.inv(A)
+    return Sigma_A
 
 
 def plot_pca(data, ndataset, plot_overlap=True):
@@ -258,7 +259,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
     Compute the pca for each dataset
     """
     print("######## plot_pca ########")
-    Alist = []
+    Sigma_Alist = []
     centerlist = []
     for dataset in range(ndataset):
         print(f"{dataset=}")
@@ -289,12 +290,15 @@ def plot_pca(data, ndataset, plot_overlap=True):
             height = 2 * np.sqrt(eigenvalues[1])
             print(f"{width=}")
             print(f"{height=}")
-            A = get_ellipse_sigma_mat(eigenvectors, width, height)
+            Sigma_A = get_ellipse_sigma_mat(eigenvectors, width, height)
             intersect = batch_ellipsoid_intersection_test(
-                Sigma_A=A, Sigma_B_list=Alist, mu_A=center, mu_B_list=centerlist
+                Sigma_A=Sigma_A,
+                Sigma_B_list=Sigma_Alist,
+                mu_A=center,
+                mu_B_list=centerlist,
             )
             print(f"{intersect=}")
-            Alist.append(A)
+            Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
             if not plot_overlap:
                 if intersect:
