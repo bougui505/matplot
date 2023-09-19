@@ -220,7 +220,7 @@ def ellipsoid_intersection_test(Sigma_A, Sigma_B, mu_A, mu_B, tau=1.0):
     res = minimize_scalar(
         K_function, bracket=[0.0, 0.5, 1.0], args=(lambdas, v_squared, tau)
     )
-    print(f"{res.fun=}")
+    # print(f"{res.fun=}")
     return res.fun >= 0
 
 
@@ -306,7 +306,7 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             if not plot_overlap:
                 if intersect:
                     plt.scatter(
-                        x[sel], y[sel], color="gray", alpha=0.25, zorder=-1, s=size
+                        x[sel], y[sel], color="gray", alpha=0.125, zorder=-1, s=size
                     )
                     continue
             if z is None:
