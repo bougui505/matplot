@@ -243,13 +243,15 @@ def plot_pca(data, ndataset):
             print(f"{width=}")
             print(f"{height=}")
             ellipse = get_ellipse(center, width, height, anglex)
-            plt.scatter(center[0], center[1], marker="P", s=100, c="k", edgecolors="w")
             if z is None:
                 # color of the last scatter
                 color = scatter_obj.get_facecolor()[0]
             else:
                 cmap = plt.get_cmap(plt.get_cmap().name)
                 color = cmap(zval)
+            plt.scatter(
+                center[0], center[1], marker="P", s=100, c=color, edgecolors="w"
+            )
             plt.plot(
                 ellipse[0],
                 ellipse[1],
