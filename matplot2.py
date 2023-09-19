@@ -182,9 +182,14 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     markers_unique = np.unique(markers)
     for marker in markers_unique:
         sel = markers == marker
+        if len(marker) > 1:
+            color = marker[0]
+            marker = marker[1]
         if z is not None:
             c = z[sel]
         else:
+            c = None
+        if color is not None:
             c = None
         out = plt.scatter(x[sel], y[sel], c=c, s=size, marker=marker, color=color)
     return out
@@ -428,6 +433,7 @@ if __name__ == "__main__":
         If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
         If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text.\
         If a 'm' field is given, use it as markers (see: https://matplotlib.org/stable/api/markers_api.html).\
+        For the 'm' field 2 characters could be given. The first one is the color, the second the marker. E.g. 'r*' to plot a red star marker\
         If a 's' field is given, use it as a list of sizes for the markers.\
         If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
         If --fields='*' is given all the columns are considered as y values.",

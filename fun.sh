@@ -21,7 +21,7 @@ test_plot2_scatter () {
 
 test_plot2_scatter_markers () {
     paste =(seq 100|shuf) =(seq 100|shuf) =(seq 100) \
-        | awk '{if (NR<50){print $0,"^"}else{print $0,"*"}}' \
+        | awk '{if (NR<50){print $0,"^"}else{print $0,"r*"}}' \
         | plot2 --fields x y z m --scatter
 }
 
@@ -35,7 +35,7 @@ test_plot2_pca () {
 
 test_plot2_pca_markers () {
     paste =(seq 100|shuf) =(seq 100|shuf) \
-        | awk '{if (NR<50){print $0,"0","^"}else{print $0,"1","*"}}' \
+        | awk '{if (NR<50){print $0,"0","^"}else{print $0,"1","r*"}}' \
         | plot2 --fields x y z m --pca
 }
 
