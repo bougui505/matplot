@@ -254,9 +254,10 @@ def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
     return Sigma_A
 
 
-def plot_pca(data, ndataset, plot_overlap=True):
+def plot_pca(data, ndataset, plot_overlap=True, scale=1.0):
     """
     Compute the pca for each dataset
+    scale: scale of the ellipses
     """
     print("######## plot_pca ########")
     Sigma_Alist = []
@@ -290,8 +291,8 @@ def plot_pca(data, ndataset, plot_overlap=True):
             X = np.vstack((x[sel], y[sel])).T
             print(f"{X.shape=}")
             eigenvalues, eigenvectors, center, anglex = pca(X)
-            width = 2 * np.sqrt(eigenvalues[0])
-            height = 2 * np.sqrt(eigenvalues[1])
+            width = 2 * np.sqrt(eigenvalues[0]) * scale
+            height = 2 * np.sqrt(eigenvalues[1]) * scale
             print(f"{width=}")
             print(f"{height=}")
             Sigma_A = get_ellipse_sigma_mat(eigenvectors, width, height)
@@ -436,6 +437,12 @@ if __name__ == "__main__":
         help="Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
         action="store_true",
     )
+    parser.add_argument(
+        "--scale",
+        help="scale for the ellipses in the pca plot (--pca) and the --no_overlap plot",
+        type=float,
+        default=1.0,
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -459,9 +466,9 @@ if __name__ == "__main__":
         elif args.moving_average is not None:
             moving_average(DATA, NDATASET, window_size=args.moving_average)
         elif args.pca:
-            plot_pca(DATA, NDATASET, plot_overlap=True)
+            plot_pca(DATA, NDATASET, plot_overlap=True, scale=args.scale)
         elif args.no_overlap:
-            plot_pca(DATA, NDATASET, plot_overlap=False)
+            plot_pca(DATA, NDATASET, plot_overlap=False, scale=args.scale)
         else:
             plot(DATA, NDATASET)
 
