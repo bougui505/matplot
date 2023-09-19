@@ -224,6 +224,10 @@ if __name__ == "__main__":
         "--ylabel", dest="ylabel", default=None, type=str, help="y axis label"
     )
     parser.add_argument(
+        "--cmap",
+        help="colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
+    )
+    parser.add_argument(
         "-d", "--delimiter", help="Delimiter to use to read the data", default=None
     )
     parser.add_argument("--save", help="Save the file", type=str)
@@ -239,6 +243,9 @@ if __name__ == "__main__":
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
+        if args.cmap is not None:
+            print(f"{args.cmap=}")
+            plt.set_cmap(args.cmap)
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
