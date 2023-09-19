@@ -30,3 +30,11 @@ test_plot2_pca () {
 test_plot2_pca_z () {
     paste -d, =(seq 1000|shuf) =(seq 1000|shuf) | awk -F"," 'BEGIN{OFS=","}{print $1,$2,NR<500}' | plot2 -d, --fields x y z --pca --cmap jet
 }
+
+test_plot2_overlap () {
+    cat \
+        =(np --nopipe 'A=np.random.normal(loc=0, scale=1, size=(1000,2));print_(A)' | awk '{print $0,0}') \
+        =(np --nopipe 'A=np.random.normal(loc=(2,2), scale=1, size=(1000,2));print_(A)' | awk '{print $0,1}') \
+        =(np --nopipe 'A=np.random.normal(loc=(8,-2), scale=1, size=(1000,2));print_(A)' | awk '{print $0,2}') \
+        | plot2 --no_over --fields x y z
+}

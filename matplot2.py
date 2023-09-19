@@ -261,6 +261,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
     print("######## plot_pca ########")
     Sigma_Alist = []
     centerlist = []
+    cmap = plt.get_cmap(plt.get_cmap().name)
     for dataset in range(ndataset):
         print(f"{dataset=}")
         x = data[f"x{dataset}"]
@@ -275,7 +276,7 @@ def plot_pca(data, ndataset, plot_overlap=True):
             print(f"{z.shape=}")
         else:
             z = None
-        scatter_obj = plt.scatter(x, y, c=z)
+        # scatter_obj = plt.scatter(x, y, c=z)
         if z is None:
             zlist = np.zeros(x.shape[0], dtype=int)
         else:
@@ -298,6 +299,15 @@ def plot_pca(data, ndataset, plot_overlap=True):
                 mu_B_list=centerlist,
             )
             print(f"{intersect=}")
+            if not plot_overlap:
+                if intersect:
+                    plt.scatter(x[sel], y[sel], color="gray", alpha=0.25)
+                    continue
+            if z is None:
+                color = None
+            else:
+                color = cmap(zval)
+            scatter_obj = plt.scatter(x[sel], y[sel], color=color)
             Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
             if not plot_overlap:
@@ -308,7 +318,6 @@ def plot_pca(data, ndataset, plot_overlap=True):
                 # color of the last scatter
                 color = scatter_obj.get_facecolor()[0]
             else:
-                cmap = plt.get_cmap(plt.get_cmap().name)
                 color = cmap(zval)
             plt.scatter(
                 center[0], center[1], marker="P", s=100, color=color, edgecolors="w"
@@ -419,6 +428,11 @@ if __name__ == "__main__":
         help="Compute and plot the Principal Component Analysis for each dataset and/or each z",
         action="store_true",
     )
+    parser.add_argument(
+        "--no_overlap",
+        help="Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
+        action="store_true",
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -442,7 +456,9 @@ if __name__ == "__main__":
         elif args.moving_average is not None:
             moving_average(DATA, NDATASET, window_size=args.moving_average)
         elif args.pca:
-            plot_pca(DATA, NDATASET)
+            plot_pca(DATA, NDATASET, plot_overlap=True)
+        elif args.no_overlap:
+            plot_pca(DATA, NDATASET, plot_overlap=False)
         else:
             plot(DATA, NDATASET)
 
