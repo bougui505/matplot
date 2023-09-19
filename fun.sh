@@ -11,6 +11,10 @@ precmd() {
     [ -f fun.sh ] && source fun.sh
 }
 
+test_plot2_simple () {
+    seq 10 |shuf | plot2
+}
+
 test_plot2_scatter () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y --scatter -d,
 }
