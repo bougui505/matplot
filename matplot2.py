@@ -149,18 +149,7 @@ if __name__ == "__main__":
     import doctest
     import argparse
 
-    # ### UNCOMMENT FOR LOGGING ####
-    # import os
-    # import logging
-    # if not os.path.isdir('logs'):
-    #     os.mkdir('logs')
-    # logfilename = 'logs/' + os.path.splitext(os.path.basename(__file__))[0] + '.log'
-    # logging.basicConfig(filename=logfilename, level=logging.INFO, format='%(asctime)s: %(message)s')
-    # logging.info(f"################ Starting {__file__} ################")
-    # ### ##################### ####
-    # argparse.ArgumentParser(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars='-', fromfile_prefix_chars=None, argument_default=None, conflict_handler='error', add_help=True, allow_abbrev=True, exit_on_error=True)
     parser = argparse.ArgumentParser(description="")
-    # parser.add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
     parser.add_argument(
         "-f",
         "--fields",
@@ -193,29 +182,7 @@ if __name__ == "__main__":
         "--read_data",
         help="Read plot data from the given png saved image using the --save option",
     )
-    parser.add_argument("--test", help="Test the code", action="store_true")
-    parser.add_argument("--func", help="Test only the given function(s)", nargs="+")
     args = parser.parse_args()
-
-    # If log is present log the arguments to the log file:
-    for k, v in args._get_kwargs():
-        log(f"# {k}: {v}")
-
-    if args.test:
-        if args.func is None:
-            doctest.testmod(
-                optionflags=doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
-            )
-        else:
-            for f in args.func:
-                print(f"Testing {f}")
-                f = getattr(sys.modules[__name__], f)
-                doctest.run_docstring_examples(
-                    f,
-                    globals(),
-                    optionflags=doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE,
-                )
-        sys.exit()
 
     if args.read_data is not None:
         DATASTR = read_metadata(args.read_data)
