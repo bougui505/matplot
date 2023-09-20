@@ -330,10 +330,12 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             X = np.vstack((x[sel], y[sel])).T
             print(f"{X.shape=}")
             eigenvalues, eigenvectors, center, anglex = pca(X)
+            print(f"{eigenvalues=}")
             width = 2 * np.sqrt(eigenvalues[0]) * scale
             height = 2 * np.sqrt(eigenvalues[1]) * scale
-            ax1 = eigenvectors[:, 0] * width
-            ax2 = eigenvectors[:, 1] * height
+            ax1 = np.squeeze(eigenvectors[:, 0] * width)
+            ax2 = np.squeeze(eigenvectors[:, 1] * height)
+            ellipse = get_ellipse(center, width, height, anglex)
             print(f"{width=}")
             print(f"{height=}")
             Sigma_A = get_ellipse_sigma_mat(eigenvectors, width, height)
@@ -366,7 +368,6 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             if not plot_overlap:
                 if intersect:
                     continue
-            ellipse = get_ellipse(center, width, height, anglex)
             if z is None:
                 # color of the last scatter
                 color = scatter_obj.get_facecolor()[0]
