@@ -81,10 +81,12 @@ def read_data(fields, delimiter):
         dtype=str,
         delimiter=delimiter,
     )
+    print(f"{inp.shape=}")
 
     # Add the x data if not present
     if "x" not in fields:
-        inp = np.vstack((np.arange(len(inp)), inp)).T
+        # inp = np.vstack((np.arange(len(inp))[None, :], inp)).T
+        inp = np.c_[np.arange(len(inp)), inp]
         fields = ["x"] + fields
 
     fields, ndataset = renumber_fields(fields)
@@ -144,7 +146,7 @@ def plot(data, ndataset):
     Simple plot
     """
     for i in range(ndataset):
-        x = data[f"x{i}"]
+        x = data[f"x{i}"] if f"x{i}" in data else data[f"x{0}"]
         y = data[f"y{i}"]
         x = tofloat(x)
         y = tofloat(y)
