@@ -215,7 +215,7 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     return out
 
 
-def moving_average(data, ndataset, window_size):
+def moving_average(data, ndataset, window_size, labels):
     print("######## moving_average ########")
     for dataset in range(ndataset):
         print(f"{dataset=}")
@@ -228,7 +228,12 @@ def moving_average(data, ndataset, window_size):
         plt.plot(x, y, color="gray", alpha=0.25)
         slmean = Sliding_op(y, window_size, np.mean, padding=True)
         ma = slmean.transform()
-        plt.plot(x, ma)
+        label = labels[dataset] if labels is not None else None
+        print(f"{label=}")
+        plt.plot(x, ma, label=label)
+        print("--")
+    if labels is not None:
+        plt.legend()
     print("#########################")
 
 
@@ -539,6 +544,11 @@ if __name__ == "__main__":
         "--orthonormal", help="Set an orthonormal basis", action="store_true"
     )
     parser.add_argument("--title", help="Title of the plot", type=str)
+    parser.add_argument(
+        "--labels",
+        nargs="+",
+        help="List of labels for each field defined with the --fields option",
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -568,7 +578,9 @@ if __name__ == "__main__":
         if args.scatter:
             scatter(DATA, NDATASET, size=args.size)
         elif args.moving_average is not None:
-            moving_average(DATA, NDATASET, window_size=args.moving_average)
+            moving_average(
+                DATA, NDATASET, window_size=args.moving_average, labels=args.labels
+            )
         elif args.pca:
             plot_pca(
                 DATA, NDATASET, plot_overlap=True, scale=args.scale, size=args.size
