@@ -215,9 +215,15 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     return out
 
 
-def moving_average(data, ndataset, window_size, labels, extremas):
+def moving_average(data, ndataset, window_size, labels, extremas, subplots=None):
     print("######## moving_average ########")
+    if subplots is not None:
+        print(f"{subplots=}")
     for dataset in range(ndataset):
+        if subplots is not None:
+            subplot = subplots + [(dataset + 1)]
+            print(f"{subplot=}")
+            plt.subplot(*subplot)
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -246,9 +252,9 @@ def moving_average(data, ndataset, window_size, labels, extremas):
                 linewidth=1.0,
                 label=f"{extrema}={v:.2g}",
             )
+        if labels is not None:
+            plt.legend()
         print("--")
-    if labels is not None:
-        plt.legend()
     print("#########################")
 
 
@@ -570,6 +576,12 @@ if __name__ == "__main__":
         nargs="+",
         choices=["min", "max"],
     )
+    parser.add_argument(
+        "--subplots",
+        nargs="+",
+        help="Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
+        type=int,
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -605,6 +617,7 @@ if __name__ == "__main__":
                 window_size=args.moving_average,
                 labels=args.labels,
                 extremas=args.extrema,
+                subplots=args.subplots,
             )
         elif args.pca:
             plot_pca(
