@@ -30,7 +30,7 @@ test_plot2_moving_average () {
 }
 
 test_plot2_pca () {
-    paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y -d, --pca
+    paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y -d, --pca --aspect 5 5
 }
 
 test_plot2_pca_markers () {

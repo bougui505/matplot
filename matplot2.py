@@ -332,6 +332,8 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             eigenvalues, eigenvectors, center, anglex = pca(X)
             width = 2 * np.sqrt(eigenvalues[0]) * scale
             height = 2 * np.sqrt(eigenvalues[1]) * scale
+            ax1 = eigenvectors[:, 0] * width
+            ax2 = eigenvectors[:, 1] * height
             print(f"{width=}")
             print(f"{height=}")
             Sigma_A = get_ellipse_sigma_mat(eigenvectors, width, height)
@@ -379,15 +381,27 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
                 edgecolors="w",
                 zorder=99,
             )
-            plt.plot(
-                ellipse[0],
-                ellipse[1],
-                color=color,
-                path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
-            )
+            plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
             print("--")
-            # see: https://stackoverflow.com/a/35762000/1679629
     print("##########################")
+
+
+def plot_ellipse(ellipse, color, center=None, ax1=None, ax2=None):
+    plt.plot(
+        ellipse[0],
+        ellipse[1],
+        color=color,
+        path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
+    )
+    # see: https://stackoverflow.com/a/35762000/1679629
+    if center is not None and ax1 is not None:
+        xc, yc = center
+        x1, y1 = center + ax1
+        plt.plot([xc, x1], [yc, y1], color="k", lw=1)
+    if center is not None and ax2 is not None:
+        xc, yc = center
+        x2, y2 = center + ax2
+        plt.plot([xc, x2], [yc, y2], color="k", lw=1)
 
 
 def pca(X, outfilename=None):
@@ -504,6 +518,12 @@ if __name__ == "__main__":
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--aspect_ratio",
+        help="Change the aspect ratio of the figure",
+        nargs=2,
+        type=int,
+    )
     parser.add_argument("--title", help="Title of the plot", type=str)
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
@@ -515,6 +535,9 @@ if __name__ == "__main__":
     if args.read_data is not None:
         DATASTR = read_metadata(args.read_data)
         print(DATASTR)
+    if args.aspect_ratio is not None:
+        print(f"{args.aspect_ratio=}")
+        plt.figure(figsize=(args.aspect_ratio[0], args.aspect_ratio[1]))
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
