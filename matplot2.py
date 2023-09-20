@@ -395,14 +395,15 @@ def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
         path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
     )
     # see: https://stackoverflow.com/a/35762000/1679629
-    if center is not None and ax1 is not None:
-        xc, yc = center
-        x1, y1 = center + ax1
-        plt.plot([xc, x1], [yc, y1], color="k", lw=1)
-    if center is not None and ax2 is not None:
-        xc, yc = center
-        x2, y2 = center + ax2
-        plt.plot([xc, x2], [yc, y2], color="k", lw=1)
+    # Print axis (bug? FIXME)
+    # if center is not None and ax1 is not None:
+    #     xc, yc = center
+    #     x1, y1 = center + ax1
+    #     plt.plot([xc, x1], [yc, y1], color="k", lw=1)
+    # if center is not None and ax2 is not None:
+    #     xc, yc = center
+    #     x2, y2 = center + ax2
+    #     plt.plot([xc, x2], [yc, y2], color="k", lw=1)
 
 
 def pca(X, outfilename=None):
@@ -418,6 +419,10 @@ def pca(X, outfilename=None):
     sorter = np.argsort(eigenvalues)[::-1]
     eigenvalues, eigenvectors = eigenvalues[sorter], eigenvectors[:, sorter]
     print(f"{eigenvectors.shape=}")
+    dotprod1 = eigenvectors[:, 0].dot(np.asarray([1, 0]))
+    dotprod2 = eigenvectors[:, 1].dot(np.asarray([0, 1]))
+    eigenvectors[:, 0] *= np.sign(dotprod1)
+    eigenvectors[:, 1] *= np.sign(dotprod2)
     anglex = np.rad2deg(np.arccos(eigenvectors[:, 0].dot(np.asarray([1, 0]))))
     print(f"{anglex=:.4g}")
     # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
