@@ -219,7 +219,7 @@ def moving_average(data, ndataset, window_size):
     print("######## moving_average ########")
     for dataset in range(ndataset):
         print(f"{dataset=}")
-        x = data[f"x{dataset}"]
+        x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
         print(f"{x.shape=}")
