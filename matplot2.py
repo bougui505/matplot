@@ -215,7 +215,7 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     return out
 
 
-def moving_average(data, ndataset, window_size, labels):
+def moving_average(data, ndataset, window_size, labels, extremas):
     print("######## moving_average ########")
     for dataset in range(ndataset):
         print(f"{dataset=}")
@@ -230,7 +230,22 @@ def moving_average(data, ndataset, window_size, labels):
         ma = slmean.transform()
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
-        plt.plot(x, ma, label=label)
+        pltobj = plt.plot(x, ma, label=label)
+        extrema = extremas[dataset] if extremas is not None else None
+        if extrema == "min":
+            v = ma.min()
+        else:
+            v = ma.max()
+        if extrema is not None:
+            # color of the last plot
+            color = pltobj[0].get_color()
+            plt.axhline(
+                y=v,
+                color=color,
+                linestyle="--",
+                linewidth=1.0,
+                label=f"{extrema}={v:.2g}",
+            )
         print("--")
     if labels is not None:
         plt.legend()
@@ -547,7 +562,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--labels",
         nargs="+",
-        help="List of labels for each field defined with the --fields option",
+        help="List of labels for each dataset defined with the --fields option",
+    )
+    parser.add_argument(
+        "--extrema",
+        help="List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
+        nargs="+",
+        choices=["min", "max"],
     )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
@@ -579,7 +600,11 @@ if __name__ == "__main__":
             scatter(DATA, NDATASET, size=args.size)
         elif args.moving_average is not None:
             moving_average(
-                DATA, NDATASET, window_size=args.moving_average, labels=args.labels
+                DATA,
+                NDATASET,
+                window_size=args.moving_average,
+                labels=args.labels,
+                extremas=args.extrema,
             )
         elif args.pca:
             plot_pca(
