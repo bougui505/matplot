@@ -524,6 +524,9 @@ if __name__ == "__main__":
         nargs=2,
         type=int,
     )
+    parser.add_argument(
+        "--orthonormal", help="Set an orthonormal basis", action="store_true"
+    )
     parser.add_argument("--title", help="Title of the plot", type=str)
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
@@ -538,6 +541,8 @@ if __name__ == "__main__":
     if args.aspect_ratio is not None:
         print(f"{args.aspect_ratio=}")
         plt.figure(figsize=(args.aspect_ratio[0], args.aspect_ratio[1]))
+    if args.orthonormal:
+        plt.axis("equal")
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)

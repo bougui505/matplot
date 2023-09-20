@@ -33,6 +33,11 @@ test_plot2_pca () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y -d, --pca --aspect 5 5
 }
 
+test_plot2_pca_gaussian () {
+    np --nopipe 'A=np.random.normal(loc=0, scale=(1,2)*np.asarray([3, 1]), size=(1000,2));print_(A)' \
+        | plot2 --fields x y --pca --orthonormal
+}
+
 test_plot2_pca_markers () {
     paste =(seq 100|shuf) =(seq 100|shuf) \
         | awk '{if (NR<50){print $0,"0","^"}else{print $0,"1","r*"}}' \
