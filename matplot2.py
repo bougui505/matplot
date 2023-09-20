@@ -215,7 +215,16 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     return out
 
 
-def moving_average(data, ndataset, window_size, labels, extremas, subplots=None):
+def moving_average(
+    data,
+    ndataset,
+    window_size,
+    labels,
+    extremas,
+    subplots=None,
+    xlabels=None,
+    ylabels=None,
+):
     print("######## moving_average ########")
     if subplots is not None:
         print(f"{subplots=}")
@@ -224,6 +233,10 @@ def moving_average(data, ndataset, window_size, labels, extremas, subplots=None)
             subplot = subplots + [(dataset + 1)]
             print(f"{subplot=}")
             plt.subplot(*subplot)
+            if xlabels is not None:
+                plt.xlabel(xlabels[dataset])
+            if ylabels is not None:
+                plt.ylabel(ylabels[dataset])
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -522,10 +535,20 @@ if __name__ == "__main__":
         help="size of the dots for the scatter plot (default: 20.0)",
     )
     parser.add_argument(
-        "--xlabel", dest="xlabel", default=None, type=str, help="x axis label"
+        "--xlabel",
+        dest="xlabel",
+        default=None,
+        type=str,
+        help="x axis label. Possibly one for each subplot",
+        nargs="+",
     )
     parser.add_argument(
-        "--ylabel", dest="ylabel", default=None, type=str, help="y axis label"
+        "--ylabel",
+        dest="ylabel",
+        default=None,
+        type=str,
+        help="y axis label. Possibly one for each subplot",
+        nargs="+",
     )
     parser.add_argument(
         "--cmap",
@@ -618,6 +641,8 @@ if __name__ == "__main__":
                 labels=args.labels,
                 extremas=args.extrema,
                 subplots=args.subplots,
+                xlabels=args.xlabel,
+                ylabels=args.ylabel,
             )
         elif args.pca:
             plot_pca(
@@ -631,9 +656,9 @@ if __name__ == "__main__":
             plot(DATA, NDATASET)
 
         if args.xlabel is not None:
-            plt.xlabel(args.xlabel)
+            plt.xlabel(args.xlabel[-1])
         if args.ylabel is not None:
-            plt.ylabel(args.ylabel)
+            plt.ylabel(args.ylabel[-1])
         if args.save is None:
             plt.show()
         else:
