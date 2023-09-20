@@ -372,21 +372,21 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
                 color = scatter_obj.get_facecolor()[0]
             else:
                 color = cmap(zval / zmax)
-            plt.scatter(
-                center[0],
-                center[1],
-                marker="P",
-                s=100,
-                color=color,
-                edgecolors="w",
-                zorder=99,
-            )
             plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
             print("--")
     print("##########################")
 
 
-def plot_ellipse(ellipse, color, center=None, ax1=None, ax2=None):
+def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
+    plt.scatter(
+        center[0],
+        center[1],
+        marker="P",
+        s=100,
+        color=color,
+        edgecolors="w",
+        zorder=99,
+    )
     plt.plot(
         ellipse[0],
         ellipse[1],
