@@ -15,6 +15,18 @@ test_plot2_simple () {
     seq 10 |shuf | plot2 --title "Simple plot"
 }
 
+test_plot2_semilogy () {
+    seq 10 |shuf | plot2 --title "Simple plot" --semilog y
+}
+
+test_plot2_semilogx () {
+    seq 10 |shuf | plot2 --title "Simple plot" --semilog x
+}
+
+test_plot2_semilogxy () {
+    seq 10 |shuf | plot2 --title "Simple plot" --semilog x y
+}
+
 test_plot2_scatter () {
     paste -d, =(seq 100|shuf) =(seq 100|shuf) =(seq 200 500|shuf) =(seq 200 500|shuf) | plot2 --fields x y x y --scatter -d,
 }

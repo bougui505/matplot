@@ -605,6 +605,13 @@ if __name__ == "__main__":
         help="Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
         type=int,
     )
+    parser.add_argument(
+        "--semilog",
+        help="Log scale for the given axis (x and/or y)",
+        nargs="+",
+        choices=["x", "y"],
+        default=[None, None],
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -620,6 +627,10 @@ if __name__ == "__main__":
         plt.figure(figsize=(args.aspect_ratio[0], args.aspect_ratio[1]))
     if args.orthonormal:
         plt.axis("equal")
+    if "x" in args.semilog:
+        plt.xscale("log")
+    if "y" in args.semilog:
+        plt.yscale("log")
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
