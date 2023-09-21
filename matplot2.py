@@ -637,10 +637,18 @@ if __name__ == "__main__":
         default=[None, None],
     )
     parser.add_argument(
-        "--ymin", type=float, help="Lower limit for y-axis", nargs="+", default=[None]
+        "--ymin",
+        type=float,
+        help="Lower limit for y-axis. If subplots are on, give one value per subplot",
+        nargs="+",
+        default=[None],
     )
     parser.add_argument(
-        "--ymax", type=float, help="Upper limit for y-axis", nargs="+", default=[None]
+        "--ymax",
+        type=float,
+        help="Upper limit for y-axis. If subplots are on, give one value per subplot",
+        nargs="+",
+        default=[None],
     )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
