@@ -275,8 +275,10 @@ def moving_average(
         extrema = extremas[dataset] if extremas is not None else None
         if extrema == "min":
             v = ma.min()
+            xv = ma.argmin()
         else:
             v = ma.max()
+            xv = ma.argmax()
         if extrema is not None:
             # color of the last plot
             color = pltobj[0].get_color()
@@ -286,6 +288,12 @@ def moving_average(
                 linestyle="--",
                 linewidth=1.0,
                 label=f"{extrema}={v:.2g}",
+            )
+            plt.axvline(
+                x=xv,
+                color=color,
+                linestyle="--",
+                linewidth=1.0,
             )
         if labels is not None:
             plt.legend()
