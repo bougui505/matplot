@@ -145,12 +145,16 @@ def plot(data, ndataset):
     """
     Simple plot
     """
+    print("######## plot ########")
     for i in range(ndataset):
         x = data[f"x{i}"] if f"x{i}" in data else data[f"x{0}"]
         y = data[f"y{i}"]
         x = tofloat(x)
         y = tofloat(y)
+        print(f"{x=}")
+        print(f"{y=}")
         plt.plot(x, y)
+    print("######################")
 
 
 def scatter(data, ndataset, size=20):
@@ -516,6 +520,16 @@ def save(outfilename, datastr):
         add_metadata(outfilename, datastr)
 
 
+def set_x_lim(xmin, xmax):
+    axes = plt.gca()
+    limits = plt.axis()
+    if xmin is None:
+        xmin = limits[0]
+    if xmax is None:
+        xmax = limits[1]
+    axes.set_xlim([xmin, xmax])
+
+
 def set_y_lim(ymin: float, ymax: float):
     axes = plt.gca()
     limits = plt.axis()
@@ -653,6 +667,20 @@ if __name__ == "__main__":
         nargs="+",
         default=[None],
     )
+    parser.add_argument(
+        "--xmin",
+        type=float,
+        help="Lower limit for x-axis. If subplots are on, give one value per subplot",
+        nargs="+",
+        default=[None],
+    )
+    parser.add_argument(
+        "--xmax",
+        type=float,
+        help="Upper limit for x-axis. If subplots are on, give one value per subplot",
+        nargs="+",
+        default=[None],
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -672,8 +700,6 @@ if __name__ == "__main__":
         plt.xscale("log")
     if "y" in args.semilog:
         plt.yscale("log")
-    if args.ymin is not None:
-        set_y_lim(args.ymin[0], args.ymax[0])
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
@@ -717,6 +743,10 @@ if __name__ == "__main__":
             plt.xlabel(args.xlabel[-1])
         if args.ylabel is not None:
             plt.ylabel(args.ylabel[-1])
+        if args.ymin is not None or args.ymax is not None:
+            set_y_lim(args.ymin[0], args.ymax[0])
+        if args.xmin is not None or args.xmax is not None:
+            set_x_lim(args.xmin[0], args.xmax[0])
         if args.save is None:
             plt.show()
         else:
