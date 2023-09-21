@@ -78,3 +78,8 @@ test_plot2_overlap () {
         =(np --nopipe 'A=np.random.normal(loc=(6,5), scale=1, size=(1000,2));print_(A)' | awk '{print $0,4}') \
         | plot2 --no_over --fields x y z --orthonormal
 }
+
+test_plot2_save_read () {
+    seq 10 | plot2 --save test.png
+    plot2 --read test.png
+}
