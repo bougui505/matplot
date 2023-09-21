@@ -224,6 +224,7 @@ def moving_average(
     subplots=None,
     xlabels=None,
     ylabels=None,
+    semilog=None,
 ):
     print("######## moving_average ########")
     if subplots is not None:
@@ -237,6 +238,11 @@ def moving_average(
                 plt.xlabel(xlabels[dataset])
             if ylabels is not None:
                 plt.ylabel(ylabels[dataset])
+            if semilog is not None:
+                if "x" in semilog:
+                    plt.xscale("log")
+                if "y" in semilog:
+                    plt.yscale("log")
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -654,6 +660,7 @@ if __name__ == "__main__":
                 subplots=args.subplots,
                 xlabels=args.xlabel,
                 ylabels=args.ylabel,
+                semilog=args.semilog,
             )
         elif args.pca:
             plot_pca(
