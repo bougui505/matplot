@@ -289,12 +289,7 @@ def moving_average(
                 linewidth=1.0,
                 label=f"{extrema}={v:.2g}",
             )
-            plt.axvline(
-                x=xv,
-                color=color,
-                linestyle="--",
-                linewidth=1.0,
-            )
+            plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
         if labels is not None:
             plt.legend()
         if subplots is not None:
