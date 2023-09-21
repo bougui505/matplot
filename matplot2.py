@@ -141,11 +141,31 @@ def tofloat(arr):
     return out
 
 
-def plot(data, ndataset):
+def plot(
+    data,
+    ndataset,
+    labels=None,
+    extremas=None,
+    subplots=None,
+    xlabels=None,
+    ylabels=None,
+    semilog=None,
+    ymin=None,
+    ymax=None,
+    xmin=None,
+    xmax=None,
+    title=None,
+):
     """
     Simple plot
     """
     print("######## plot ########")
+    if subplots is not None:
+        print(f"{subplots=}")
+    ymin = _broadcast_(ymin, ndataset)
+    ymax = _broadcast_(ymax, ndataset)
+    xmin = _broadcast_(xmin, ndataset)
+    xmax = _broadcast_(xmax, ndataset)
     for i in range(ndataset):
         x = data[f"x{i}"] if f"x{i}" in data else data[f"x{0}"]
         y = data[f"y{i}"]
@@ -219,6 +239,14 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
     return out
 
 
+def _broadcast_(inp, n):
+    if not isinstance(inp, list):
+        return [inp] * n
+    if len(inp) == 1 and isinstance(inp, list):
+        return inp * n
+    return inp
+
+
 def moving_average(
     data,
     ndataset,
@@ -237,17 +265,12 @@ def moving_average(
 ):
     print("######## moving_average ########")
 
-    def broadcast_none(inp, n):
-        if inp is None or len(inp) == 1 and inp[0] is None:
-            inp = [None] * n
-        return inp
-
     if subplots is not None:
         print(f"{subplots=}")
-    ymin = broadcast_none(ymin, ndataset)
-    ymax = broadcast_none(ymax, ndataset)
-    xmin = broadcast_none(xmin, ndataset)
-    xmax = broadcast_none(xmax, ndataset)
+    ymin = _broadcast_(ymin, ndataset)
+    ymax = _broadcast_(ymax, ndataset)
+    xmin = _broadcast_(xmin, ndataset)
+    xmax = _broadcast_(xmax, ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
             if title is not None:
