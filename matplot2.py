@@ -231,15 +231,23 @@ def moving_average(
     semilog=None,
     ymin=None,
     ymax=None,
+    xmin=None,
+    xmax=None,
     title=None,
 ):
     print("######## moving_average ########")
+
+    def broadcast_none(inp, n):
+        if inp is None or len(inp) == 1 and inp[0] is None:
+            inp = [None] * n
+        return inp
+
     if subplots is not None:
         print(f"{subplots=}")
-    if ymin is None or len(ymin) == 1 and ymin[0] is None:
-        ymin = [None] * ndataset
-    if ymax is None or len(ymax) == 1 and ymax[0] is None:
-        ymax = [None] * ndataset
+    ymin = broadcast_none(ymin, ndataset)
+    ymax = broadcast_none(ymax, ndataset)
+    xmin = broadcast_none(xmin, ndataset)
+    xmax = broadcast_none(xmax, ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
             if title is not None:
@@ -288,6 +296,7 @@ def moving_average(
                 if "y" in semilog:
                     plt.yscale("log")
             set_y_lim(ymin[dataset], ymax[dataset])
+            set_x_lim(xmin[dataset], xmax[dataset])
         print("--")
     print("#########################")
 
@@ -726,6 +735,8 @@ if __name__ == "__main__":
                 semilog=args.semilog,
                 ymin=args.ymin,
                 ymax=args.ymax,
+                xmin=args.xmin,
+                xmax=args.xmax,
                 title=args.title,
             )
         elif args.pca:
@@ -743,9 +754,9 @@ if __name__ == "__main__":
             plt.xlabel(args.xlabel[-1])
         if args.ylabel is not None:
             plt.ylabel(args.ylabel[-1])
-        if args.ymin is not None or args.ymax is not None:
+        if (args.ymin is not None or args.ymax is not None) and args.subplots is None:
             set_y_lim(args.ymin[0], args.ymax[0])
-        if args.xmin is not None or args.xmax is not None:
+        if (args.xmin is not None or args.xmax is not None) and args.subplots is None:
             set_x_lim(args.xmin[0], args.xmax[0])
         if args.save is None:
             plt.show()
