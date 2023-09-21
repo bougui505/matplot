@@ -166,14 +166,31 @@ def plot(
     ymax = _broadcast_(ymax, ndataset)
     xmin = _broadcast_(xmin, ndataset)
     xmax = _broadcast_(xmax, ndataset)
-    for i in range(ndataset):
-        x = data[f"x{i}"] if f"x{i}" in data else data[f"x{0}"]
-        y = data[f"y{i}"]
+    for dataset in range(ndataset):
+        if subplots is not None:
+            _setup_subplot_(
+                subplots, dataset, title=title, xlabels=xlabels, ylabels=ylabels
+            )
+        x = data[f"x{dataset}"] if f"x{dataset}" in data else data[f"x{0}"]
+        y = data[f"y{dataset}"]
         x = tofloat(x)
         y = tofloat(y)
         print(f"{x=}")
         print(f"{y=}")
-        plt.plot(x, y)
+        label = labels[dataset] if labels is not None else None
+        print(f"{label=}")
+        pltobj = plt.plot(x, y, label=label)
+        plot_extremas(extremas, dataset, y, pltobj)
+        if labels is not None:
+            plt.legend()
+        if subplots is not None:
+            if semilog is not None:
+                if "x" in semilog:
+                    plt.xscale("log")
+                if "y" in semilog:
+                    plt.yscale("log")
+            set_x_lim(xmin[dataset], xmax[dataset])
+            set_y_lim(ymin[dataset], ymax[dataset])
     print("######################")
 
 
@@ -247,6 +264,39 @@ def _broadcast_(inp, n):
     return inp
 
 
+def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
+    if title is not None:
+        plt.title(title)
+    subplot = subplots + [(dataset + 1)]
+    print(f"{subplot=}")
+    plt.subplot(*subplot)
+    if xlabels is not None:
+        plt.xlabel(xlabels[dataset])
+    if ylabels is not None:
+        plt.ylabel(ylabels[dataset])
+
+
+def plot_extremas(extremas, dataset, ydata, pltobj):
+    extrema = extremas[dataset] if extremas is not None else None
+    if extrema == "min":
+        v = ydata.min()
+        xv = ydata.argmin()
+    else:
+        v = ydata.max()
+        xv = ydata.argmax()
+    if extrema is not None:
+        # color of the last plot
+        color = pltobj[0].get_color()
+        plt.axhline(
+            y=v,
+            color=color,
+            linestyle="--",
+            linewidth=1.0,
+            label=f"{extrema}={v:.2g}",
+        )
+        plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
+
+
 def moving_average(
     data,
     ndataset,
@@ -273,15 +323,9 @@ def moving_average(
     xmax = _broadcast_(xmax, ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
-            if title is not None:
-                plt.title(title)
-            subplot = subplots + [(dataset + 1)]
-            print(f"{subplot=}")
-            plt.subplot(*subplot)
-            if xlabels is not None:
-                plt.xlabel(xlabels[dataset])
-            if ylabels is not None:
-                plt.ylabel(ylabels[dataset])
+            _setup_subplot_(
+                subplots, dataset, title=title, xlabels=xlabels, ylabels=ylabels
+            )
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -295,24 +339,7 @@ def moving_average(
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
         pltobj = plt.plot(x, ma, label=label)
-        extrema = extremas[dataset] if extremas is not None else None
-        if extrema == "min":
-            v = ma.min()
-            xv = ma.argmin()
-        else:
-            v = ma.max()
-            xv = ma.argmax()
-        if extrema is not None:
-            # color of the last plot
-            color = pltobj[0].get_color()
-            plt.axhline(
-                y=v,
-                color=color,
-                linestyle="--",
-                linewidth=1.0,
-                label=f"{extrema}={v:.2g}",
-            )
-            plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
+        plot_extremas(extremas, dataset, ma, pltobj)
         if labels is not None:
             plt.legend()
         if subplots is not None:
@@ -321,8 +348,8 @@ def moving_average(
                     plt.xscale("log")
                 if "y" in semilog:
                     plt.yscale("log")
-            set_y_lim(ymin[dataset], ymax[dataset])
             set_x_lim(xmin[dataset], xmax[dataset])
+            set_y_lim(ymin[dataset], ymax[dataset])
         print("--")
     print("#########################")
 
@@ -774,7 +801,21 @@ if __name__ == "__main__":
                 DATA, NDATASET, plot_overlap=False, scale=args.scale, size=args.size
             )
         else:
-            plot(DATA, NDATASET)
+            plot(
+                DATA,
+                NDATASET,
+                labels=args.labels,
+                extremas=args.extrema,
+                subplots=args.subplots,
+                xlabels=args.xlabel,
+                ylabels=args.ylabel,
+                semilog=args.semilog,
+                ymin=args.ymin,
+                ymax=args.ymax,
+                xmin=args.xmin,
+                xmax=args.xmax,
+                title=args.title,
+            )
 
         if args.xlabel is not None:
             plt.xlabel(args.xlabel[-1])
