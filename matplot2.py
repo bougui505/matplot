@@ -227,6 +227,7 @@ def moving_average(
     semilog=None,
     ymin=None,
     ymax=None,
+    title=None,
 ):
     print("######## moving_average ########")
     if subplots is not None:
@@ -237,6 +238,8 @@ def moving_average(
         ymax = [None] * ndataset
     for dataset in range(ndataset):
         if subplots is not None:
+            if title is not None:
+                plt.title(title)
             subplot = subplots + [(dataset + 1)]
             print(f"{subplot=}")
             plt.subplot(*subplot)
@@ -697,6 +700,7 @@ if __name__ == "__main__":
                 semilog=args.semilog,
                 ymin=args.ymin,
                 ymax=args.ymax,
+                title=args.title,
             )
         elif args.pca:
             plot_pca(
