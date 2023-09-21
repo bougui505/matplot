@@ -15,6 +15,10 @@ test_plot2_simple () {
     seq 10 |shuf | plot2 --title "Simple plot"
 }
 
+test_plot2_ylim () {
+    seq 10 |shuf | plot2 --title "Simple plot" --ymin 5 --ymax 7
+}
+
 test_plot2_semilogy () {
     seq 10 |shuf | plot2 --title "Simple plot" --semilog y
 }

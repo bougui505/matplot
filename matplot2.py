@@ -225,10 +225,16 @@ def moving_average(
     xlabels=None,
     ylabels=None,
     semilog=None,
+    ymin=None,
+    ymax=None,
 ):
     print("######## moving_average ########")
     if subplots is not None:
         print(f"{subplots=}")
+    if ymin is None or len(ymin) == 1 and ymin[0] is None:
+        ymin = [None] * ndataset
+    if ymax is None or len(ymax) == 1 and ymax[0] is None:
+        ymax = [None] * ndataset
     for dataset in range(ndataset):
         if subplots is not None:
             subplot = subplots + [(dataset + 1)]
@@ -238,11 +244,6 @@ def moving_average(
                 plt.xlabel(xlabels[dataset])
             if ylabels is not None:
                 plt.ylabel(ylabels[dataset])
-            if semilog is not None:
-                if "x" in semilog:
-                    plt.xscale("log")
-                if "y" in semilog:
-                    plt.yscale("log")
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -273,6 +274,13 @@ def moving_average(
             )
         if labels is not None:
             plt.legend()
+        if subplots is not None:
+            if semilog is not None:
+                if "x" in semilog:
+                    plt.xscale("log")
+                if "y" in semilog:
+                    plt.yscale("log")
+            set_y_lim(ymin[dataset], ymax[dataset])
         print("--")
     print("#########################")
 
@@ -505,6 +513,16 @@ def save(outfilename, datastr):
         add_metadata(outfilename, datastr)
 
 
+def set_y_lim(ymin: float, ymax: float):
+    axes = plt.gca()
+    limits = plt.axis()
+    if ymin is None:
+        ymin = limits[-2]
+    if ymax is None:
+        ymax = limits[-1]
+    axes.set_ylim([ymin, ymax])
+
+
 if __name__ == "__main__":
     import doctest
     import argparse
@@ -618,6 +636,12 @@ if __name__ == "__main__":
         choices=["x", "y"],
         default=[None, None],
     )
+    parser.add_argument(
+        "--ymin", type=float, help="Lower limit for y-axis", nargs="+", default=[None]
+    )
+    parser.add_argument(
+        "--ymax", type=float, help="Upper limit for y-axis", nargs="+", default=[None]
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -637,6 +661,8 @@ if __name__ == "__main__":
         plt.xscale("log")
     if "y" in args.semilog:
         plt.yscale("log")
+    if args.ymin is not None:
+        set_y_lim(args.ymin[0], args.ymax[0])
     if (
         not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
@@ -661,6 +687,8 @@ if __name__ == "__main__":
                 xlabels=args.xlabel,
                 ylabels=args.ylabel,
                 semilog=args.semilog,
+                ymin=args.ymin,
+                ymax=args.ymax,
             )
         elif args.pca:
             plot_pca(
