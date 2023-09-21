@@ -417,6 +417,28 @@ def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
     return Sigma_A
 
 
+def order_z_per_variance(data, ndataset):
+    zorders = []
+    for dataset in range(ndataset):
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
+        x = tofloat(x)
+        y = tofloat(y)
+        z = data[f"z{dataset}"]
+        z = tofloat(z)
+        eigenvalues_list = []
+        for zval in np.unique(z):
+            sel = z == zval
+            X = np.vstack((x[sel], y[sel])).T
+            eigenvalues, eigenvectors, center, anglex = pca(X)
+            eigenvalues_list.append(eigenvalues[0])
+        zsorter = np.argsort(eigenvalues_list)
+        zorder = np.unique(z)[zsorter]
+        print(f"{zorder=}")
+        zorders.append(zorder)
+    return zorders
+
+
 def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
     """
     Compute the pca for each dataset
@@ -426,6 +448,10 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
     Sigma_Alist = []
     centerlist = []
     cmap = plt.get_cmap(plt.get_cmap().name)
+    if "z0" in data:
+        zorders = order_z_per_variance(data, ndataset)
+    else:
+        zorders = None
     for dataset in range(ndataset):
         print(f"{dataset=}")
         x = data[f"x{dataset}"]
@@ -448,7 +474,11 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
         zmax = zlist.max()
         if zmax == 0:
             zmax = 1
-        for zval in np.unique(zlist):
+        if zorders is not None:
+            zunique = zorders[dataset]
+        else:
+            zunique = np.unique(zlist)
+        for zval in zunique:
             print(f"{zval=}")
             sel = zlist == zval
             X = np.vstack((x[sel], y[sel])).T
