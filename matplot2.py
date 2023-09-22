@@ -213,6 +213,7 @@ def scatter(data, ndataset, size=20, labels=None):
             print(f"{z.shape=}")
         else:
             z = None
+        plot_texts(data, dataset)
         if f"m{dataset}" not in data:
             plt.scatter(x, y, c=z, s=size)
         else:
@@ -221,6 +222,18 @@ def scatter(data, ndataset, size=20, labels=None):
     if labels is not None:
         plt.legend()
     print("#########################")
+
+
+def plot_texts(data, dataset):
+    if f"t{dataset}" in data:
+        texts = data[f"t{dataset}"]
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
+        x = tofloat(x)
+        y = tofloat(y)
+        for xval, yval, t in zip(x, y, texts):
+            if t != "-":
+                plt.text(x=xval, y=yval, s=t)
 
 
 KNOWN_LABELS = set()
@@ -673,6 +686,7 @@ if __name__ == "__main__":
         If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
         If --fields='*' is given all the columns are considered as y values.",
         default=["y"],
+        choices=["x", "y", "z", "e", "l", "w", "t", "m", "s", "c", "*"],
         nargs="+",
     )
     parser.add_argument(

@@ -87,3 +87,12 @@ test_plot2_save_read () {
     seq 10 | plot2 --save test.png
     plot2 --read test.png
 }
+
+test_plot2_text () {
+    cat << EOF | plot2 --scatter --fields x y z m t --cmap tab10
+0 0 0 o -
+1 2 1 o -
+0 1 0 r* 0
+1 3 1 r* 1
+EOF
+}
