@@ -314,7 +314,7 @@ If a 'e' field is given it is used to plot the error. \
 If a 'l' field is given this are the labels for the xticks -- xticklabels --.\
 If a 'w' field is given it is used as weights for weighted hostogram plotting (see: -H).\
 If a 't' field is given plot the given text at the given position (with x and y fields) using matplotlib.pyplot.text. If "
-    - " no text is plotted in the current position x, y\
+    " no text is plotted in the current position x, y\
 If a 'm' field is given, use it as markers (see: https://matplotlib.org/stable/api/markers_api.html).\
 If a 's' field is given, use it as a list of sizes for the markers.\
 If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
