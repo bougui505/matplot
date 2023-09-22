@@ -194,7 +194,7 @@ def plot(
     print("######################")
 
 
-def scatter(data, ndataset, size=20, labels=None):
+def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
     """
     Scatter plot
     """
@@ -213,7 +213,7 @@ def scatter(data, ndataset, size=20, labels=None):
             print(f"{z.shape=}")
         else:
             z = None
-        plot_texts(data, dataset)
+        plot_texts(data, dataset, fontsize=fontsize)
         if f"m{dataset}" not in data:
             plt.scatter(x, y, c=z, s=size)
         else:
@@ -224,7 +224,7 @@ def scatter(data, ndataset, size=20, labels=None):
     print("#########################")
 
 
-def plot_texts(data, dataset):
+def plot_texts(data, dataset, fontsize):
     if f"t{dataset}" in data:
         texts = data[f"t{dataset}"]
         x = data[f"x{dataset}"]
@@ -233,7 +233,7 @@ def plot_texts(data, dataset):
         y = tofloat(y)
         for xval, yval, t in zip(x, y, texts):
             if t != "-":
-                plt.text(x=xval, y=yval, s=t)
+                plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
 
 
 KNOWN_LABELS = set()
@@ -807,6 +807,12 @@ if __name__ == "__main__":
         nargs="+",
         default=[None],
     )
+    parser.add_argument(
+        "--fontsize",
+        default="medium",
+        type=str,
+        help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
+    )
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -838,7 +844,13 @@ if __name__ == "__main__":
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
-            scatter(DATA, NDATASET, size=args.size, labels=args.labels)
+            scatter(
+                DATA,
+                NDATASET,
+                size=args.size,
+                labels=args.labels,
+                fontsize=args.fontsize,
+            )
         elif args.moving_average is not None:
             moving_average(
                 DATA,
