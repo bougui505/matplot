@@ -233,7 +233,9 @@ def plot_texts(data, dataset, fontsize):
         y = tofloat(y)
         for xval, yval, t in zip(x, y, texts):
             if t != "-":
-                plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
+                plttext = plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
+                # Add white line around text
+                plttext.set_path_effects([pe.withStroke(linewidth=2, foreground="w")])
 
 
 KNOWN_LABELS = set()
