@@ -194,7 +194,7 @@ def plot(
     print("######################")
 
 
-def scatter(data, ndataset, size=20):
+def scatter(data, ndataset, size=20, labels=None):
     """
     Scatter plot
     """
@@ -217,14 +217,19 @@ def scatter(data, ndataset, size=20):
             plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
-            scatter_markers(x=x, y=y, z=z, markers=markers, size=size)
+            scatter_markers(x=x, y=y, z=z, markers=markers, size=size, labels=labels)
+    if labels is not None:
+        plt.legend()
     print("#########################")
 
 
-def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
+KNOWN_LABELS = set()
+
+
+def scatter_markers(x, y, z=None, markers=None, size=None, color=None, labels=None):
     markers_unique = np.unique(markers)
     size_ori = size
-    for marker in markers_unique:
+    for i, marker in enumerate(markers_unique):
         sel = markers == marker
         if len(marker) > 1:
             color = marker[0]
@@ -243,6 +248,13 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
             zorder = None
             edgecolors = None
             size = size_ori
+        if labels is not None:
+            label = labels[i]
+        else:
+            label = None
+        if label in KNOWN_LABELS:
+            label = None
+        KNOWN_LABELS.add(label)
         out = plt.scatter(
             x[sel],
             y[sel],
@@ -252,6 +264,7 @@ def scatter_markers(x, y, z=None, markers=None, size=None, color=None):
             color=color,
             zorder=zorder,
             edgecolors=edgecolors,
+            label=label,
         )
     return out
 
@@ -439,7 +452,7 @@ def order_z_per_variance(data, ndataset):
     return zorders
 
 
-def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
+def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0, labels=None):
     """
     Compute the pca for each dataset
     scale: scale of the ellipses
@@ -478,7 +491,7 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             zunique = zorders[dataset]
         else:
             zunique = np.unique(zlist)
-        for zval in zunique:
+        for i, zval in enumerate(zunique):
             print(f"{zval=}")
             sel = zlist == zval
             X = np.vstack((x[sel], y[sel])).T
@@ -515,7 +528,12 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
             else:
                 markers = data[f"m{dataset}"][sel]
                 scatter_obj = scatter_markers(
-                    x=x[sel], y=y[sel], markers=markers, color=color, size=size
+                    x=x[sel],
+                    y=y[sel],
+                    markers=markers,
+                    color=color,
+                    size=size,
+                    labels=labels,
                 )
             Sigma_Alist.append(Sigma_A)
             centerlist.append(center)
@@ -529,6 +547,8 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0):
                 color = cmap(zval / zmax)
             plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
             print("--")
+    if labels is not None:
+        plt.legend()
     print("##########################")
 
 
@@ -724,7 +744,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--labels",
         nargs="+",
-        help="List of labels for each dataset defined with the --fields option",
+        help="List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
     )
     parser.add_argument(
         "--extrema",
@@ -804,7 +824,7 @@ if __name__ == "__main__":
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
-            scatter(DATA, NDATASET, size=args.size)
+            scatter(DATA, NDATASET, size=args.size, labels=args.labels)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
@@ -828,7 +848,12 @@ if __name__ == "__main__":
             )
         elif args.no_overlap:
             plot_pca(
-                DATA, NDATASET, plot_overlap=False, scale=args.scale, size=args.size
+                DATA,
+                NDATASET,
+                plot_overlap=False,
+                scale=args.scale,
+                size=args.size,
+                labels=args.labels,
             )
         else:
             plot(
