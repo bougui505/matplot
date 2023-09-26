@@ -224,8 +224,11 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
     print("#########################")
 
 
-def histogram(data, ndataset, labels=None, alpha=1.0):
+def histogram(data, ndataset, labels=None, alpha=1.0, bins=None):
     print("######## histogram ########")
+    if bins is None:
+        bins = "auto"
+    print(f"{bins=}")
     for dataset in range(ndataset):
         print(f"{dataset=}")
         y = data[f"y{dataset}"]
@@ -235,7 +238,7 @@ def histogram(data, ndataset, labels=None, alpha=1.0):
             label = labels[dataset]
         else:
             label = None
-        plt.hist(y, label=label, alpha=alpha)
+        plt.hist(y, label=label, alpha=alpha, bins=bins)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -914,7 +917,9 @@ if __name__ == "__main__":
                 labels=args.labels,
             )
         elif args.histogram:
-            histogram(DATA, NDATASET, labels=args.labels, alpha=args.alpha)
+            histogram(
+                DATA, NDATASET, labels=args.labels, alpha=args.alpha, bins=args.bins
+            )
         else:
             plot(
                 DATA,
