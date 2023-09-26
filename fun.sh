@@ -15,6 +15,16 @@ test_plot2_simple () {
     seq 10 |shuf | plot2 --title "Simple plot"
 }
 
+test_plot2_hist () {
+    np --nopipe "
+a=np.random.normal(loc=0, size=100)
+b=np.random.normal(loc=1, size=100)
+out = np.c_[a, b]
+print_(out)
+" \
+    | plot2 --title "Histogram" -H --fields y y --labels h1 h2 --alpha 0.5
+}
+
 test_plot2_ylim () {
     seq 10 |shuf | plot2 --title "Simple plot" --ymin 5 --ymax 7
 }

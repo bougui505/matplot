@@ -224,6 +224,23 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
     print("#########################")
 
 
+def histogram(data, ndataset, labels=None, alpha=1.0):
+    print("######## histogram ########")
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        y = data[f"y{dataset}"]
+        y = tofloat(y)
+        print(f"{y.shape=}")
+        if labels is not None:
+            label = labels[dataset]
+        else:
+            label = None
+        plt.hist(y, label=label, alpha=alpha)
+    if labels is not None:
+        plt.legend()
+    print("#########################")
+
+
 def plot_texts(data, dataset, fontsize):
     if f"t{dataset}" in data:
         texts = data[f"t{dataset}"]
@@ -782,6 +799,19 @@ if __name__ == "__main__":
         default=[None, None],
     )
     parser.add_argument(
+        "-H",
+        "--histogram",
+        action="store_true",
+        help="Compute and plot histogram from data",
+    )
+    parser.add_argument(
+        "-b",
+        "--bins",
+        type=int,
+        help="Number of bins in the histogram",
+    )
+    parser.add_argument("--alpha", type=float, default=1.0, help="Transparency")
+    parser.add_argument(
         "--ymin",
         type=float,
         help="Lower limit for y-axis. If subplots are on, give one value per subplot",
@@ -883,6 +913,8 @@ if __name__ == "__main__":
                 size=args.size,
                 labels=args.labels,
             )
+        elif args.histogram:
+            histogram(DATA, NDATASET, labels=args.labels, alpha=args.alpha)
         else:
             plot(
                 DATA,
