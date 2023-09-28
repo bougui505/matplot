@@ -848,6 +848,7 @@ if __name__ == "__main__":
         type=str,
         help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
     )
+    parser.add_argument("--colorbar", help="Display the colorbar", action="store_true")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -945,6 +946,8 @@ if __name__ == "__main__":
             set_y_lim(args.ymin[0], args.ymax[0])
         if (args.xmin is not None or args.xmax is not None) and args.subplots is None:
             set_x_lim(args.xmin[0], args.xmax[0])
+        if args.colorbar:
+            plt.colorbar()
         if args.save is None:
             plt.show()
         else:
