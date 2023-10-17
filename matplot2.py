@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF8 -*-
 
+import os
+import socket
 #############################################################################
 # Author: Guillaume Bouvier -- guillaume.bouvier@pasteur.fr                 #
 # https://research.pasteur.fr/en/member/guillaume-bouvier/                  #
@@ -36,17 +38,17 @@
 #                                                                           #
 #############################################################################
 import sys
-import os
-import matplotlib.pyplot as plt
+
 import matplotlib.patheffects as pe
+import matplotlib.pyplot as plt
 import numpy as np
+from numpy import linalg
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-import socket
-from sliding import Sliding_op
-from numpy import linalg
-from scipy.optimize import minimize_scalar
 from scipy.linalg import eigh
+from scipy.optimize import minimize_scalar
+
+from sliding import Sliding_op
 
 
 def log(msg):
@@ -218,7 +220,8 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
             plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
-            scatter_markers(x=x, y=y, z=z, markers=markers, size=size, labels=labels)
+            scatter_markers(x=x, y=y, z=z, markers=markers,
+                            size=size, labels=labels)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -233,6 +236,7 @@ def histogram(data, ndataset, labels=None, alpha=1.0, bins=None):
         print(f"{dataset=}")
         y = data[f"y{dataset}"]
         y = tofloat(y)
+        y = y[~np.isinf(y)]
         print(f"{y.shape=}")
         if labels is not None:
             label = labels[dataset]
@@ -253,9 +257,11 @@ def plot_texts(data, dataset, fontsize):
         y = tofloat(y)
         for xval, yval, t in zip(x, y, texts):
             if t != "-":
-                plttext = plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
+                plttext = plt.text(x=xval, y=yval, s=t,
+                                   fontsize=fontsize, zorder=101)
                 # Add white line around text
-                plttext.set_path_effects([pe.withStroke(linewidth=2, foreground="w")])
+                plttext.set_path_effects(
+                    [pe.withStroke(linewidth=2, foreground="w")])
 
 
 KNOWN_LABELS = set()
@@ -342,7 +348,8 @@ def plot_extremas(extremas, dataset, ydata, pltobj):
             linewidth=1.0,
             label=f"{extrema}={v:.2g}",
         )
-        plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
+        plt.axvline(x=xv, color=color, linestyle="dotted",
+                    linewidth=1.0, label=xv)
 
 
 def moving_average(
@@ -413,7 +420,8 @@ def get_ellipse(center, width, height, angle):
     angle = np.deg2rad(angle)
     t = np.linspace(0, 2 * np.pi, 100)
     Ell = np.array([width * np.cos(t), height * np.sin(t)])
-    R_rot = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    R_rot = np.array([[np.cos(angle), -np.sin(angle)],
+                     [np.sin(angle), np.cos(angle)]])
     Ell_rot = np.zeros((2, Ell.shape[1]))
     for i in range(Ell.shape[1]):
         Ell_rot[:, i] = np.dot(R_rot, Ell[:, i])
@@ -640,7 +648,8 @@ def pca(X, outfilename=None):
     # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
     # print(f"{angley=:.4g}")
     if outfilename is not None:
-        np.savez(outfilename, eigenvalues=eigenvalues, eigenvectors=eigenvectors)
+        np.savez(outfilename, eigenvalues=eigenvalues,
+                 eigenvectors=eigenvectors)
     return eigenvalues, eigenvectors, center, anglex
 
 
@@ -688,7 +697,6 @@ def set_y_lim(ymin: float, ymax: float):
 
 
 if __name__ == "__main__":
-    import doctest
     import argparse
 
     parser = argparse.ArgumentParser(description="")
@@ -813,7 +821,8 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
-    parser.add_argument("--alpha", type=float, default=1.0, help="Transparency")
+    parser.add_argument("--alpha", type=float,
+                        default=1.0, help="Transparency")
     parser.add_argument(
         "--ymin",
         type=float,
@@ -848,7 +857,8 @@ if __name__ == "__main__":
         type=str,
         help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
     )
-    parser.add_argument("--colorbar", help="Display the colorbar", action="store_true")
+    parser.add_argument(
+        "--colorbar", help="Display the colorbar", action="store_true")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
