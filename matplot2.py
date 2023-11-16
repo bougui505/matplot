@@ -3,6 +3,7 @@
 
 import os
 import socket
+
 #############################################################################
 # Author: Guillaume Bouvier -- guillaume.bouvier@pasteur.fr                 #
 # https://research.pasteur.fr/en/member/guillaume-bouvier/                  #
@@ -328,9 +329,10 @@ def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
 
 
 def plot_extremas(extremas, dataset, ydata, pltobj):
-    assert dataset < len(
-        extremas
-    ), f"Number of extrema keyword given to option --extrema ({len(args.extrema)}) does not match the number of dataset for current dataset ({dataset+1})"
+    if extremas is not None:
+        assert dataset < len(
+            extremas
+        ), f"Number of extrema keyword given to option --extrema ({len(args.extrema)}) does not match the number of dataset for current dataset ({dataset+1})"
     extrema = extremas[dataset] if extremas is not None else None
     if extrema == "min":
         v = ydata.min()
