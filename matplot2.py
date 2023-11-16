@@ -220,8 +220,7 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
             plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
-            scatter_markers(x=x, y=y, z=z, markers=markers,
-                            size=size, labels=labels)
+            scatter_markers(x=x, y=y, z=z, markers=markers, size=size, labels=labels)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -257,11 +256,9 @@ def plot_texts(data, dataset, fontsize):
         y = tofloat(y)
         for xval, yval, t in zip(x, y, texts):
             if t != "-":
-                plttext = plt.text(x=xval, y=yval, s=t,
-                                   fontsize=fontsize, zorder=101)
+                plttext = plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
                 # Add white line around text
-                plttext.set_path_effects(
-                    [pe.withStroke(linewidth=2, foreground="w")])
+                plttext.set_path_effects([pe.withStroke(linewidth=2, foreground="w")])
 
 
 KNOWN_LABELS = set()
@@ -331,6 +328,9 @@ def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
 
 
 def plot_extremas(extremas, dataset, ydata, pltobj):
+    assert dataset < len(
+        extremas
+    ), f"Number of extrema keyword given to option --extrema ({len(args.extrema)}) does not match the number of dataset for current dataset ({dataset+1})"
     extrema = extremas[dataset] if extremas is not None else None
     if extrema == "min":
         v = ydata.min()
@@ -348,8 +348,7 @@ def plot_extremas(extremas, dataset, ydata, pltobj):
             linewidth=1.0,
             label=f"{extrema}={v:.2g}",
         )
-        plt.axvline(x=xv, color=color, linestyle="dotted",
-                    linewidth=1.0, label=xv)
+        plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
 
 
 def moving_average(
@@ -420,8 +419,7 @@ def get_ellipse(center, width, height, angle):
     angle = np.deg2rad(angle)
     t = np.linspace(0, 2 * np.pi, 100)
     Ell = np.array([width * np.cos(t), height * np.sin(t)])
-    R_rot = np.array([[np.cos(angle), -np.sin(angle)],
-                     [np.sin(angle), np.cos(angle)]])
+    R_rot = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     Ell_rot = np.zeros((2, Ell.shape[1]))
     for i in range(Ell.shape[1]):
         Ell_rot[:, i] = np.dot(R_rot, Ell[:, i])
@@ -648,8 +646,7 @@ def pca(X, outfilename=None):
     # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
     # print(f"{angley=:.4g}")
     if outfilename is not None:
-        np.savez(outfilename, eigenvalues=eigenvalues,
-                 eigenvectors=eigenvectors)
+        np.savez(outfilename, eigenvalues=eigenvalues, eigenvectors=eigenvectors)
     return eigenvalues, eigenvectors, center, anglex
 
 
@@ -821,8 +818,7 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
-    parser.add_argument("--alpha", type=float,
-                        default=1.0, help="Transparency")
+    parser.add_argument("--alpha", type=float, default=1.0, help="Transparency")
     parser.add_argument(
         "--ymin",
         type=float,
@@ -857,8 +853,7 @@ if __name__ == "__main__":
         type=str,
         help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
     )
-    parser.add_argument(
-        "--colorbar", help="Display the colorbar", action="store_true")
+    parser.add_argument("--colorbar", help="Display the colorbar", action="store_true")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
