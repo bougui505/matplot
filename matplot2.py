@@ -3,7 +3,6 @@
 
 import os
 import socket
-
 #############################################################################
 # Author: Guillaume Bouvier -- guillaume.bouvier@pasteur.fr                 #
 # https://research.pasteur.fr/en/member/guillaume-bouvier/                  #
@@ -111,13 +110,13 @@ def add_metadata(filename, datastr, key="data"):
     """
     metadata = PngInfo()
     metadata.add_text(key, datastr, zip=True)
+    if args.labels is not None:
+        metadata.add_text(f"labels", " ".join(args.labels))
     metadata.add_text("cwd", os.getcwd())
     metadata.add_text("hostname", socket.gethostname())
     # if options.subsample is not None:
     #     print("# Adding subsampling metadata")
     #     metadata.add_text("subsampling", "1st-column")
-    # if options.labels is not None:
-    #     metadata.add_text("labels", options.labels)
     targetImage = Image.open(filename)
     targetImage.save(filename, pnginfo=metadata)
 
