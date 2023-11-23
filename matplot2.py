@@ -236,7 +236,7 @@ def add_repulsion(x, y, repulsion):
     coords, loss = apply_repulsion(x=coords,
                                    repulsion=repulsion,
                                    min_delta=min_delta,
-                                   niter=100)
+                                   niter=1000)
     return coords[:, 0], coords[:, 1]
 
 
