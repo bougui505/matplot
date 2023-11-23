@@ -93,6 +93,13 @@ test_plot2_overlap () {
         | plot2 --no_over --fields x y z --orthonormal
 }
 
+test_plot2_repulsion () {
+    cat \
+    =(np --nopipe 'A=np.random.normal(loc=0, scale=1, size=(1000,2));print_(A)' | awk '{print $0,0}') \
+    =(np --nopipe 'A=np.random.normal(loc=(5,5), scale=1, size=(1000,2));print_(A)' | awk '{print $0,1}') \
+    | plot2 --fields x y z --orthonormal --scatter --repulsion 0.5
+}
+
 test_plot2_save_read () {
     seq 10 | plot2 --save test.png
     plot2 --read test.png

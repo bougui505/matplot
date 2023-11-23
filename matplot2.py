@@ -1,42 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: UTF8 -*-
 
-import os
-import socket
 #############################################################################
 # Author: Guillaume Bouvier -- guillaume.bouvier@pasteur.fr                 #
 # https://research.pasteur.fr/en/member/guillaume-bouvier/                  #
 # Copyright (c) 2023 Institut Pasteur                                       #
-#                               				                            #
-#                                                                           #
-#  Redistribution and use in source and binary forms, with or without       #
-#  modification, are permitted provided that the following conditions       #
-#  are met:                                                                 #
-#                                                                           #
-#  1. Redistributions of source code must retain the above copyright        #
-#  notice, this list of conditions and the following disclaimer.            #
-#  2. Redistributions in binary form must reproduce the above copyright     #
-#  notice, this list of conditions and the following disclaimer in the      #
-#  documentation and/or other materials provided with the distribution.     #
-#  3. Neither the name of the copyright holder nor the names of its         #
-#  contributors may be used to endorse or promote products derived from     #
-#  this software without specific prior written permission.                 #
-#                                                                           #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS      #
-#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT        #
-#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR    #
-#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT     #
-#  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,   #
-#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT         #
-#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,    #
-#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY    #
-#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT      #
-#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE    #
-#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.     #
-#                                                                           #
-#  This program is free software: you can redistribute it and/or modify     #
-#                                                                           #
 #############################################################################
+
+import os
+import socket
 import sys
 
 import matplotlib.patheffects as pe
@@ -170,9 +142,11 @@ def plot(
     xmax = _broadcast_(xmax, ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
-            _setup_subplot_(
-                subplots, dataset, title=title, xlabels=xlabels, ylabels=ylabels
-            )
+            _setup_subplot_(subplots,
+                            dataset,
+                            title=title,
+                            xlabels=xlabels,
+                            ylabels=ylabels)
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data[f"x{0}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
@@ -196,7 +170,82 @@ def plot(
     print("######################")
 
 
-def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
+def apply_repulsion(
+    repulsion,
+    x,
+    ndims=2,
+    niter=10000,
+    device="cpu",
+    min_delta=1e-6,
+    return_np=True,
+    verbose=True,
+):
+    import torch
+
+    class Mover(torch.nn.Module):
+
+        def __init__(self, npts, ndims=2):
+            super().__init__()
+            self.delta = torch.nn.Parameter(torch.randn(size=(npts, ndims)))
+
+        def forward(self, x):
+            return x + self.delta
+
+    def lossfunc(x, repulsion):
+        xmat = torch.cdist(x, x)
+        repulsive_mask = xmat < repulsion
+        loss_rep = torch.mean((xmat[repulsive_mask] - repulsion)**2)
+        return loss_rep
+
+    npts = x.shape[0]
+    mover = Mover(npts=npts, ndims=ndims).to(device)
+    optimizer = torch.optim.Adam(mover.parameters(), amsgrad=False, lr=0.01)
+    y = x
+    loss = torch.inf
+    loss_prev = torch.inf
+    for i in range(niter):
+        optimizer.zero_grad()
+        y = mover(x)
+        loss = lossfunc(y, repulsion=repulsion)
+        loss.backward()
+        optimizer.step()
+        progress = (i + 1) / niter
+        delta_loss = torch.abs(loss - loss_prev)
+        loss_prev = loss
+        if verbose:
+            print(f"{i=}")
+            print(f"{progress=:.2%}")
+            print(f"{loss=:.5g}")
+            print(f"{delta_loss=:.5g}")
+            print("--")
+        if delta_loss <= min_delta:
+            break
+    if return_np:
+        return y.detach().cpu().numpy(), loss
+    else:
+        return y.detach(), loss
+
+
+def add_repulsion(x, y, repulsion):
+    import scipy.spatial.distance as scidist
+    import torch
+
+    coords = np.c_[x, y]
+    coords = torch.from_numpy(coords)
+    min_delta = 1e-6
+    coords, loss = apply_repulsion(x=coords,
+                                   repulsion=repulsion,
+                                   min_delta=min_delta,
+                                   niter=100)
+    return coords[:, 0], coords[:, 1]
+
+
+def scatter(data,
+            ndataset,
+            size=20,
+            labels=None,
+            fontsize="medium",
+            repulsion=0.):
     """
     Scatter plot
     """
@@ -209,6 +258,8 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
         print(f"{x.shape=}")
         y = tofloat(y)
         print(f"{y.shape=}")
+        if repulsion > 0:
+            x, y = add_repulsion(x, y, repulsion=repulsion)
         if f"z{dataset}" in data:
             z = data[f"z{dataset}"]
             z = tofloat(z)
@@ -220,7 +271,12 @@ def scatter(data, ndataset, size=20, labels=None, fontsize="medium"):
             plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
-            scatter_markers(x=x, y=y, z=z, markers=markers, size=size, labels=labels)
+            scatter_markers(x=x,
+                            y=y,
+                            z=z,
+                            markers=markers,
+                            size=size,
+                            labels=labels)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -256,15 +312,26 @@ def plot_texts(data, dataset, fontsize):
         y = tofloat(y)
         for xval, yval, t in zip(x, y, texts):
             if t != "-":
-                plttext = plt.text(x=xval, y=yval, s=t, fontsize=fontsize, zorder=101)
+                plttext = plt.text(x=xval,
+                                   y=yval,
+                                   s=t,
+                                   fontsize=fontsize,
+                                   zorder=101)
                 # Add white line around text
-                plttext.set_path_effects([pe.withStroke(linewidth=2, foreground="w")])
+                plttext.set_path_effects(
+                    [pe.withStroke(linewidth=2, foreground="w")])
 
 
 KNOWN_LABELS = set()
 
 
-def scatter_markers(x, y, z=None, markers=None, size=None, color=None, labels=None):
+def scatter_markers(x,
+                    y,
+                    z=None,
+                    markers=None,
+                    size=None,
+                    color=None,
+                    labels=None):
     markers_unique = np.unique(markers)
     size_ori = size
     for i, marker in enumerate(markers_unique):
@@ -349,7 +416,11 @@ def plot_extremas(extremas, dataset, ydata, pltobj):
             linewidth=1.0,
             label=f"{extrema}={v:.2g}",
         )
-        plt.axvline(x=xv, color=color, linestyle="dotted", linewidth=1.0, label=xv)
+        plt.axvline(x=xv,
+                    color=color,
+                    linestyle="dotted",
+                    linewidth=1.0,
+                    label=xv)
 
 
 def moving_average(
@@ -378,9 +449,11 @@ def moving_average(
     xmax = _broadcast_(xmax, ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
-            _setup_subplot_(
-                subplots, dataset, title=title, xlabels=xlabels, ylabels=ylabels
-            )
+            _setup_subplot_(subplots,
+                            dataset,
+                            title=title,
+                            xlabels=xlabels,
+                            ylabels=ylabels)
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -420,7 +493,8 @@ def get_ellipse(center, width, height, angle):
     angle = np.deg2rad(angle)
     t = np.linspace(0, 2 * np.pi, 100)
     Ell = np.array([width * np.cos(t), height * np.sin(t)])
-    R_rot = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    R_rot = np.array([[np.cos(angle), -np.sin(angle)],
+                      [np.sin(angle), np.cos(angle)]])
     Ell_rot = np.zeros((2, Ell.shape[1]))
     for i in range(Ell.shape[1]):
         Ell_rot[:, i] = np.dot(R_rot, Ell[:, i])
@@ -434,10 +508,10 @@ def ellipsoid_intersection_test(Sigma_A, Sigma_B, mu_A, mu_B, tau=1.0):
     Adapted from: https://math.stackexchange.com/a/3678498/192193
     """
     lambdas, Phi = eigh(Sigma_A, b=Sigma_B)
-    v_squared = np.dot(Phi.T, mu_A - mu_B) ** 2
-    res = minimize_scalar(
-        K_function, bracket=[0.0, 0.5, 1.0], args=(lambdas, v_squared, tau)
-    )
+    v_squared = np.dot(Phi.T, mu_A - mu_B)**2
+    res = minimize_scalar(K_function,
+                          bracket=[0.0, 0.5, 1.0],
+                          args=(lambdas, v_squared, tau))
     # print(f"{res.fun=}")
     return res.fun >= 0
 
@@ -454,9 +528,9 @@ def batch_ellipsoid_intersection_test(Sigma_A, Sigma_B_list, mu_A, mu_B_list):
 
 
 def K_function(s, lambdas, v_squared, tau):
-    return 1.0 - (1.0 / tau**2) * np.sum(
-        v_squared * ((s * (1.0 - s)) / (1.0 + s * (lambdas - 1.0)))
-    )
+    return 1.0 - (1.0 / tau**2) * np.sum(v_squared * ((s * (1.0 - s)) /
+                                                      (1.0 + s *
+                                                       (lambdas - 1.0))))
 
 
 def get_ellipse_sigma_mat(u1u2, sigma1, sigma2):
@@ -494,7 +568,12 @@ def order_z_per_variance(data, ndataset):
     return zorders
 
 
-def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0, labels=None):
+def plot_pca(data,
+             ndataset,
+             plot_overlap=True,
+             scale=1.0,
+             size=20.0,
+             labels=None):
     """
     Compute the pca for each dataset
     scale: scale of the ellipses
@@ -557,9 +636,12 @@ def plot_pca(data, ndataset, plot_overlap=True, scale=1.0, size=20.0, labels=Non
             print(f"{intersect=}")
             if not plot_overlap:
                 if intersect:
-                    plt.scatter(
-                        x[sel], y[sel], color="gray", alpha=0.125, zorder=-1, s=size
-                    )
+                    plt.scatter(x[sel],
+                                y[sel],
+                                color="gray",
+                                alpha=0.125,
+                                zorder=-1,
+                                s=size)
                     continue
             if z is None:
                 color = None
@@ -608,7 +690,8 @@ def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
         ellipse[0],
         ellipse[1],
         color=color,
-        path_effects=[pe.Stroke(linewidth=5, foreground="w"), pe.Normal()],
+        path_effects=[pe.Stroke(linewidth=5, foreground="w"),
+                      pe.Normal()],
     )
     # see: https://stackoverflow.com/a/35762000/1679629
     # Print axis (bug? FIXME)
@@ -641,13 +724,14 @@ def pca(X, outfilename=None):
     eigenvectors[:, 1] *= np.sign(dotprod2)
     anglesign = np.sign(eigenvectors[:, 0].dot(np.asarray([0, 1])))
     anglex = anglesign * np.rad2deg(
-        np.arccos(eigenvectors[:, 0].dot(np.asarray([1, 0])))
-    )
+        np.arccos(eigenvectors[:, 0].dot(np.asarray([1, 0]))))
     print(f"{anglex=:.4g}")
     # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
     # print(f"{angley=:.4g}")
     if outfilename is not None:
-        np.savez(outfilename, eigenvalues=eigenvalues, eigenvectors=eigenvectors)
+        np.savez(outfilename,
+                 eigenvalues=eigenvalues,
+                 eigenvectors=eigenvectors)
     return eigenvalues, eigenvectors, center, anglex
 
 
@@ -723,6 +807,13 @@ if __name__ == "__main__":
         help="Scatter plot of the (x,y) data",
     )
     parser.add_argument(
+        "--repulsion",
+        help="Add a repulsion parameter between points in scatter plot to \
+        avoid overlap. Repulsion is a distance between points. \
+        Warnings: dependencies to pytorch",
+        default=0.0,
+        type=float)
+    parser.add_argument(
         "-s",
         "--size",
         default=20.0,
@@ -747,11 +838,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--cmap",
-        help="colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
+        help=
+        "colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
     )
-    parser.add_argument(
-        "-d", "--delimiter", help="Delimiter to use to read the data", default=None
-    )
+    parser.add_argument("-d",
+                        "--delimiter",
+                        help="Delimiter to use to read the data",
+                        default=None)
     parser.add_argument(
         "--moving_average",
         type=int,
@@ -759,17 +852,20 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--pca",
-        help="Compute and plot the Principal Component Analysis for each dataset and/or each z",
+        help=
+        "Compute and plot the Principal Component Analysis for each dataset and/or each z",
         action="store_true",
     )
     parser.add_argument(
         "--no_overlap",
-        help="Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
+        help=
+        "Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
         action="store_true",
     )
     parser.add_argument(
         "--scale",
-        help="scale for the ellipses in the pca plot (--pca) and the --no_overlap plot",
+        help=
+        "scale for the ellipses in the pca plot (--pca) and the --no_overlap plot",
         type=float,
         default=1.0,
     )
@@ -779,25 +875,28 @@ if __name__ == "__main__":
         nargs=2,
         type=int,
     )
-    parser.add_argument(
-        "--orthonormal", help="Set an orthonormal basis", action="store_true"
-    )
+    parser.add_argument("--orthonormal",
+                        help="Set an orthonormal basis",
+                        action="store_true")
     parser.add_argument("--title", help="Title of the plot", type=str)
     parser.add_argument(
         "--labels",
         nargs="+",
-        help="List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
+        help=
+        "List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
     )
     parser.add_argument(
         "--extrema",
-        help="List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
+        help=
+        "List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
         nargs="+",
         choices=["min", "max"],
     )
     parser.add_argument(
         "--subplots",
         nargs="+",
-        help="Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
+        help=
+        "Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
         type=int,
     )
     parser.add_argument(
@@ -819,32 +918,39 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
-    parser.add_argument("--alpha", type=float, default=1.0, help="Transparency")
+    parser.add_argument("--alpha",
+                        type=float,
+                        default=1.0,
+                        help="Transparency")
     parser.add_argument(
         "--ymin",
         type=float,
-        help="Lower limit for y-axis. If subplots are on, give one value per subplot",
+        help=
+        "Lower limit for y-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--ymax",
         type=float,
-        help="Upper limit for y-axis. If subplots are on, give one value per subplot",
+        help=
+        "Upper limit for y-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmin",
         type=float,
-        help="Lower limit for x-axis. If subplots are on, give one value per subplot",
+        help=
+        "Lower limit for x-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmax",
         type=float,
-        help="Upper limit for x-axis. If subplots are on, give one value per subplot",
+        help=
+        "Upper limit for x-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
@@ -852,13 +958,17 @@ if __name__ == "__main__":
         "--fontsize",
         default="medium",
         type=str,
-        help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
+        help=
+        "The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
     )
-    parser.add_argument("--colorbar", help="Display the colorbar", action="store_true")
+    parser.add_argument("--colorbar",
+                        help="Display the colorbar",
+                        action="store_true")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
-        help="Read plot data from the given png saved image using the --save option",
+        help=
+        "Read plot data from the given png saved image using the --save option",
     )
     args = parser.parse_args()
 
@@ -875,7 +985,7 @@ if __name__ == "__main__":
     if "y" in args.semilog:
         plt.yscale("log")
     if (
-        not sys.stdin.isatty()
+            not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
         if args.cmap is not None:
             print(f"{args.cmap=}")
@@ -886,13 +996,12 @@ if __name__ == "__main__":
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if args.scatter:
-            scatter(
-                DATA,
-                NDATASET,
-                size=args.size,
-                labels=args.labels,
-                fontsize=args.fontsize,
-            )
+            scatter(DATA,
+                    NDATASET,
+                    size=args.size,
+                    labels=args.labels,
+                    fontsize=args.fontsize,
+                    repulsion=args.repulsion)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
@@ -911,9 +1020,11 @@ if __name__ == "__main__":
                 title=args.title,
             )
         elif args.pca:
-            plot_pca(
-                DATA, NDATASET, plot_overlap=True, scale=args.scale, size=args.size
-            )
+            plot_pca(DATA,
+                     NDATASET,
+                     plot_overlap=True,
+                     scale=args.scale,
+                     size=args.size)
         elif args.no_overlap:
             plot_pca(
                 DATA,
@@ -924,9 +1035,11 @@ if __name__ == "__main__":
                 labels=args.labels,
             )
         elif args.histogram:
-            histogram(
-                DATA, NDATASET, labels=args.labels, alpha=args.alpha, bins=args.bins
-            )
+            histogram(DATA,
+                      NDATASET,
+                      labels=args.labels,
+                      alpha=args.alpha,
+                      bins=args.bins)
         else:
             plot(
                 DATA,
@@ -948,9 +1061,11 @@ if __name__ == "__main__":
             plt.xlabel(args.xlabel[-1])
         if args.ylabel is not None:
             plt.ylabel(args.ylabel[-1])
-        if (args.ymin is not None or args.ymax is not None) and args.subplots is None:
+        if (args.ymin is not None
+                or args.ymax is not None) and args.subplots is None:
             set_y_lim(args.ymin[0], args.ymax[0])
-        if (args.xmin is not None or args.xmax is not None) and args.subplots is None:
+        if (args.xmin is not None
+                or args.xmax is not None) and args.subplots is None:
             set_x_lim(args.xmin[0], args.xmax[0])
         if args.colorbar:
             plt.colorbar()
