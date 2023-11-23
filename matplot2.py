@@ -260,6 +260,8 @@ def scatter(data,
         print(f"{y.shape=}")
         if repulsion > 0:
             x, y = add_repulsion(x, y, repulsion=repulsion)
+            data[f"x{dataset}"] = x
+            data[f"y{dataset}"] = y
         if f"z{dataset}" in data:
             z = data[f"z{dataset}"]
             z = tofloat(z)
@@ -838,8 +840,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--cmap",
-        help=
-        "colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
+        help="colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
     )
     parser.add_argument("-d",
                         "--delimiter",
@@ -852,20 +853,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--pca",
-        help=
-        "Compute and plot the Principal Component Analysis for each dataset and/or each z",
+        help="Compute and plot the Principal Component Analysis for each dataset and/or each z",
         action="store_true",
     )
     parser.add_argument(
         "--no_overlap",
-        help=
-        "Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
+        help="Compute and plot the Principal Component Analysis for each dataset and/or each z and do not plot overlapping data (from z or datasets)",
         action="store_true",
     )
     parser.add_argument(
         "--scale",
-        help=
-        "scale for the ellipses in the pca plot (--pca) and the --no_overlap plot",
+        help="scale for the ellipses in the pca plot (--pca) and the --no_overlap plot",
         type=float,
         default=1.0,
     )
@@ -882,21 +880,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--labels",
         nargs="+",
-        help=
-        "List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
+        help="List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
     )
     parser.add_argument(
         "--extrema",
-        help=
-        "List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
+        help="List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
         nargs="+",
         choices=["min", "max"],
     )
     parser.add_argument(
         "--subplots",
         nargs="+",
-        help=
-        "Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
+        help="Print each dataset in a different subplot. Give the number of rows and columns for subplot layout.",
         type=int,
     )
     parser.add_argument(
@@ -925,32 +920,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ymin",
         type=float,
-        help=
-        "Lower limit for y-axis. If subplots are on, give one value per subplot",
+        help="Lower limit for y-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--ymax",
         type=float,
-        help=
-        "Upper limit for y-axis. If subplots are on, give one value per subplot",
+        help="Upper limit for y-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmin",
         type=float,
-        help=
-        "Lower limit for x-axis. If subplots are on, give one value per subplot",
+        help="Lower limit for x-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmax",
         type=float,
-        help=
-        "Upper limit for x-axis. If subplots are on, give one value per subplot",
+        help="Upper limit for x-axis. If subplots are on, give one value per subplot",
         nargs="+",
         default=[None],
     )
@@ -958,8 +949,7 @@ if __name__ == "__main__":
         "--fontsize",
         default="medium",
         type=str,
-        help=
-        "The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
+        help="The font size for the legend and the text plot. If the value is numeric the size will be the absolute font size in points. String values are relative to the current default font size. int or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}. Default: 'medium'",
     )
     parser.add_argument("--colorbar",
                         help="Display the colorbar",
@@ -967,8 +957,7 @@ if __name__ == "__main__":
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
-        help=
-        "Read plot data from the given png saved image using the --save option",
+        help="Read plot data from the given png saved image using the --save option",
     )
     args = parser.parse_args()
 
