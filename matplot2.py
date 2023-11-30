@@ -121,6 +121,7 @@ def plot(
     labels=None,
     extremas=None,
     subplots=None,
+    subplots_assignment=None,
     xlabels=None,
     ylabels=None,
     semilog=None,
@@ -140,10 +141,12 @@ def plot(
     ymax = _broadcast_(ymax, ndataset)
     xmin = _broadcast_(xmin, ndataset)
     xmax = _broadcast_(xmax, ndataset)
+    if subplots_assignment is None:
+        subplots_assignment = range(ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
             _setup_subplot_(subplots,
-                            dataset,
+                            subplots_assignment[dataset],
                             title=title,
                             xlabels=xlabels,
                             ylabels=ylabels)
@@ -432,6 +435,7 @@ def moving_average(
     labels,
     extremas,
     subplots=None,
+    subplots_assignment=None,
     xlabels=None,
     ylabels=None,
     semilog=None,
@@ -449,10 +453,12 @@ def moving_average(
     ymax = _broadcast_(ymax, ndataset)
     xmin = _broadcast_(xmin, ndataset)
     xmax = _broadcast_(xmax, ndataset)
+    if subplots_assignment is None:
+        subplots_assignment = range(ndataset)
     for dataset in range(ndataset):
         if subplots is not None:
             _setup_subplot_(subplots,
-                            dataset,
+                            subplots_assignment[dataset],
                             title=title,
                             xlabels=xlabels,
                             ylabels=ylabels)
@@ -895,6 +901,12 @@ if __name__ == "__main__":
         type=int,
     )
     parser.add_argument(
+        "-sp",
+        "--sp_assignment",
+        nargs="+",
+        help="Assign each dataset to a specific subplot. By default, 1 dataset per subplot.",
+        type=int)
+    parser.add_argument(
         "--semilog",
         help="Log scale for the given axis (x and/or y)",
         nargs="+",
@@ -999,6 +1011,7 @@ if __name__ == "__main__":
                 labels=args.labels,
                 extremas=args.extrema,
                 subplots=args.subplots,
+                subplots_assignment=args.sp_assignment,
                 xlabels=args.xlabel,
                 ylabels=args.ylabel,
                 semilog=args.semilog,
@@ -1036,6 +1049,7 @@ if __name__ == "__main__":
                 labels=args.labels,
                 extremas=args.extrema,
                 subplots=args.subplots,
+                subplots_assignment=args.sp_assignment,
                 xlabels=args.xlabel,
                 ylabels=args.ylabel,
                 semilog=args.semilog,
