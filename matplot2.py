@@ -353,11 +353,11 @@ def scatter_markers(x,
         if marker != "o":
             zorder = 100
             edgecolors = "w"
-            size = 100
+            # size = 100
         else:
             zorder = None
             edgecolors = None
-            size = size_ori
+            # size = size_ori
         if labels is not None:
             label = labels[i]
         else:
@@ -369,7 +369,7 @@ def scatter_markers(x,
             x[sel],
             y[sel],
             c=c,
-            s=size,
+            s=size[sel],
             marker=marker,
             color=color,
             zorder=zorder,
@@ -996,6 +996,8 @@ if __name__ == "__main__":
             plt.title(args.title)
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
+        if "s0" in DATA:
+            args.size = np.float_(DATA["s0"])
         if args.scatter:
             scatter(DATA,
                     NDATASET,
