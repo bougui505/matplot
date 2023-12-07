@@ -110,8 +110,16 @@ def read_metadata(filename):
 
 
 def tofloat(arr):
-    out = arr.copy()
-    out = np.asarray([float(e) for e in out if e != ""])
+    # out = arr.copy()
+    # out = np.asarray([float(e) for e in out if e != ""])
+    out = []
+    for e in arr:
+        try:
+            v = float(e)
+        except ValueError:
+            v = np.nan
+        out.append(v)
+    out = np.asarray(out)
     return out
 
 
@@ -406,11 +414,11 @@ def plot_extremas(extremas, dataset, ydata, pltobj):
         ), f"Number of extrema keyword given to option --extrema ({len(args.extrema)}) does not match the number of dataset for current dataset ({dataset+1})"
     extrema = extremas[dataset] if extremas is not None else None
     if extrema == "min":
-        v = ydata.min()
-        xv = ydata.argmin()
+        v = np.nanmin(ydata)
+        xv = np.nanargmin(ydata)
     else:
-        v = ydata.max()
-        xv = ydata.argmax()
+        v = np.nanmax(ydata)
+        xv = np.nanargmax(ydata)
     if extrema is not None:
         # color of the last plot
         color = pltobj[0].get_color()
