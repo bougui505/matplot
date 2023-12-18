@@ -373,11 +373,15 @@ def scatter_markers(x,
         if label in KNOWN_LABELS:
             label = None
         KNOWN_LABELS.add(label)
+        try:
+            s = size[sel]
+        except TypeError:
+            s = size
         out = plt.scatter(
             x[sel],
             y[sel],
             c=c,
-            s=size[sel],
+            s=s,
             marker=marker,
             color=color,
             zorder=zorder,
