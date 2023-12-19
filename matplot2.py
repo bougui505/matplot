@@ -251,6 +251,38 @@ def add_repulsion(x, y, repulsion):
     return coords[:, 0], coords[:, 1]
 
 
+def graph(data, ndataset, size=20, labels=None):
+    print("######## GRAPH ########")
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        x = data[f"x{dataset}"]
+        y = data[f"y{dataset}"]
+        x = tofloat(x)
+        print(f"{x.shape=}")
+        y = tofloat(y)
+        print(f"{y.shape=}")
+        if f"z{dataset}" in data:
+            z = data[f"z{dataset}"]
+            z = tofloat(z)
+            print(f"{z.shape=}")
+        else:
+            z = None
+        if f"m{dataset}" not in data:
+            plt.scatter(x, y, c=z, s=size)
+        else:
+            markers = data[f"m{dataset}"]
+            scatter_markers(x=x,
+                            y=y,
+                            z=z,
+                            markers=markers,
+                            size=size,
+                            labels=labels)
+    edge_labels = np.unique(data[f"ed{dataset}"])
+    for edge_label in edge_labels:
+        sel = (data[f"ed{dataset}"] == edge_label)
+        plt.plot(x[sel], y[sel])
+    print("#######################")
+
 def scatter(data,
             ndataset,
             size=20,
@@ -816,9 +848,10 @@ if __name__ == "__main__":
         For the 'm' field 2 characters could be given. The first one is the color, the second the marker. E.g. 'r*' to plot a red star marker\
         If a 's' field is given, use it as a list of sizes for the markers.\
         If a 'c' field is given, use it as a list of colors (text color: r, g, b, y, ...) for the markers.\
+        If a 'ed' field is given this is the edge label for the graph see --graph option \
         If --fields='*' is given all the columns are considered as y values.",
         default=["y"],
-        choices=["x", "y", "z", "e", "l", "w", "t", "m", "s", "c", "*"],
+        choices=["x", "y", "z", "e", "l", "w", "t", "m", "s", "c", "ed", "*"],
         nargs="+",
     )
     parser.add_argument(
@@ -942,6 +975,9 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
+    parser.add_argument("--graph",
+                        help="Plot a graph. The input data are x y e where e is the edge index. Points with the same edge index are linked by a line",
+                        action="store_true")
     parser.add_argument("--alpha",
                         type=float,
                         default=1.0,
@@ -1062,6 +1098,12 @@ if __name__ == "__main__":
                       alpha=args.alpha,
                       bins=args.bins,
                       normed=args.normed)
+        elif args.graph:
+            graph(DATA,
+                  NDATASET,
+                  size=args.size,
+                  labels=args.labels,
+                  )
         else:
             plot(
                 DATA,

@@ -113,3 +113,9 @@ test_plot2_text () {
 1 3 1 r* 1
 EOF
 }
+
+test_plot2_graph () {
+    paste =(seq 10|shuf) =(seq 10|shuf) =(seq 10 | awk '{if ($1<5){print 0}else{print 1}}')\
+        | awk '{print $1,$2,$3,$3}' \
+        | plot2 --graph --fields x y z ed
+}
