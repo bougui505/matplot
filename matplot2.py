@@ -295,7 +295,7 @@ def scatter(data,
     print("#########################")
 
 
-def histogram(data, ndataset, labels=None, alpha=1.0, bins=None):
+def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False):
     print("######## histogram ########")
     if bins is None:
         bins = "auto"
@@ -310,7 +310,7 @@ def histogram(data, ndataset, labels=None, alpha=1.0, bins=None):
             label = labels[dataset]
         else:
             label = None
-        plt.hist(y, label=label, alpha=alpha, bins=bins)
+        plt.hist(y, label=label, alpha=alpha, bins=bins, density=normed)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -932,6 +932,11 @@ if __name__ == "__main__":
         help="Compute and plot histogram from data",
     )
     parser.add_argument(
+        "--normed",
+        help="If True, the first element of the return tuple will be the counts normalized to form a probability density",
+        action="store_true"
+    )
+    parser.add_argument(
         "-b",
         "--bins",
         type=int,
@@ -1055,7 +1060,8 @@ if __name__ == "__main__":
                       NDATASET,
                       labels=args.labels,
                       alpha=args.alpha,
-                      bins=args.bins)
+                      bins=args.bins,
+                      normed=args.normed)
         else:
             plot(
                 DATA,
