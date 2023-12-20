@@ -281,7 +281,7 @@ def graph(data, ndataset, size=20, labels=None, fontsize="medium"):
         edge_labels = np.unique(data[f"ed{dataset}"])
         for edge_label in edge_labels:
             sel = (data[f"ed{dataset}"] == edge_label)
-            plt.plot(x[sel], y[sel], 'k-')
+            plt.plot(x[sel], y[sel], 'k-', zorder=-100)
     print("#######################")
 
 def scatter(data,
