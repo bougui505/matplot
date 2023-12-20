@@ -251,7 +251,7 @@ def add_repulsion(x, y, repulsion):
     return coords[:, 0], coords[:, 1]
 
 
-def graph(data, ndataset, size=20, labels=None):
+def graph(data, ndataset, size=20, labels=None, fontsize="medium"):
     print("######## GRAPH ########")
     for dataset in range(ndataset):
         print(f"{dataset=}")
@@ -277,10 +277,11 @@ def graph(data, ndataset, size=20, labels=None):
                             markers=markers,
                             size=size,
                             labels=labels)
-    edge_labels = np.unique(data[f"ed{dataset}"])
-    for edge_label in edge_labels:
-        sel = (data[f"ed{dataset}"] == edge_label)
-        plt.plot(x[sel], y[sel], 'k-')
+        plot_texts(data, dataset, fontsize=fontsize)
+        edge_labels = np.unique(data[f"ed{dataset}"])
+        for edge_label in edge_labels:
+            sel = (data[f"ed{dataset}"] == edge_label)
+            plt.plot(x[sel], y[sel], 'k-')
     print("#######################")
 
 def scatter(data,
@@ -1103,6 +1104,7 @@ if __name__ == "__main__":
                   NDATASET,
                   size=args.size,
                   labels=args.labels,
+                  fontsize=args.fontsize
                   )
         else:
             plot(
