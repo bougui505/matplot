@@ -392,7 +392,7 @@ def scatter_markers(x,
             c = None
         if marker != "o":
             zorder = 100
-            edgecolors = "w"
+            # edgecolors = "w"
             # size = 100
         else:
             zorder = None
