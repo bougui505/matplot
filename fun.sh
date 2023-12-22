@@ -119,3 +119,8 @@ test_plot2_graph () {
         | awk '{print $1,$2,$3,$3}' \
         | plot2 --graph --fields x y z ed
 }
+
+test_plot2_linear () {
+    seq 100 | awk '{print $1/10+2*rand(),$1/10+2*rand()}' \
+        | plot2 --fields x y --scatter --pcr
+}

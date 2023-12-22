@@ -14,6 +14,7 @@ import sys
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.offsetbox import AnchoredText
 from numpy import linalg
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -289,7 +290,8 @@ def scatter(data,
             size=20,
             labels=None,
             fontsize="medium",
-            repulsion=0.):
+            repulsion=0.,
+            dopcr=False):
     """
     Scatter plot
     """
@@ -323,9 +325,43 @@ def scatter(data,
                             markers=markers,
                             size=size,
                             labels=labels)
+        if dopcr:
+            pcr(x, y)
     if labels is not None:
         plt.legend()
     print("#########################")
+
+def pcr(x, y):
+    """
+    Principal Component Regression
+    See: https://en.wikipedia.org/wiki/Principal_component_regression
+    """
+    print("######## PCR ########")
+    X = np.stack([x, y]).T
+    eigenvalues, eigenvectors, center, anglex = pca(X)
+    a = eigenvectors[1, 0] / eigenvectors[0, 0]
+    print(f"{a=}")
+    b = center[1] - a * center[0]
+    print(f"{b=}")
+    xm = x.min()
+    ym = a*xm+b
+    xM = x.max()
+    yM = a*xM+b
+    plt.plot([xm, xM], [ym, yM])
+    v2_x = [center[0], center[0]+eigenvectors[0, 1]*np.sqrt(eigenvalues[1])]
+    v2_y = [center[1], center[1]+eigenvectors[1, 1]*np.sqrt(eigenvalues[1])]
+    plt.plot(v2_x, v2_y)
+    explained_variance = eigenvalues[0]/eigenvalues.sum()
+    print(f"{explained_variance=}")
+    pearson = np.sum((x-x.mean())*(y-y.mean())) / (np.sqrt(np.sum((x-x.mean())**2)) * np.sqrt(np.sum((y-y.mean())**2)))
+    print(f"{pearson=}")
+    R_squared = 1 - np.sum((y-a*x+b)**2) / np.sum((y-y.mean())**2)
+    print(f"{R_squared=}")
+    annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
+    bbox = dict(boxstyle ="round", fc ="0.8")
+    plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
+    print("#####################")
+
 
 
 def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False):
@@ -860,6 +896,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Scatter plot of the (x,y) data",
     )
+    parser.add_argument("--pcr", help="Principal Component Regression. Linear regression using PCA", action="store_true")
     parser.add_argument(
         "--repulsion",
         help="Add a repulsion parameter between points in scatter plot to \
@@ -1058,7 +1095,8 @@ if __name__ == "__main__":
                     size=args.size,
                     labels=args.labels,
                     fontsize=args.fontsize,
-                    repulsion=args.repulsion)
+                    repulsion=args.repulsion,
+                    dopcr=args.pcr)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
