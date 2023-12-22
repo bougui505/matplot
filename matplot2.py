@@ -347,10 +347,10 @@ def pcr(x, y):
     ym = a*xm+b
     xM = x.max()
     yM = a*xM+b
-    plt.plot([xm, xM], [ym, yM])
+    plt.plot([xm, xM], [ym, yM], zorder=100, color="red")
     v2_x = [center[0], center[0]+eigenvectors[0, 1]*np.sqrt(eigenvalues[1])]
     v2_y = [center[1], center[1]+eigenvectors[1, 1]*np.sqrt(eigenvalues[1])]
-    plt.plot(v2_x, v2_y)
+    # plt.plot(v2_x, v2_y)
     explained_variance = eigenvalues[0]/eigenvalues.sum()
     print(f"{explained_variance=}")
     pearson = np.sum((x-x.mean())*(y-y.mean())) / (np.sqrt(np.sum((x-x.mean())**2)) * np.sqrt(np.sum((y-y.mean())**2)))
