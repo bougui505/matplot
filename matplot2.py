@@ -1062,8 +1062,16 @@ if __name__ == "__main__":
         "--read_data",
         help="Read plot data from the given png saved image using the --save option",
     )
+    parser.add_argument("--vlines", help="Plot vertical lines at the given positions", nargs="+", type=int)
+    parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=int)
     args = parser.parse_args()
 
+    if args.vlines is not None:
+        for xv in args.vlines:
+            plt.axvline(x=xv, zorder=10, color='k')
+    if args.hlines is not None:
+        for yv in args.hlines:
+            plt.axhline(y=yv, zorder=10, color='k')
     if args.read_data is not None:
         DATASTR = read_metadata(args.read_data)
         print(DATASTR)
