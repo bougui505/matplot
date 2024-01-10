@@ -291,7 +291,8 @@ def scatter(data,
             labels=None,
             fontsize="medium",
             repulsion=0.,
-            dopcr=False):
+            dopcr=False,
+            alpha=1.):
     """
     Scatter plot
     """
@@ -316,7 +317,7 @@ def scatter(data,
             z = None
         plot_texts(data, dataset, fontsize=fontsize)
         if f"m{dataset}" not in data:
-            plt.scatter(x, y, c=z, s=size)
+            plt.scatter(x, y, c=z, s=size, alpha=alpha)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -1104,7 +1105,8 @@ if __name__ == "__main__":
                     labels=args.labels,
                     fontsize=args.fontsize,
                     repulsion=args.repulsion,
-                    dopcr=args.pcr)
+                    dopcr=args.pcr,
+                    alpha=args.alpha)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
