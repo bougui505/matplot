@@ -455,7 +455,7 @@ def scatter_markers(x,
             marker=marker,
             color=color,
             zorder=zorder,
-            edgecolors=edgecolors,
+            edgecolors="w",
             label=label,
         )
     return out
