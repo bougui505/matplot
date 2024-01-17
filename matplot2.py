@@ -168,7 +168,7 @@ def plot(
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
         pltobj = plt.plot(x, y, label=label)
-        plot_extremas(extremas, dataset, y, pltobj)
+        plot_extremas(extremas, dataset, y, pltobj, xdata=x)
         if labels is not None:
             plt.legend()
         if subplots is not None:
@@ -481,7 +481,9 @@ def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
         plt.ylabel(ylabels[dataset])
 
 
-def plot_extremas(extremas, dataset, ydata, pltobj):
+def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None):
+    if xdata is None:
+        xdata = np.arange(len(ydata))
     if extremas is not None:
         assert dataset < len(
             extremas
@@ -489,10 +491,10 @@ def plot_extremas(extremas, dataset, ydata, pltobj):
     extrema = extremas[dataset] if extremas is not None else None
     if extrema == "min":
         v = np.nanmin(ydata)
-        xv = np.nanargmin(ydata)
+        xv = xdata[np.nanargmin(ydata)]
     else:
         v = np.nanmax(ydata)
-        xv = np.nanargmax(ydata)
+        xv = xdata[np.nanargmax(ydata)]
     if extrema is not None:
         # color of the last plot
         color = pltobj[0].get_color()
@@ -557,7 +559,7 @@ def moving_average(
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
         pltobj = plt.plot(x, ma, label=label)
-        plot_extremas(extremas, dataset, ma, pltobj)
+        plot_extremas(extremas, dataset, ma, pltobj, xdata=x)
         if labels is not None:
             plt.legend()
         if subplots is not None:
