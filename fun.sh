@@ -124,3 +124,23 @@ test_plot2_linear () {
     seq 100 | awk '{print $1/10+2*rand(),$1/10+2*rand()}' \
         | plot2 --fields x y --scatter --pcr
 }
+
+test_plot_sigma (){
+    # Testing plotting standard deviation
+    seq 100 \
+        | awk '{
+            n=100
+            s=0
+            s2=0
+            for (i=1;i<=n;i++){
+                x=rand()
+                s+=x
+                s2+=x**2
+            }
+            mu=s/n
+            mu2=s2/n
+            sigma=mu2-mu**2
+            print(mu,sigma)
+    }' \
+        | plot2 --fields y e
+}

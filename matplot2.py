@@ -181,6 +181,66 @@ def plot(
             set_y_lim(ymin[dataset], ymax[dataset])
     print("######################")
 
+def plot_std(
+    data,
+    ndataset,
+    labels=None,
+    extremas=None,
+    subplots=None,
+    subplots_assignment=None,
+    xlabels=None,
+    ylabels=None,
+    semilog=None,
+    ymin=None,
+    ymax=None,
+    xmin=None,
+    xmax=None,
+    title=None,
+):
+    """
+    Timeseries plot with standard deviation (sigma), aka error or standard error
+    """
+    print("######## plot_std ########")
+    if subplots is not None:
+        print(f"{subplots=}")
+    ymin = _broadcast_(ymin, ndataset)
+    ymax = _broadcast_(ymax, ndataset)
+    xmin = _broadcast_(xmin, ndataset)
+    xmax = _broadcast_(xmax, ndataset)
+    if subplots_assignment is None:
+        subplots_assignment = range(ndataset)
+    for dataset in range(ndataset):
+        if subplots is not None:
+            _setup_subplot_(subplots,
+                            subplots_assignment[dataset],
+                            title=title,
+                            xlabels=xlabels,
+                            ylabels=ylabels)
+        x = data[f"x{dataset}"] if f"x{dataset}" in data else data[f"x{0}"]
+        y = data[f"y{dataset}"]
+        e = data[f"e{dataset}"]
+        x = tofloat(x)
+        y = tofloat(y)
+        e = tofloat(e)
+        print(f"{x=}")
+        print(f"{y=}")
+        print(f"{e=}")
+        label = labels[dataset] if labels is not None else None
+        print(f"{label=}")
+        plt.fill_between(x, y1=y-e, y2=y+e, alpha=0.5)
+        pltobj = plt.plot(x, y, label=label)
+        plot_extremas(extremas, dataset, y, pltobj, xdata=x)
+        if labels is not None:
+            plt.legend()
+        if subplots is not None:
+            if semilog is not None:
+                if "x" in semilog:
+                    plt.xscale("log")
+                if "y" in semilog:
+                    plt.yscale("log")
+            set_x_lim(xmin[dataset], xmax[dataset])
+            set_y_lim(ymin[dataset], ymax[dataset])
+    print("######################")
 
 def apply_repulsion(
     repulsion,
@@ -1156,6 +1216,23 @@ if __name__ == "__main__":
                   labels=args.labels,
                   fontsize=args.fontsize
                   )
+        elif "e0" in DATA:
+            plot_std(
+                DATA,
+                NDATASET,
+                labels=args.labels,
+                extremas=args.extrema,
+                subplots=args.subplots,
+                subplots_assignment=args.sp_assignment,
+                xlabels=args.xlabel,
+                ylabels=args.ylabel,
+                semilog=args.semilog,
+                ymin=args.ymin,
+                ymax=args.ymax,
+                xmin=args.xmin,
+                xmax=args.xmax,
+                title=args.title,
+            )
         else:
             plot(
                 DATA,
