@@ -16,12 +16,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.offsetbox import AnchoredText
 from numpy import linalg
-from PIL import Image
+from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
 from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
 
 from sliding import Sliding_op
+
+# Reading data from a png with large number of points:
+# See: https://stackoverflow.com/a/61466412/1679629
+LARGE_ENOUGH_NUMBER = 100
+PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 
 def log(msg):
