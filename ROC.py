@@ -36,6 +36,7 @@
 #                                                                           #
 #############################################################################
 import os
+
 import numpy as np
 
 
@@ -84,12 +85,13 @@ def ROC(positives, negatives):
     all_labels = np.concatenate((positive_labels, negative_labels))
     all_labels = all_labels[sorter]
     x, y = [0.], [0.]
+    thresholds=[np.nan]
     auc = 0.
     # pROC: compute the pROC as explained in https://link.springer.com/article/10.1007/s10822-008-9181-z#Sec2
     pROC_auc = 0.
     TP = 0
     FP = 0
-    for label in all_labels:
+    for label, threshold in zip(all_labels, alldata[sorter]):
         if label:
             # positive
             TP += 1
@@ -106,24 +108,34 @@ def ROC(positives, negatives):
             FPR = 0.
         x.append(FPR)
         y.append(TPR)
+        thresholds.append(threshold)
         auc += (x[-1] - x[-2]) * y[-1]
         if x[-1] > 0 and x[-2] > 0:
             pROC_auc += -np.log10(x[-2] / x[-1]) * y[-1]
-    return x, y, auc, pROC_auc
+    return x, y, auc, pROC_auc, thresholds
 
 
-def print_roc(x, y, auc, pROC_auc):
-    print(f'#AUC: {auc:.2f}')
-    print(f'#pROC_AUC: {pROC_auc:.2f}')
-    print('#FPR #TPR')
-    for xval, yval in zip(x, y):
-        print(f'{xval:.2f} {yval:.2f}')
+def print_roc(x, y, thresholds, auc, pROC_auc):
+    # print(f'#AUC: {auc:.2f}')
+    # print(f'#pROC_AUC: {pROC_auc:.2f}')
+    # print('#FPR #TPR')
+    # for xval, yval in zip(x, y):
+    #     print(f'{xval:.2f} {yval:.2f}')
+    print(f"{auc=:.2f}")
+    print(f"{pROC_auc=:.2f}")
+    print('--')
+    for xval, yval, threshold in zip(x, y, thresholds):
+        print(f'fpr={xval:.2f}')
+        print(f'tpr={yval:.2f}')
+        print(f'threshold={threshold:.2g}')
+        print('--')
 
 
 if __name__ == '__main__':
-    import sys
-    import doctest
     import argparse
+    import doctest
+    import sys
+
     # ### UNCOMMENT FOR LOGGING ####
     # import os
     # import logging
@@ -170,5 +182,5 @@ if __name__ == '__main__':
     data = np.genfromtxt(sys.stdin, invalid_raise=False, delimiter=',')
     negatives = data[:, 0]
     positives = data[:, 1]
-    x, y, auc, pROC_auc = ROC(positives, negatives)
-    print_roc(x, y, auc, pROC_auc)
+    x, y, auc, pROC_auc, thresholds = ROC(positives, negatives)
+    print_roc(x, y, thresholds, auc, pROC_auc)
