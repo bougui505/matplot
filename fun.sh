@@ -125,7 +125,7 @@ test_plot2_linear () {
         | plot2 --fields x y --scatter --pcr
 }
 
-test_plot_sigma (){
+test_plot2_sigma (){
     # Testing plotting standard deviation
     seq 100 \
         | awk '{
@@ -143,4 +143,10 @@ test_plot_sigma (){
             print(mu,sigma)
     }' \
         | plot2 --fields y e
+}
+
+test_plot2_boxplot (){
+    paste -d"," =(seq 50) =(seq 100) =(seq 80) \
+        | plot2 -d"," --boxplot --fields y y y
+
 }

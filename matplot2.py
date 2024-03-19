@@ -451,6 +451,20 @@ def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False):
         plt.legend()
     print("#########################")
 
+def boxplot(data, ndataset):
+    print("######## boxplot ########")
+    plotdata = []
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        y = data[f"y{dataset}"]
+        y = tofloat(y)
+        y = y[~np.isinf(y)]
+        y = y[~np.isnan(y)]
+        print(f"{y.shape=}")
+        plotdata.append(y)
+    plt.boxplot(plotdata)
+    print("#########################")
+
 
 def plot_texts(data, dataset, fontsize):
     if f"t{dataset}" in data:
@@ -1109,6 +1123,7 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
+    parser.add_argument("--boxplot", help="Plot a box plot", action="store_true")
     parser.add_argument("--graph",
                         help="Plot a graph. The input data are x y e where e is the edge index. Points with the same edge index are linked by a line",
                         action="store_true")
@@ -1246,6 +1261,8 @@ if __name__ == "__main__":
                       alpha=args.alpha,
                       bins=args.bins,
                       normed=args.normed)
+        elif args.boxplot:
+            boxplot(DATA, NDATASET)
         elif args.graph:
             graph(DATA,
                   NDATASET,
