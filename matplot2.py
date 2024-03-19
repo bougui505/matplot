@@ -465,6 +465,25 @@ def boxplot(data, ndataset):
     plt.boxplot(plotdata)
     print("#########################")
 
+def boxplot_xy(data, ndataset, nbins):
+    """
+    Boxplot with digitization of x with the given number of bins
+    """
+    print("######## boxplot_xy ########")
+    x = tofloat(data["x0"])
+    y = tofloat(data["y0"])
+    bins = list(np.cumsum([(x.max() - x.min())/nbins]*(nbins)))
+    print(f"{bins=}")
+    inds = np.digitize(x, bins[:-1])
+    plotdata = []
+    for i in np.unique(inds):
+        sel = inds==i
+        plotdata.append(y[sel])
+    fig, ax = plt.subplots()
+    ax.boxplot(plotdata)
+    # ax.set_xticks(np.linspace(0, nbins))  # set the positions of the tick marks
+    ax.set_xticklabels([f"{e:.2g}" for e in bins])  # set the labels for the tick marks
+    print("############################")
 
 def plot_texts(data, dataset, fontsize):
     if f"t{dataset}" in data:
@@ -1123,7 +1142,7 @@ if __name__ == "__main__":
         type=int,
         help="Number of bins in the histogram",
     )
-    parser.add_argument("--boxplot", help="Plot a box plot", action="store_true")
+    parser.add_argument("--boxplot", help="Plot a box plot. If a x is given in the --fields option, then use the argument of --bins to define the number of bins (number of box plots)", action="store_true")
     parser.add_argument("--graph",
                         help="Plot a graph. The input data are x y e where e is the edge index. Points with the same edge index are linked by a line",
                         action="store_true")
@@ -1262,7 +1281,10 @@ if __name__ == "__main__":
                       bins=args.bins,
                       normed=args.normed)
         elif args.boxplot:
-            boxplot(DATA, NDATASET)
+            if args.bins is None:
+                boxplot(DATA, NDATASET)
+            else:
+                boxplot_xy(DATA, NDATASET, args.bins)
         elif args.graph:
             graph(DATA,
                   NDATASET,

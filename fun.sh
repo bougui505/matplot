@@ -150,3 +150,9 @@ test_plot2_boxplot (){
         | plot2 -d"," --boxplot --fields y y y
 
 }
+
+test_plot2_boxplot_xy (){
+    paste -d"," =(seq 100) =(seq 100) \
+        | plot2 -d"," --boxplot --fields x y --bins 10
+
+}
