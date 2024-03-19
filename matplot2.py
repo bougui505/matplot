@@ -472,17 +472,17 @@ def boxplot_xy(data, ndataset, nbins):
     print("######## boxplot_xy ########")
     x = tofloat(data["x0"])
     y = tofloat(data["y0"])
-    bins = list(np.cumsum([(x.max() - x.min())/nbins]*(nbins)))
+    bins = np.linspace(x.min(), x.max(), nbins+1)[:-1]
     print(f"{bins=}")
-    inds = np.digitize(x, bins[:-1])
+    inds = np.digitize(x, bins)
     plotdata = []
     for i in np.unique(inds):
         sel = inds==i
         plotdata.append(y[sel])
     fig, ax = plt.subplots()
     ax.boxplot(plotdata)
-    # ax.set_xticks(np.linspace(0, nbins))  # set the positions of the tick marks
-    ax.set_xticklabels([f"{e:.2g}" for e in bins])  # set the labels for the tick marks
+    ax.set_xticks(np.arange(1, nbins+1))  # set the positions of the tick marks
+    ax.set_xticklabels([f"{e:.4g}" for e in list(bins[1:])+[x.max()]])  # set the labels for the tick marks
     print("############################")
 
 def plot_texts(data, dataset, fontsize):
