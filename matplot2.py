@@ -351,6 +351,12 @@ def graph(data, ndataset, size=20, labels=None, fontsize="medium"):
             plt.plot(x[sel], y[sel], 'k-', zorder=-100, lw=1)
     print("#######################")
 
+def heatmap(A):
+    print("######## heatmap ########")
+    plt.matshow(A)
+    plt.colorbar()
+    print("#########################")
+
 def scatter(data,
             ndataset,
             size=20,
@@ -1025,6 +1031,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Scatter plot of the (x,y) data",
     )
+    parser.add_argument("--heatmap", action="store_true", help="Heatmap plotting")
     parser.add_argument("--pcr", help="Principal Component Regression. Linear regression using PCA", action="store_true")
     parser.add_argument(
         "--repulsion",
@@ -1227,6 +1234,14 @@ if __name__ == "__main__":
         if args.title is not None:
             print(f"{args.title=}")
             plt.title(args.title)
+        if args.heatmap:
+            inp = np.genfromtxt(sys.stdin, dtype=float, delimiter=args.delimiter)
+            heatmap(inp)
+            if args.save is None:
+                plt.show()
+            else:
+                save(args.save, np.array2string(inp, threshold=np.inf, max_line_width=np.inf)+"\n")
+            sys.exit()
         DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if "s0" in DATA:

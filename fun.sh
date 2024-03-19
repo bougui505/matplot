@@ -156,3 +156,8 @@ test_plot2_boxplot_xy (){
         | plot2 -d"," --boxplot --fields x y --bins 10
 
 }
+
+test_plot2_heatmap (){
+    cat /dev/null | np -c 'print_(np.random.uniform(size=(10,10)))' \
+        | plot2 --heatmap --cmap coolwarm
+}
