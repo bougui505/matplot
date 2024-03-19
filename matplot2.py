@@ -7,6 +7,7 @@
 # Copyright (c) 2023 Institut Pasteur                                       #
 #############################################################################
 
+import gzip
 import os
 import socket
 import sys
@@ -913,7 +914,34 @@ def save(outfilename, datastr):
     print(f"{ext=}")
     if ext == ".png":
         add_metadata(outfilename, datastr)
+    if ext == ".svg":
+        add_svgdata(outfilename, datastr)
 
+def add_svgdata(outfilename, datastr):
+    gzfn = os.path.splitext(outfilename)[0] + ".svgz"
+    with gzip.open(gzfn, 'wt') as gz:
+        with open(outfilename, "r") as f:
+            for line in f:
+                gz.write(line)
+        gz.write("<!-- data\n")
+        if args.labels is not None:
+            gz.write(f"#labels={' '.join(args.labels)}\n")
+        gz.write(f"#cwd={os.getcwd()}\n")
+        gz.write(f"#hostname={socket.gethostname()}\n")
+        gz.write(datastr)
+        gz.write("-->")
+    os.remove(outfilename)
+
+def read_svgdata(svgzfn):
+    with gzip.open(svgzfn, "rt") as gz:
+        doprint = False
+        for line in gz:
+            if line.startswith("-->"):
+                doprint = False
+            if doprint:
+                print(line.strip())
+            if line.startswith("<!-- data"):
+                doprint = True
 
 def set_x_lim(xmin, xmax):
     axes = plt.gca()
@@ -1141,8 +1169,12 @@ if __name__ == "__main__":
         for yv in args.hlines:
             plt.axhline(y=yv, zorder=10, color='k')
     if args.read_data is not None:
-        DATASTR = read_metadata(args.read_data)
-        print(DATASTR)
+        ext = os.path.splitext(args.read_data)[1]
+        if ext==".png":
+            DATASTR = read_metadata(args.read_data)
+            print(DATASTR)
+        if ext==".svgz":
+            read_svgdata(args.read_data)
     if args.aspect_ratio is not None:
         print(f"{args.aspect_ratio=}")
         plt.figure(figsize=(args.aspect_ratio[0], args.aspect_ratio[1]))
