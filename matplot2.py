@@ -437,7 +437,7 @@ def pcr(x, y):
 
 
 
-def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False):
+def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False, histtype="bar"):
     print("######## histogram ########")
     if bins is None:
         bins = "auto"
@@ -452,7 +452,7 @@ def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False):
             label = labels[dataset]
         else:
             label = None
-        plt.hist(y, label=label, alpha=alpha, bins=bins, density=normed)
+        plt.hist(y, label=label, alpha=alpha, bins=bins, density=normed, histtype=histtype)
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -1138,6 +1138,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Compute and plot histogram from data",
     )
+    parser.add_argument("--histtype", default="bar", help="Histogram type. Can be: {'bar', 'barstacked', 'step', 'stepfilled'}, default: 'bar'")
     parser.add_argument(
         "--normed",
         help="If True, the first element of the return tuple will be the counts normalized to form a probability density",
@@ -1294,7 +1295,8 @@ if __name__ == "__main__":
                       labels=args.labels,
                       alpha=args.alpha,
                       bins=args.bins,
-                      normed=args.normed)
+                      normed=args.normed,
+                      histtype=args.histtype)
         elif args.boxplot:
             if args.bins is None:
                 boxplot(DATA, NDATASET)
