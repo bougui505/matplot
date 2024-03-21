@@ -15,6 +15,7 @@ import sys
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
 from matplotlib.offsetbox import AnchoredText
 from numpy import linalg
 from PIL import Image, PngImagePlugin
@@ -428,11 +429,13 @@ def pcr(x, y):
     print(f"{explained_variance=}")
     pearson = np.sum((x-x.mean())*(y-y.mean())) / (np.sqrt(np.sum((x-x.mean())**2)) * np.sqrt(np.sum((y-y.mean())**2)))
     print(f"{pearson=}")
+    spearman = scipy.stats.spearmanr(a=x, b=y).statistic
+    print(f"{spearman=}")
     R_squared = 1 - np.sum((y-a*x+b)**2) / np.sum((y-y.mean())**2)
     print(f"{R_squared=}")
-    annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
-    bbox = dict(boxstyle ="round", fc ="0.8")
-    plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
+    # annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
+    # bbox = dict(boxstyle ="round", fc ="0.8")
+    # plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
     print("#####################")
 
 
