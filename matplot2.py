@@ -491,7 +491,11 @@ def boxplot_xy(data, ndataset, nbins):
     fig, ax = plt.subplots()
     ax.boxplot(plotdata)
     ax.set_xticks(np.arange(1, nbins+1))  # set the positions of the tick marks
-    ax.set_xticklabels([f"{e:.4g}" for e in list(bins[1:])+[x.max()]])  # set the labels for the tick marks
+    windows = list(zip(bins, bins[1:]))
+    windows.append((bins[-1], max(x)))
+    print(f"{windows=}")
+    ax.tick_params(axis='x', rotation=22.5)
+    ax.set_xticklabels([f"{e[0]:.3g}:{e[1]:.3g}" for e in windows])  # set the labels for the tick marks
     print("############################")
 
 def plot_texts(data, dataset, fontsize):
