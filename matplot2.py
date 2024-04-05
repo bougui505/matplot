@@ -472,6 +472,7 @@ def kde(data, ndataset, labels=None, alpha=1.0, bandwidth="scott", npts=100, xra
         y = data[f"y{dataset}"]
         y = tofloat(y)
         y = y[~np.isinf(y)]
+        y = y[~np.isnan(y)]
         print(f"{y.shape=}")
         if labels is not None:
             label = labels[dataset]
