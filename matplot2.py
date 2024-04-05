@@ -1188,6 +1188,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--kde", action="store_true", help="Kernel Density estimation of the data")
     parser.add_argument("--bandwidth", help="bandwidth for the KDE estimation (see --kde). By default the 'scott' estimation is used", type=float)
+    parser.add_argument("--npts", help="Number of points for the KDE plot (see: --kde) (default: 100)", type=int, default=100)
     parser.add_argument("--histtype", default="bar", help="Histogram type. Can be: {'bar', 'barstacked', 'step', 'stepfilled'}, default: 'bar'")
     parser.add_argument(
         "--normed",
@@ -1351,7 +1352,7 @@ if __name__ == "__main__":
         elif args.kde:
             if args.bandwidth is None:
                 args.bandwidth = "scott"
-            kde(DATA, NDATASET, labels=args.labels, alpha=args.alpha, bandwidth=args.bandwidth)
+            kde(DATA, NDATASET, labels=args.labels, alpha=args.alpha, bandwidth=args.bandwidth, npts=args.npts)
         elif args.boxplot:
             if args.bins is None:
                 boxplot(DATA, NDATASET)
