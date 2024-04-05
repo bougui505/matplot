@@ -22,6 +22,7 @@ from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
 from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
+from sklearn.neighbors import KernelDensity
 
 from sliding import Sliding_op
 
@@ -459,6 +460,45 @@ def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False, h
     if labels is not None:
         plt.legend()
     print("#########################")
+
+def kde(data, ndataset, labels=None, alpha=1.0, bandwidth="scott", npts=100, xrange_tol=1e-1):
+    """
+    xrange_tol: relative tolerance to define the x range of the probability density function (PDF) plot.
+          The xrange_tol is the xrange where the 1-normalized (max value of the PDF normalized to 1) PDF is higher than xrange_tol
+    """
+    print("######### KDE #############")
+    for dataset in range(ndataset):
+        print(f"{dataset=}")
+        y = data[f"y{dataset}"]
+        y = tofloat(y)
+        y = y[~np.isinf(y)]
+        print(f"{y.shape=}")
+        if labels is not None:
+            label = labels[dataset]
+        else:
+            label = None
+        y = y[:, None]
+        kde = KernelDensity(
+            kernel='gaussian',
+            bandwidth=bandwidth,  # type: ignore
+        ).fit(y)
+        print(kde.get_params())
+        kde_y = np.exp(kde.score_samples(y))
+        y = np.squeeze(y)
+        sorter = y.argsort()
+        y = y[sorter]
+        kde_y = kde_y[sorter]
+        sel = kde_y/kde_y.max() > xrange_tol
+        x0 = y[sel][0]
+        x1 = y[sel][-1]
+        print(f"{x0=}")
+        print(f"{x1=}")
+        x = np.linspace(x0, x1, npts)
+        y = np.exp(kde.score_samples(x[:, None]).squeeze())
+        plt.plot(x, y, label=label, alpha=alpha)
+    if labels is not None:
+        plt.legend()
+    print("###########################")
 
 def boxplot(data, ndataset):
     print("######## boxplot ########")
@@ -1145,6 +1185,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Compute and plot histogram from data",
     )
+    parser.add_argument("--kde", action="store_true", help="Kernel Density estimation of the data")
     parser.add_argument("--histtype", default="bar", help="Histogram type. Can be: {'bar', 'barstacked', 'step', 'stepfilled'}, default: 'bar'")
     parser.add_argument(
         "--normed",
@@ -1202,6 +1243,7 @@ if __name__ == "__main__":
     parser.add_argument("--colorbar",
                         help="Display the colorbar",
                         action="store_true")
+    parser.add_argument("--grid", help="Add a grid", action="store_true")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -1304,6 +1346,8 @@ if __name__ == "__main__":
                       bins=args.bins,
                       normed=args.normed,
                       histtype=args.histtype)
+        elif args.kde:
+            kde(DATA, NDATASET, labels=args.labels, alpha=args.alpha, bandwidth="scott")
         elif args.boxplot:
             if args.bins is None:
                 boxplot(DATA, NDATASET)
@@ -1363,6 +1407,8 @@ if __name__ == "__main__":
             set_x_lim(args.xmin[0], args.xmax[0])
         if args.colorbar:
             plt.colorbar()
+        if args.grid:
+            plt.grid()
         if args.save is None:
             plt.show()
         else:

@@ -161,3 +161,16 @@ test_plot2_heatmap (){
     cat /dev/null | np -c 'print_(np.random.uniform(size=(10,10)))' \
         | plot2 --heatmap --cmap coolwarm
 }
+
+test_plot2_kde (){
+    np --nopipe -c "
+a=np.random.normal(loc=0, size=100)
+b=np.random.normal(loc=1, size=100)
+# Add outliers to test the plot
+a = [-100] + list(a) + [100]
+b = [-100] + list(b) + [100]
+out = np.c_[a, b]
+print_(out)
+" \
+    | plot2 --kde --fields y y
+}
