@@ -1187,6 +1187,7 @@ if __name__ == "__main__":
         help="Compute and plot histogram from data",
     )
     parser.add_argument("--kde", action="store_true", help="Kernel Density estimation of the data")
+    parser.add_argument("--bandwidth", help="bandwidth for the KDE estimation (see --kde). By default the 'scott' estimation is used", type=float)
     parser.add_argument("--histtype", default="bar", help="Histogram type. Can be: {'bar', 'barstacked', 'step', 'stepfilled'}, default: 'bar'")
     parser.add_argument(
         "--normed",
@@ -1348,7 +1349,9 @@ if __name__ == "__main__":
                       normed=args.normed,
                       histtype=args.histtype)
         elif args.kde:
-            kde(DATA, NDATASET, labels=args.labels, alpha=args.alpha, bandwidth="scott")
+            if args.bandwidth is None:
+                args.bandwidth = "scott"
+            kde(DATA, NDATASET, labels=args.labels, alpha=args.alpha, bandwidth=args.bandwidth)
         elif args.boxplot:
             if args.bins is None:
                 boxplot(DATA, NDATASET)
