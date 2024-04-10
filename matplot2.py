@@ -23,6 +23,7 @@ from PIL.PngImagePlugin import PngInfo
 from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
 from sklearn.neighbors import KernelDensity
+
 from sliding import Sliding_op
 
 # Reading data from a png with large number of points:
@@ -365,7 +366,8 @@ def scatter(data,
             fontsize="medium",
             repulsion=0.,
             dopcr=False,
-            alpha=1.):
+            alpha=1.,
+            marker="o"):
     """
     Scatter plot
     """
@@ -393,7 +395,7 @@ def scatter(data,
             z = None
         plot_texts(data, dataset, fontsize=fontsize)
         if f"m{dataset}" not in data:
-            plt.scatter(x, y, c=z, s=size, alpha=alpha, label=labels[dataset])
+            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=labels[dataset])
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
