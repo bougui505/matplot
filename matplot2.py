@@ -23,7 +23,6 @@ from PIL.PngImagePlugin import PngInfo
 from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
 from sklearn.neighbors import KernelDensity
-
 from sliding import Sliding_op
 
 # Reading data from a png with large number of points:
@@ -373,7 +372,10 @@ def scatter(data,
     print("######## scatter ########")
     for dataset in range(ndataset):
         print(f"{dataset=}")
-        x = data[f"x{dataset}"]
+        if f"x{dataset}" in data:
+            x = data[f"x{dataset}"]
+        else:
+            x = data["x0"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
         print(f"{x.shape=}")
