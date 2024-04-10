@@ -395,7 +395,11 @@ def scatter(data,
             z = None
         plot_texts(data, dataset, fontsize=fontsize)
         if f"m{dataset}" not in data:
-            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=labels[dataset])
+            if labels is not None:
+                label = labels[dataset]
+            else:
+                label = None
+            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
