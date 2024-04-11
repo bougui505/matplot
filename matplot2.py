@@ -148,6 +148,7 @@ def plot(
     xmin=None,
     xmax=None,
     title=None,
+    ncols_legend=None,
 ):
     """
     Simple plot
@@ -183,7 +184,10 @@ def plot(
         pltobj = plt.plot(x, y, label=label, c=color)
         plot_extremas(extremas, dataset, y, pltobj, xdata=x)
         if labels is not None:
-            plt.legend()
+            if ncols_legend is None:
+                plt.legend()
+            else:
+                plt.legend(bbox_to_anchor=(1, 1), ncols=ncols_legend, loc='upper left')
         if subplots is not None:
             if semilog is not None:
                 if "x" in semilog:
@@ -1168,6 +1172,7 @@ if __name__ == "__main__":
         nargs="+",
         help="List of labels for each dataset defined with the --fields option. For scatter plots with different markers one label per marker can be given.",
     )
+    parser.add_argument("--ncols", help="Number of columns for the legend (if labels are given --labels)", type=int)
     parser.add_argument(
         "--extrema",
         help="List of keyword 'min' 'max' for each dataset to plot an horizontal line for minima or maxima respectively",
@@ -1411,6 +1416,7 @@ if __name__ == "__main__":
                 xmin=args.xmin,
                 xmax=args.xmax,
                 title=args.title,
+                ncols_legend=args.ncols,
             )
 
         if args.xlabel is not None:
