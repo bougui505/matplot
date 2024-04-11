@@ -171,6 +171,9 @@ def plot(
         y = data[f"y{dataset}"]
         x = tofloat(x)
         y = tofloat(y)
+        sel = ~np.isnan(y)
+        x = x[sel]
+        y = y[sel]
         print(f"{x=}")
         print(f"{y=}")
         label = labels[dataset] if labels is not None else None
