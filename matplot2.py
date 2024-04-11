@@ -12,6 +12,7 @@ import os
 import socket
 import sys
 
+import colorcet as cc
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
@@ -178,7 +179,8 @@ def plot(
         print(f"{y=}")
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
-        pltobj = plt.plot(x, y, label=label)
+        color = cc.glasbey_bw[dataset]
+        pltobj = plt.plot(x, y, label=label, c=color)
         plot_extremas(extremas, dataset, y, pltobj, xdata=x)
         if labels is not None:
             plt.legend()
