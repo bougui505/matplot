@@ -149,6 +149,7 @@ def plot(
     xmax=None,
     title=None,
     ncols_legend=None,
+    fontsize=None,
 ):
     """
     Simple plot
@@ -185,9 +186,11 @@ def plot(
         plot_extremas(extremas, dataset, y, pltobj, xdata=x)
         if labels is not None:
             if ncols_legend is None:
-                plt.legend()
+                plt.legend(fontsize=fontsize)
             else:
-                plt.legend(bbox_to_anchor=(1, 1), ncols=ncols_legend, loc='upper left')
+                plt.legend(bbox_to_anchor=(1, 1), ncols=ncols_legend, loc='upper left', fontsize=fontsize)
+        elif extremas is not None:
+            plt.legend(fontsize=fontsize)
         if subplots is not None:
             if semilog is not None:
                 if "x" in semilog:
@@ -1417,6 +1420,7 @@ if __name__ == "__main__":
                 xmax=args.xmax,
                 title=args.title,
                 ncols_legend=args.ncols,
+                fontsize=args.fontsize,
             )
 
         if args.xlabel is not None:
