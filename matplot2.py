@@ -386,7 +386,8 @@ def scatter(data,
             axis=(0, 1),
             dopcr=False,
             alpha=1.,
-            marker="o"):
+            marker="o",
+            cmap=None):
     """
     Scatter plot
     """
@@ -418,7 +419,7 @@ def scatter(data,
                 label = labels[dataset]
             else:
                 label = None
-            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label)
+            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -1312,9 +1313,9 @@ if __name__ == "__main__":
     if (
             not sys.stdin.isatty()
     ):  # stdin is not empty (see: https://stackoverflow.com/a/17735803/1679629)
-        if args.cmap is not None:
-            print(f"{args.cmap=}")
-            plt.set_cmap(args.cmap)
+        # if args.cmap is not None:
+        #     print(f"{args.cmap=}")
+        #     plt.set_cmap(args.cmap)
         if args.title is not None:
             print(f"{args.title=}")
             plt.title(args.title)
@@ -1339,7 +1340,8 @@ if __name__ == "__main__":
                     repulsion=args.repulsion,
                     axis=args.axis,
                     dopcr=args.pcr,
-                    alpha=args.alpha)
+                    alpha=args.alpha,
+                    cmap=args.cmap)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
