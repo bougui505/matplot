@@ -265,7 +265,6 @@ def plot_std(
 def apply_repulsion(
     repulsion,
     x,
-    ndims=2,
     niter=10000,
     device="cpu",
     min_delta=1e-6,
@@ -281,17 +280,23 @@ def apply_repulsion(
             self.delta = torch.nn.Parameter(torch.randn(size=(npts, ndims)))
 
         def forward(self, x):
-            return x + self.delta
+            return x + self.delta.squeeze()
 
     def lossfunc(x, repulsion):
+        if x.ndim == 1:
+            x = x[:, None]
         xmat = torch.cdist(x, x)
         repulsive_mask = xmat < repulsion
         loss_rep = torch.mean((xmat[repulsive_mask] - repulsion)**2)
         return loss_rep
 
+    x = torch.from_numpy(x)
+    x = x.squeeze()
     npts = x.shape[0]
+    ndims = x.ndim
     mover = Mover(npts=npts, ndims=ndims).to(device)
-    optimizer = torch.optim.Adam(mover.parameters(), amsgrad=False, lr=0.01)
+    lr = repulsion/10
+    optimizer = torch.optim.Adam(mover.parameters(), amsgrad=False, lr=lr)
     y = x
     loss = torch.inf
     loss_prev = torch.inf
@@ -312,20 +317,21 @@ def apply_repulsion(
             print("--")
         if delta_loss <= min_delta:
             break
+    if ndims == 1:
+        y = y[:, None]
     if return_np:
         return y.detach().cpu().numpy(), loss
     else:
         return y.detach(), loss
 
 
-def add_repulsion(x, y, repulsion):
+def add_repulsion(x, y, repulsion, axis=(0, 1)):
     import scipy.spatial.distance as scidist
     import torch
 
     coords = np.c_[x, y]
-    coords = torch.from_numpy(coords)
     min_delta = 1e-6
-    coords, loss = apply_repulsion(x=coords,
+    coords[:, axis], loss = apply_repulsion(x=coords[:, axis],
                                    repulsion=repulsion,
                                    min_delta=min_delta,
                                    niter=1000)
@@ -377,6 +383,7 @@ def scatter(data,
             labels=None,
             fontsize="medium",
             repulsion=0.,
+            axis=(0, 1),
             dopcr=False,
             alpha=1.,
             marker="o"):
@@ -396,7 +403,7 @@ def scatter(data,
         y = tofloat(y)
         print(f"{y.shape=}")
         if repulsion > 0:
-            x, y = add_repulsion(x, y, repulsion=repulsion)
+            x, y = add_repulsion(x, y, repulsion=repulsion, axis=axis)
             data[f"x{dataset}"] = x
             data[f"y{dataset}"] = y
         if f"z{dataset}" in data:
@@ -1108,6 +1115,7 @@ if __name__ == "__main__":
         Warnings: dependencies to pytorch",
         default=0.0,
         type=float)
+    parser.add_argument("--axis", help="axis to apply the repulsion on. By default both (axis=(0, 1)))", nargs='+', default=[0, 1], type=int)
     parser.add_argument(
         "-s",
         "--size",
@@ -1277,6 +1285,8 @@ if __name__ == "__main__":
     parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=int)
     args = parser.parse_args()
 
+    args.axis = tuple(args.axis)
+
     if args.vlines is not None:
         for xv in args.vlines:
             plt.axvline(x=xv, zorder=10, color='k')
@@ -1327,6 +1337,7 @@ if __name__ == "__main__":
                     labels=args.labels,
                     fontsize=args.fontsize,
                     repulsion=args.repulsion,
+                    axis=args.axis,
                     dopcr=args.pcr,
                     alpha=args.alpha)
         elif args.moving_average is not None:
