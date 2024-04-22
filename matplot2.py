@@ -1020,6 +1020,7 @@ def save(outfilename, datastr):
     plt.savefig(outfilename)
     ext = os.path.splitext(outfilename)[1]
     print(f"{ext=}")
+    print(f"{outfilename=}")
     if ext == ".png":
         add_metadata(outfilename, datastr)
     if ext == ".svg":
