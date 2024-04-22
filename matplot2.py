@@ -104,7 +104,7 @@ def read_data_xy():
             data[f"y{dataset}"].append(y)
     for k in data:
         data[k] = np.asarray(data[k], dtype=str)
-    ndataset = dataset + 1
+    ndataset = len(data)//2
     return data, ndataset
 
 
@@ -1060,7 +1060,10 @@ def get_datastr(data):
     outstr += "\n"
     for i in range(n):
         for k in keys:
-            outstr += f"{data[k][i]} "
+            try:
+                outstr += f"{data[k][i]},"
+            except IndexError:
+                outstr += ","
         outstr += "\n"
     print(f"{outstr[:80]=}...")
     return outstr

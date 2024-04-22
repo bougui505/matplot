@@ -177,8 +177,9 @@ print_(out)
 
 test_plot2_xy (){
     cat \
+        =(paste -d " " =(seq 11 28) =(seq 11 28)) \
+        =(echo " ") \
         =(paste -d " " =(seq 10) =(seq 10)) \
         =(echo "") \
-        =(paste -d " " =(seq 11 25) =(seq 11 25)) \
     | plot2 --xy
 }
