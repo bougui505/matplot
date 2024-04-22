@@ -1411,7 +1411,9 @@ if __name__ == "__main__":
                     dopcr=args.pcr,
                     alpha=args.alpha,
                     cmap=args.cmap,
-                    orthonormal=args.orthonormal)
+                    orthonormal=args.orthonormal,
+                    xlabels=args.xlabel,
+                    ylabels=args.ylabel)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
