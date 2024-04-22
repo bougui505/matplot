@@ -131,6 +131,17 @@ def tofloat(arr):
     out = np.asarray(out)
     return out
 
+def plot_text(xytext):
+    """
+    xytext=["x0", "y0", "text0", "x1", "y1", "text1", ...]
+    """
+    n = len(xytext)
+    assert n%3==0
+    xytext = np.asarray(xytext).reshape(n//3, 3)
+    for x, y, text in xytext:
+        x = float(x)
+        y = float(y)
+        plt.text(x, y, text)
 
 def plot(
     data,
@@ -1283,6 +1294,7 @@ if __name__ == "__main__":
                         help="Display the colorbar",
                         action="store_true")
     parser.add_argument("--grid", help="Add a grid", action="store_true")
+    parser.add_argument("--text", help="Give text to plot in format x1 y1 text1 x2 y2 text2 [...]", type=str, nargs="+")
     parser.add_argument("--save", help="Save the file", type=str)
     parser.add_argument(
         "--read_data",
@@ -1323,6 +1335,8 @@ if __name__ == "__main__":
         if args.title is not None:
             print(f"{args.title=}")
             plt.title(args.title)
+        if args.text is not None:
+            plot_text(args.text)
         if args.heatmap:
             inp = np.genfromtxt(sys.stdin, dtype=float, delimiter=args.delimiter)
             heatmap(inp)
