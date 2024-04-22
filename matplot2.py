@@ -690,6 +690,8 @@ def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None, xmin=None, xmax=
             linewidth=1.0,
             label=f"{extrema}={v:.2g}",
         )
+        if int(xv)==xv:
+            xv = int(xv)
         plt.axvline(x=xv,
                     color=color,
                     linestyle="dotted",
