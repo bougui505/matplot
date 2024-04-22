@@ -174,3 +174,11 @@ print_(out)
 " \
     | plot2 --kde --fields y y
 }
+
+test_plot2_xy (){
+    cat \
+        =(paste -d " " =(seq 10) =(seq 10)) \
+        =(echo "") \
+        =(paste -d " " =(seq 11 25) =(seq 11 25)) \
+    | plot2 --xy
+}

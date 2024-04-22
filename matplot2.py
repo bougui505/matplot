@@ -84,6 +84,29 @@ def read_data(fields, delimiter):
     print("###########################")
     return data, ndataset
 
+def read_data_xy():
+    """
+    Read x y data. Blank lines indicate new dataset, like in xmgrace (see: https://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html#ss3.1)
+    """
+    data = dict()
+    dataset = 0
+    for line in sys.stdin:
+        line = line.strip()
+        if line == "":
+            dataset+=1
+        else:
+            x, y = line.split()
+            if f"x{dataset}" not in data:
+                data[f"x{dataset}"] = []
+            if f"y{dataset}" not in data:
+                data[f"y{dataset}"] = []
+            data[f"x{dataset}"].append(x)
+            data[f"y{dataset}"].append(y)
+    for k in data:
+        data[k] = np.asarray(data[k], dtype=str)
+    ndataset = dataset + 1
+    return data, ndataset
+
 
 def add_metadata(filename, datastr, key="data"):
     """
@@ -1103,6 +1126,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="")
+    parser.add_argument("--xy", help="xy format like 'x y' with blank lines indicating new datasets (xmgrace style)", action="store_true")
     parser.add_argument(
         "-f",
         "--fields",
@@ -1348,7 +1372,10 @@ if __name__ == "__main__":
             else:
                 save(args.save, np.array2string(inp, threshold=np.inf, max_line_width=np.inf)+"\n")
             sys.exit()
-        DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
+        if args.xy:
+            DATA, NDATASET = read_data_xy()
+        else:
+            DATA, NDATASET = read_data(args.fields, delimiter=args.delimiter)
         DATASTR = get_datastr(DATA)
         if "s0" in DATA:
             args.size = np.float_(DATA["s0"])
