@@ -411,18 +411,33 @@ def scatter(data,
             ndataset,
             size=20,
             labels=None,
+            subplots=None,
+            subplots_assignment=None,
             fontsize="medium",
             repulsion=0.,
             dopcr=False,
             alpha=1.,
             marker="o",
-            cmap=None):
+            cmap=None,
+            title=None,
+            xlabels=None,
+            ylabels=None,
+            orthonormal=False):
     """
     Scatter plot
     """
     print("######## scatter ########")
+    if subplots_assignment is None:
+        subplots_assignment = range(ndataset)
     for dataset in range(ndataset):
         print(f"{dataset=}")
+        if subplots is not None:
+            _setup_subplot_(subplots,
+                            subplots_assignment[dataset],
+                            title=title,
+                            xlabels=xlabels,
+                            ylabels=ylabels,
+                            orthonormal=orthonormal)
         if f"x{dataset}" in data:
             x = data[f"x{dataset}"]
         else:
@@ -679,9 +694,11 @@ def _broadcast_(inp, n):
     return inp
 
 
-def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
+def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None, orthonormal=False):
     if title is not None:
         plt.title(title)
+    if orthonormal:
+        plt.axis("equal")
     subplot = subplots + [(dataset + 1)]
     print(f"{subplot=}")
     plt.subplot(*subplot)
@@ -1387,11 +1404,14 @@ if __name__ == "__main__":
                     NDATASET,
                     size=args.size,
                     labels=args.labels,
+                    subplots=args.subplots,
+                    subplots_assignment=args.sp_assignment,
                     fontsize=args.fontsize,
                     repulsion=args.repulsion,
                     dopcr=args.pcr,
                     alpha=args.alpha,
-                    cmap=args.cmap)
+                    cmap=args.cmap,
+                    orthonormal=args.orthonormal)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
