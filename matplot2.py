@@ -474,6 +474,8 @@ def scatter(data,
                             labels=labels)
         if dopcr:
             pcr(x, y)
+        if orthonormal:
+            plt.axis("equal")
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -697,8 +699,6 @@ def _broadcast_(inp, n):
 def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None, orthonormal=False):
     if title is not None:
         plt.title(title)
-    if orthonormal:
-        plt.axis("equal")
     subplot = subplots + [(dataset + 1)]
     print(f"{subplot=}")
     plt.subplot(*subplot)
