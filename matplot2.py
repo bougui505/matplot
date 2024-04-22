@@ -17,7 +17,6 @@ import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-from matplotlib.offsetbox import AnchoredText
 from numpy import linalg
 from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
@@ -183,7 +182,7 @@ def plot(
         print(f"{label=}")
         color = cc.glasbey_bw[dataset]
         pltobj = plt.plot(x, y, label=label, c=color)
-        plot_extremas(extremas, dataset, y, pltobj, xdata=x)
+        plot_extremas(extremas, dataset, y, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
             if ncols_legend is None:
                 plt.legend(fontsize=fontsize)
@@ -249,7 +248,7 @@ def plot_std(
         print(f"{label=}")
         plt.fill_between(x, y1=y-e, y2=y+e, alpha=0.5)
         pltobj = plt.plot(x, y, label=label)
-        plot_extremas(extremas, dataset, y, pltobj, xdata=x)
+        plot_extremas(extremas, dataset, y, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
             plt.legend()
         if subplots is not None:
@@ -655,7 +654,11 @@ def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None):
         plt.ylabel(ylabels[dataset])
 
 
-def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None):
+def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None, xmin=None, xmax=None):
+    if xmin is None:
+        xmin = [None]*dataset
+    if xmax is None:
+        xmax = [None]*dataset
     if xdata is None:
         xdata = np.arange(len(ydata))
     if extremas is not None:
@@ -663,6 +666,14 @@ def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None):
             extremas
         ), f"Number of extrema keyword given to option --extrema ({len(args.extrema)}) does not match the number of dataset for current dataset ({dataset+1})"
     extrema = extremas[dataset] if extremas is not None else None
+    if xmin[dataset] is not None:
+        xsel = xdata >= xmin[dataset]
+        xdata = xdata[xsel]
+        ydata = ydata[xsel]
+    if xmax[dataset] is not None:
+        xsel = xdata <= xmax[dataset]
+        xdata = xdata[xsel]
+        ydata = ydata[xsel]
     if extrema == "min":
         v = np.nanmin(ydata)
         xv = xdata[np.nanargmin(ydata)]
@@ -733,7 +744,7 @@ def moving_average(
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
         pltobj = plt.plot(x, ma, label=label)
-        plot_extremas(extremas, dataset, ma, pltobj, xdata=x)
+        plot_extremas(extremas, dataset, ma, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
             plt.legend()
         if subplots is not None:
