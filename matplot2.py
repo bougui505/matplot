@@ -508,13 +508,28 @@ def pcr(x, y):
     print(f"{spearman=}")
     R_squared = 1 - np.sum((y-a*x+b)**2) / np.sum((y-y.mean())**2)
     print(f"{R_squared=}")
-    plt.title(f"ρ={pearson:.1f}|y={a:.1g}x+{b:.1g}")
+    regstr = "y="
+    if f"{a:.1g}" == "1":
+        regstr+="x"
+    else:
+        regstr+=f"{a:.1g}x"
+    if float(f"{b:.1g}")<0:
+        regstr+=f"{b:.1g}"
+    elif float(f"{b:.1g}")>0:
+        regstr+=f"+{b:.1g}"
+    else:
+        pass
+    plt.title(f"ρ={format_nbr(pearson)}|ρₛ={format_nbr(spearman)}\n{regstr}")
     # annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
     # bbox = dict(boxstyle ="round", fc ="0.8")
     # plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
     print("#####################")
 
-
+def format_nbr(x, precision='.1f'):
+    if float(format(x, precision))==round(x):
+        return f'{round(x)}'
+    else:
+        return format(x, precision)
 
 def histogram(data, ndataset, labels=None, alpha=1.0, bins=None, normed=False, histtype="bar"):
     print("######## histogram ########")
