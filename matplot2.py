@@ -508,6 +508,7 @@ def pcr(x, y):
     print(f"{spearman=}")
     R_squared = 1 - np.sum((y-a*x+b)**2) / np.sum((y-y.mean())**2)
     print(f"{R_squared=}")
+    plt.title(f"ρ={pearson:.1f}|y={a:.1g}x+{b:.1g}")
     # annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
     # bbox = dict(boxstyle ="round", fc ="0.8")
     # plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
