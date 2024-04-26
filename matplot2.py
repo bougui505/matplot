@@ -1337,28 +1337,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ymin",
         type=float,
-        help="Lower limit for y-axis. If subplots are on, give one value per subplot",
+        help="Lower limit for y-axis. Give one value per dataset",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--ymax",
         type=float,
-        help="Upper limit for y-axis. If subplots are on, give one value per subplot",
+        help="Upper limit for y-axis. Give one value per dataset",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmin",
         type=float,
-        help="Lower limit for x-axis. If subplots are on, give one value per subplot",
+        help="Lower limit for x-axis. Give one value per dataset",
         nargs="+",
         default=[None],
     )
     parser.add_argument(
         "--xmax",
         type=float,
-        help="Upper limit for x-axis. If subplots are on, give one value per subplot",
+        help="Upper limit for x-axis. Give one value per dataset",
         nargs="+",
         default=[None],
     )
