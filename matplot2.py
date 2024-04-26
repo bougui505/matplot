@@ -186,6 +186,7 @@ def plot(
     title=None,
     ncols_legend=None,
     fontsize=None,
+    alpha=1,
 ):
     """
     Simple plot
@@ -218,7 +219,7 @@ def plot(
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
         color = cc.glasbey_bw[dataset]
-        pltobj = plt.plot(x, y, label=label, c=color)
+        pltobj = plt.plot(x, y, label=label, c=color, alpha=alpha)
         plot_extremas(extremas, dataset, y, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
             if ncols_legend is None:
@@ -1522,6 +1523,7 @@ if __name__ == "__main__":
                 title=args.title,
                 ncols_legend=args.ncols,
                 fontsize=args.fontsize,
+                alpha=args.alpha,
             )
 
         if args.xlabel is not None:
@@ -1537,7 +1539,8 @@ if __name__ == "__main__":
         if args.colorbar:
             plt.colorbar()
         if args.grid:
-            plt.grid()
+            plt.grid(which='both', alpha=0.25)
+            plt.grid(which='major', alpha=1.)
         if args.save is None:
             plt.show()
         else:
