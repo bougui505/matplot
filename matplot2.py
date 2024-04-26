@@ -11,6 +11,7 @@ import gzip
 import os
 import socket
 import sys
+from collections import defaultdict
 
 import colorcet as cc
 import matplotlib.patheffects as pe
@@ -187,6 +188,7 @@ def plot(
     ncols_legend=None,
     fontsize=None,
     alpha=1,
+    grid=False,
 ):
     """
     Simple plot
@@ -198,15 +200,12 @@ def plot(
     ymax = _broadcast_(ymax, ndataset)
     xmin = _broadcast_(xmin, ndataset)
     xmax = _broadcast_(xmax, ndataset)
-    if subplots_assignment is None:
-        subplots_assignment = range(ndataset)
+    subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
     for dataset in range(ndataset):
+        print("--")
+        color = cc.glasbey_bw[dataset]
         if subplots is not None:
-            _setup_subplot_(subplots,
-                            subplots_assignment[dataset],
-                            title=title,
-                            xlabels=xlabels,
-                            ylabels=ylabels)
+            color = subfactory.setup(dataset, grid=grid)
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data[f"x{0}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
@@ -218,7 +217,6 @@ def plot(
         print(f"{y=}")
         label = labels[dataset] if labels is not None else None
         print(f"{label=}")
-        color = cc.glasbey_bw[dataset]
         pltobj = plt.plot(x, y, label=label, c=color, alpha=alpha)
         plot_extremas(extremas, dataset, y, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
@@ -266,13 +264,10 @@ def plot_std(
     xmax = _broadcast_(xmax, ndataset)
     if subplots_assignment is None:
         subplots_assignment = range(ndataset)
+    subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
     for dataset in range(ndataset):
         if subplots is not None:
-            _setup_subplot_(subplots,
-                            subplots_assignment[dataset],
-                            title=title,
-                            xlabels=xlabels,
-                            ylabels=ylabels)
+            color = subfactory.setup(dataset, grid=False)
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data[f"x{0}"]
         y = data[f"y{dataset}"]
         e = data[f"e{dataset}"]
@@ -430,15 +425,11 @@ def scatter(data,
     print("######## scatter ########")
     if subplots_assignment is None:
         subplots_assignment = range(ndataset)
+    subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
     for dataset in range(ndataset):
         print(f"{dataset=}")
         if subplots is not None:
-            _setup_subplot_(subplots,
-                            subplots_assignment[dataset],
-                            title=title,
-                            xlabels=xlabels,
-                            ylabels=ylabels,
-                            orthonormal=orthonormal)
+            color = subfactory.setup(dataset, grid=False)
         if f"x{dataset}" in data:
             x = data[f"x{dataset}"]
         else:
@@ -713,17 +704,44 @@ def _broadcast_(inp, n):
     return inp
 
 
-def _setup_subplot_(subplots, dataset, title=None, xlabels=None, ylabels=None, orthonormal=False):
-    if title is not None:
-        plt.title(title)
-    subplot = subplots + [(dataset + 1)]
-    print(f"{subplot=}")
-    plt.subplot(*subplot)
-    if xlabels is not None:
-        plt.xlabel(xlabels[dataset])
-    if ylabels is not None:
-        plt.ylabel(ylabels[dataset])
+class Subplots_factory(object):
+    def __init__(self, subplots, subplots_assignment, ndataset, xlabels=None, ylabels=None, titles=None) -> None:
+        self.subplots = subplots
+        self.subplot_dataset = defaultdict(lambda: -1)
+        self.subplot_index = -1
+        if subplots_assignment is None:
+            self.subplots_assignment = range(ndataset)
+        else:
+            self.subplots_assignment = subplots_assignment
+        self.titles = titles
+        self.xlabels = xlabels
+        self.ylabels = ylabels
 
+    def setup(self, dataset, grid=False):
+        subplot_assignment = self.subplots_assignment[dataset]
+        self.subplot_dataset[subplot_assignment] += 1
+        if self.subplot_dataset[subplot_assignment] == 0:
+            self.subplot_index += 1
+        if self.titles is not None:
+            _title_ = self.titles[self.subplot_index]
+            print(f"{_title_=}")
+        else:
+            _title_ = None
+        color = cc.glasbey_bw[self.subplot_dataset[subplot_assignment]]
+        subplot = self.subplots + [(subplot_assignment + 1)]
+        print(f"{subplot=}")
+        plt.subplot(*subplot)
+        if self.xlabels is not None:
+            plt.xlabel(self.xlabels[self.subplot_index])
+        if self.ylabels is not None:
+            plt.ylabel(self.ylabels[self.subplot_index])
+        if _title_ is not None:
+            plt.title(_title_)
+        if grid:
+            plt.grid(which='both', alpha=0.25, axis='both')
+            plt.grid(which='major', alpha=1., axis='both')
+        plt.autoscale()
+        return color
 
 def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None, xmin=None, xmax=None):
     if xmin is None:
@@ -786,6 +804,7 @@ def moving_average(
     xmin=None,
     xmax=None,
     title=None,
+    grid=None,
 ):
     print("######## moving_average ########")
 
@@ -795,15 +814,10 @@ def moving_average(
     ymax = _broadcast_(ymax, ndataset)
     xmin = _broadcast_(xmin, ndataset)
     xmax = _broadcast_(xmax, ndataset)
-    if subplots_assignment is None:
-        subplots_assignment = range(ndataset)
+    subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
     for dataset in range(ndataset):
         if subplots is not None:
-            _setup_subplot_(subplots,
-                            subplots_assignment[dataset],
-                            title=title,
-                            xlabels=xlabels,
-                            ylabels=ylabels)
+            color = subfactory.setup(dataset, grid=False)
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
@@ -1259,7 +1273,7 @@ if __name__ == "__main__":
     parser.add_argument("--orthonormal",
                         help="Set an orthonormal basis",
                         action="store_true")
-    parser.add_argument("--title", help="Title of the plot", type=str)
+    parser.add_argument("--title", help="Title of the plot", type=str, nargs="+")
     parser.add_argument(
         "--labels",
         nargs="+",
@@ -1448,6 +1462,7 @@ if __name__ == "__main__":
                 xmin=args.xmin,
                 xmax=args.xmax,
                 title=args.title,
+                grid=args.grid,
             )
         elif args.pca:
             plot_pca(DATA,
@@ -1524,6 +1539,7 @@ if __name__ == "__main__":
                 ncols_legend=args.ncols,
                 fontsize=args.fontsize,
                 alpha=args.alpha,
+                grid=args.grid,
             )
 
         if args.xlabel is not None:
