@@ -317,7 +317,7 @@ def apply_repulsion(
 
     def lossfunc(x, repulsion):
         xmat = torch.cdist(x, x)
-        repulsive_mask = xmat < repulsion
+        repulsive_mask = torch.logical_or(xmat < repulsion, torch.eye(xmat.shape[0]))
         loss_rep = torch.mean((xmat[repulsive_mask] - repulsion)**2)
         return loss_rep
 
