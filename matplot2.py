@@ -25,6 +25,7 @@ from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
 from sklearn.neighbors import KernelDensity
 
+import textalloc as ta
 from sliding import Sliding_op
 
 # Reading data from a png with large number of points:
@@ -381,7 +382,7 @@ def graph(data, ndataset, size=20, labels=None, fontsize="medium"):
         else:
             z = None
         if f"m{dataset}" not in data:
-            plt.scatter(x, y, c=z, s=size)
+            p = plt.scatter(x, y, c=z, s=size)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -390,7 +391,7 @@ def graph(data, ndataset, size=20, labels=None, fontsize="medium"):
                             markers=markers,
                             size=size,
                             labels=labels)
-        plot_texts(data, dataset, fontsize=fontsize)
+        plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         edge_labels = np.unique(data[f"ed{dataset}"])
         for edge_label in edge_labels:
             sel = (data[f"ed{dataset}"] == edge_label)
@@ -449,13 +450,12 @@ def scatter(data,
             print(f"{z.shape=}")
         else:
             z = None
-        plot_texts(data, dataset, fontsize=fontsize)
         if f"m{dataset}" not in data:
             if labels is not None:
                 label = labels[dataset]
             else:
                 label = None
-            plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
+            p = plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -464,6 +464,7 @@ def scatter(data,
                             markers=markers,
                             size=size,
                             labels=labels)
+        plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         if dopcr:
             pcr(x, y)
         if orthonormal:
@@ -621,23 +622,15 @@ def boxplot_xy(data, ndataset, nbins):
     ax.set_xticklabels([f"{e[0]:.3g}:{e[1]:.3g}" for e in windows])  # set the labels for the tick marks
     print("############################")
 
-def plot_texts(data, dataset, fontsize):
+def plot_texts(data, dataset, fontsize, ax):
     if f"t{dataset}" in data:
         texts = data[f"t{dataset}"]
         x = data[f"x{dataset}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
         y = tofloat(y)
-        for xval, yval, t in zip(x, y, texts):
-            if t != "-":
-                plttext = plt.text(x=xval,
-                                   y=yval,
-                                   s=t,
-                                   fontsize=fontsize,
-                                   zorder=101)
-                # Add white line around text
-                plttext.set_path_effects(
-                    [pe.withStroke(linewidth=2, foreground="w")])
+        fontsize = [fontsize]*len(x)
+        ta.allocate(ax, x, y, texts, x_scatter=x, y_scatter=y,textsize=fontsize)
 
 
 KNOWN_LABELS = set()
