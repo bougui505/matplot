@@ -419,7 +419,9 @@ def scatter(data,
             title=None,
             xlabels=None,
             ylabels=None,
-            orthonormal=False):
+            orthonormal=False,
+            xjitter=0,
+            yjitter=0):
     """
     Scatter plot
     """
@@ -455,7 +457,15 @@ def scatter(data,
                 label = labels[dataset]
             else:
                 label = None
-            p = plt.scatter(x, y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
+            if xjitter > 0:
+                epsilon_x = np.random.uniform(-xjitter, xjitter, len(x))
+            else:
+                epsilon_x = 0.0
+            if yjitter > 0:
+                epsilon_y = np.random.uniform(-yjitter, yjitter, len(x))
+            else:
+                epsilon_y = 0.0
+            p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -1373,6 +1383,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--vlines", help="Plot vertical lines at the given positions", nargs="+", type=int)
     parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=int)
+    parser.add_argument("--xjitter", help="Amplitude of the uniform jitter to add to x-values", type=float, default=0.0)
+    parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
     args = parser.parse_args()
 
     if args.vlines is not None:
@@ -1437,7 +1449,9 @@ if __name__ == "__main__":
                     cmap=args.cmap,
                     orthonormal=args.orthonormal,
                     xlabels=args.xlabel,
-                    ylabels=args.ylabel)
+                    ylabels=args.ylabel,
+                    xjitter=args.xjitter,
+                    yjitter=args.yjitter)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
