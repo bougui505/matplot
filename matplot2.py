@@ -420,12 +420,20 @@ def scatter(data,
             xlabels=None,
             ylabels=None,
             orthonormal=False,
+            xmin=None,
+            xmax=None,
+            ymin=None,
+            ymax=None,
             xjitter=0,
             yjitter=0):
     """
     Scatter plot
     """
     print("######## scatter ########")
+    ymin = _broadcast_(ymin, ndataset)
+    ymax = _broadcast_(ymax, ndataset)
+    xmin = _broadcast_(xmin, ndataset)
+    xmax = _broadcast_(xmax, ndataset)
     if subplots_assignment is None:
         subplots_assignment = range(ndataset)
     subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
@@ -479,6 +487,9 @@ def scatter(data,
             pcr(x, y)
         if orthonormal:
             plt.axis("equal")
+        if subplots is not None:
+            set_x_lim(xmin[dataset], xmax[dataset])
+            set_y_lim(ymin[dataset], ymax[dataset])
     if labels is not None:
         plt.legend()
     print("#########################")
@@ -1450,6 +1461,10 @@ if __name__ == "__main__":
                     orthonormal=args.orthonormal,
                     xlabels=args.xlabel,
                     ylabels=args.ylabel,
+                    ymin=args.ymin,
+                    ymax=args.ymax,
+                    xmin=args.xmin,
+                    xmax=args.xmax,
                     xjitter=args.xjitter,
                     yjitter=args.yjitter)
         elif args.moving_average is not None:
