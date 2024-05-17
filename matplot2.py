@@ -1465,6 +1465,7 @@ if __name__ == "__main__":
                     ymax=args.ymax,
                     xmin=args.xmin,
                     xmax=args.xmax,
+                    title=args.title,
                     xjitter=args.xjitter,
                     yjitter=args.yjitter)
         elif args.moving_average is not None:
