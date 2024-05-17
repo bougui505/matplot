@@ -424,6 +424,7 @@ def scatter(data,
             xmax=None,
             ymin=None,
             ymax=None,
+            class_average=False,
             xjitter=0,
             yjitter=0):
     """
@@ -474,6 +475,17 @@ def scatter(data,
             else:
                 epsilon_y = 0.0
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
+            if class_average:
+                xmean, ymean = [], []
+                for x_ in np.unique(x):
+                    selx = x==x_
+                    xmean.append(x_) # x[selx].mean()
+                    ymean.append(y[selx].mean())
+                if xjitter == 0:
+                    plt.scatter(xmean, ymean, marker="_")
+                else:
+                    for xm, ym in zip(xmean, ymean):
+                        plt.plot([xm-xjitter,xm+xjitter], [ym, ym], color="salmon")
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
@@ -1396,6 +1408,7 @@ if __name__ == "__main__":
     parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=int)
     parser.add_argument("--xjitter", help="Amplitude of the uniform jitter to add to x-values", type=float, default=0.0)
     parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
+    parser.add_argument("--class_average", help='Perform a class average of y-values per x-value. Useful for jitter plot (see: --xjitter, --xjitter)', action="store_true")
     args = parser.parse_args()
 
     if args.vlines is not None:
@@ -1466,6 +1479,7 @@ if __name__ == "__main__":
                     xmin=args.xmin,
                     xmax=args.xmax,
                     title=args.title,
+                    class_average=args.class_average,
                     xjitter=args.xjitter,
                     yjitter=args.yjitter)
         elif args.moving_average is not None:
