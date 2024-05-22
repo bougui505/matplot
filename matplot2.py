@@ -474,7 +474,7 @@ def scatter(data,
                 epsilon_y = np.random.uniform(-yjitter, yjitter, len(x))
             else:
                 epsilon_y = 0.0
-            if cmap is not None and yjitter > 0:
+            if cmap is not None and (xjitter > 0 or yjitter > 0):
                 x_new = []
                 y_new = []
                 z = []
@@ -494,10 +494,10 @@ def scatter(data,
                     xmean.append(x_) # x[selx].mean()
                     ymean.append(y[selx].mean())
                 if xjitter == 0:
-                    plt.scatter(xmean, ymean, marker="_")
+                    plt.plot(xmean, ymean, color="black")
                 else:
                     for xm, ym in zip(xmean, ymean):
-                        plt.plot([xm-xjitter,xm+xjitter], [ym, ym], color="salmon")
+                        plt.plot([xm-xjitter,xm+xjitter], [ym, ym], color="black")
         else:
             markers = data[f"m{dataset}"]
             scatter_markers(x=x,
