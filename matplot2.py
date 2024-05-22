@@ -1275,7 +1275,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--cmap",
-        help="colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html",
+        help="colormap to use. See: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html or https://colorcet.holoviz.org/user_guide/index.html",
     )
     parser.add_argument("-d",
                         "--delimiter",
