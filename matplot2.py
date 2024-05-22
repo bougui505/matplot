@@ -474,6 +474,18 @@ def scatter(data,
                 epsilon_y = np.random.uniform(-yjitter, yjitter, len(x))
             else:
                 epsilon_y = 0.0
+            if cmap is not None and yjitter > 0:
+                x_new = []
+                y_new = []
+                z = []
+                for x_ in np.unique(x):
+                    selx = x==x_
+                    kde = KernelDensity(kernel="gaussian", bandwidth="scott").fit(y[selx][:, None])  # type: ignore
+                    kde_y = np.exp(kde.score_samples(y[selx][:, None]))
+                    x_new.extend([x_]*(selx.sum()))
+                    y_new.extend(y[selx])
+                    z.extend(kde_y)
+                x, y = np.asarray(x_new), np.asarray(y_new)
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
             if class_average:
                 xmean, ymean = [], []

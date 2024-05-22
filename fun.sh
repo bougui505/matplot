@@ -183,3 +183,11 @@ test_plot2_xy (){
         =(echo "") \
     | plot2 --xy
 }
+
+test_jitter(){
+    cat \
+        =(np --nopipe -c "y=np.random.normal(loc=0, size=1000);x=np.ones(1000)*0;print_(np.c_[x, y])") \
+        =(np --nopipe -c "y=np.random.normal(loc=3, size=1000);x=np.ones(1000)*1;print_(np.c_[x, y])") \
+        =(np --nopipe -c "y=np.random.normal(loc=5, size=1000);x=np.ones(1000)*2;print_(np.c_[x, y])") \
+    | plot2 --scatter --fields x y --xjitter 0.2 --yjitter 0.01 --cmap "coolwarm"
+}
