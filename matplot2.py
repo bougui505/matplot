@@ -747,7 +747,6 @@ class Subplots_factory(object):
     def __init__(self, subplots, subplots_assignment, ndataset, xlabels=None, ylabels=None, titles=None) -> None:
         self.subplots = subplots
         self.subplot_dataset = defaultdict(lambda: -1)
-        self.subplot_index = -1
         if subplots_assignment is None:
             self.subplots_assignment = range(ndataset)
         else:
@@ -759,10 +758,8 @@ class Subplots_factory(object):
     def setup(self, dataset, grid=False):
         subplot_assignment = self.subplots_assignment[dataset]
         self.subplot_dataset[subplot_assignment] += 1
-        if self.subplot_dataset[subplot_assignment] == 0:
-            self.subplot_index += 1
         if self.titles is not None:
-            _title_ = self.titles[self.subplot_index]
+            _title_ = self.titles[subplot_assignment]
             print(f"{_title_=}")
         else:
             _title_ = None
@@ -771,9 +768,9 @@ class Subplots_factory(object):
         print(f"{subplot=}")
         plt.subplot(*subplot)
         if self.xlabels is not None:
-            plt.xlabel(self.xlabels[self.subplot_index])
+            plt.xlabel(self.xlabels[subplot_assignment])
         if self.ylabels is not None:
-            plt.ylabel(self.ylabels[self.subplot_index])
+            plt.ylabel(self.ylabels[subplot_assignment])
         if _title_ is not None:
             plt.title(_title_)
         if grid:
