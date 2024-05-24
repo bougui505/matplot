@@ -24,6 +24,7 @@ from PIL.PngImagePlugin import PngInfo
 from scipy.linalg import eigh
 from scipy.optimize import minimize_scalar
 from sklearn.neighbors import KernelDensity
+from tqdm import tqdm
 
 import textalloc as ta
 from sliding import Sliding_op
@@ -478,7 +479,7 @@ def scatter(data,
                 x_new = []
                 y_new = []
                 z = []
-                for x_ in np.unique(x):
+                for x_ in tqdm(np.unique(x), desc="KDE"):
                     selx = x==x_
                     kde = KernelDensity(kernel="gaussian", bandwidth="scott").fit(y[selx][:, None])  # type: ignore
                     kde_y = np.exp(kde.score_samples(y[selx][:, None]))
