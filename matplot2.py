@@ -427,7 +427,8 @@ def scatter(data,
             ymax=None,
             class_average=False,
             xjitter=0,
-            yjitter=0):
+            yjitter=0,
+            semilog=None):
     """
     Scatter plot
     """
@@ -513,6 +514,11 @@ def scatter(data,
         if orthonormal:
             plt.axis("equal")
         if subplots is not None:
+            if semilog is not None:
+                if "x" in semilog:
+                    plt.xscale("log")
+                if "y" in semilog:
+                    plt.yscale("log")
             set_x_lim(xmin[dataset], xmax[dataset])
             set_y_lim(ymin[dataset], ymax[dataset])
     if labels is not None:
@@ -1491,7 +1497,8 @@ if __name__ == "__main__":
                     title=args.title,
                     class_average=args.class_average,
                     xjitter=args.xjitter,
-                    yjitter=args.yjitter)
+                    yjitter=args.yjitter,
+                    semilog=args.semilog)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
