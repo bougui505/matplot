@@ -428,7 +428,8 @@ def scatter(data,
             class_average=False,
             xjitter=0,
             yjitter=0,
-            semilog=None):
+            semilog=None,
+            grid=False):
     """
     Scatter plot
     """
@@ -443,7 +444,7 @@ def scatter(data,
     for dataset in range(ndataset):
         print(f"{dataset=}")
         if subplots is not None:
-            color = subfactory.setup(dataset, grid=False)
+            color = subfactory.setup(dataset, grid=grid)
         if f"x{dataset}" in data:
             x = data[f"x{dataset}"]
         else:
@@ -1498,7 +1499,8 @@ if __name__ == "__main__":
                     class_average=args.class_average,
                     xjitter=args.xjitter,
                     yjitter=args.yjitter,
-                    semilog=args.semilog)
+                    semilog=args.semilog,
+                    grid=args.grid)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
