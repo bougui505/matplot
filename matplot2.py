@@ -523,7 +523,7 @@ def scatter(data,
             set_x_lim(xmin[dataset], xmax[dataset])
             set_y_lim(ymin[dataset], ymax[dataset])
     if labels is not None:
-        plt.legend()
+        plt.legend(fontsize=fontsize)
     print("#########################")
 
 def pcr(x, y):
