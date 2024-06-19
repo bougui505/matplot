@@ -849,6 +849,7 @@ def moving_average(
     xmax=None,
     title=None,
     grid=None,
+    fontsize=None
 ):
     print("######## moving_average ########")
 
@@ -877,7 +878,7 @@ def moving_average(
         pltobj = plt.plot(x, ma, label=label)
         plot_extremas(extremas, dataset, ma, pltobj, xdata=x, xmin=xmin, xmax=xmax)
         if labels is not None:
-            plt.legend()
+            plt.legend(fontsize=fontsize)
         if subplots is not None:
             if semilog is not None:
                 if "x" in semilog:
@@ -1520,6 +1521,7 @@ if __name__ == "__main__":
                 xmax=args.xmax,
                 title=args.title,
                 grid=args.grid,
+                fontsize=args.fontsize
             )
         elif args.pca:
             plot_pca(DATA,
