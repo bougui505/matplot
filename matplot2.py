@@ -806,12 +806,13 @@ def plot_extremas(extremas, dataset, ydata, pltobj, xdata=None, xmin=None, xmax=
         xsel = xdata <= xmax[dataset]
         xdata = xdata[xsel]
         ydata = ydata[xsel]
-    if extrema == "min":
-        v = np.nanmin(ydata)
-        xv = xdata[np.nanargmin(ydata)]
-    else:
-        v = np.nanmax(ydata)
-        xv = xdata[np.nanargmax(ydata)]
+    if extrema is not None:
+        if extrema == "min":
+            v = np.nanmin(ydata)
+            xv = xdata[np.nanargmin(ydata)]
+        else:
+            v = np.nanmax(ydata)
+            xv = xdata[np.nanargmax(ydata)]
     if extrema is not None:
         # color of the last plot
         color = pltobj[0].get_color()
