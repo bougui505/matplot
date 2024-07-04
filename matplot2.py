@@ -238,6 +238,22 @@ def plot(
             set_y_lim(ymin[dataset], ymax[dataset])
     print("######################")
 
+def fill_between(data, fill_between_assignment):
+    print('######## fill_between ########')
+    fill_between_assignment = np.asarray(fill_between_assignment).reshape((-1, 2))
+    for i, j in fill_between_assignment:
+        x = data[f"x{i}"] if f"x{i}" in data else data[f"x{0}"]
+        yi = data[f"y{i}"]
+        yj = data[f"y{j}"]
+        x = tofloat(x)
+        yi = tofloat(yi)
+        yj = tofloat(yj)
+        print(f"{x=}")
+        print(f"{yi=}")
+        print(f"{yj=}")
+        plt.fill_between(x=x, y1=yi, y2=yj, alpha=0.25)  # type: ignore
+    print('##############################')
+
 def plot_std(
     data,
     ndataset,
@@ -1428,6 +1444,7 @@ if __name__ == "__main__":
     parser.add_argument("--xjitter", help="Amplitude of the uniform jitter to add to x-values", type=float, default=0.0)
     parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
     parser.add_argument("--class_average", help='Perform a class average of y-values per x-value. Useful for jitter plot (see: --xjitter, --xjitter)', action="store_true")
+    parser.add_argument("--fill_between", help='Give the index of the dataset to fill between. E.g. 0 1 2 3 will fill the area between the dataset 0 and 1 and 2 and 3', type=int, nargs="+")
     args = parser.parse_args()
 
     if args.vlines is not None:
@@ -1600,6 +1617,8 @@ if __name__ == "__main__":
                 alpha=args.alpha,
                 grid=args.grid,
             )
+        if args.fill_between is not None:
+            fill_between(data=DATA, fill_between_assignment=args.fill_between)
 
         if args.xlabel is not None:
             plt.xlabel(args.xlabel[-1])
