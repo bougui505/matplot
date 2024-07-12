@@ -802,6 +802,8 @@ class Subplots_factory(object):
         if args.hlines is not None:
             for yv in args.hlines:
                 plt.axhline(y=yv, zorder=10, color='gray')
+        if args.text is not None:
+            plot_text(args.text)
         plt.autoscale()
         return color
 
