@@ -799,6 +799,9 @@ class Subplots_factory(object):
         if grid:
             plt.grid(which='both', alpha=0.25, axis='both')
             plt.grid(which='major', alpha=1., axis='both')
+        if args.hlines is not None:
+            for yv in args.hlines:
+                plt.axhline(y=yv, zorder=10, color='gray')
         plt.autoscale()
         return color
 
@@ -1440,7 +1443,7 @@ if __name__ == "__main__":
         help="Read plot data from the given png saved image using the --save option",
     )
     parser.add_argument("--vlines", help="Plot vertical lines at the given positions", nargs="+", type=int)
-    parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=int)
+    parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=float)
     parser.add_argument("--xjitter", help="Amplitude of the uniform jitter to add to x-values", type=float, default=0.0)
     parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
     parser.add_argument("--class_average", help='Perform a class average of y-values per x-value. Useful for jitter plot (see: --xjitter, --xjitter)', action="store_true")
