@@ -1444,7 +1444,7 @@ if __name__ == "__main__":
         "--read_data",
         help="Read plot data from the given png saved image using the --save option",
     )
-    parser.add_argument("--vlines", help="Plot vertical lines at the given positions", nargs="+", type=int)
+    parser.add_argument("--vlines", help="Plot vertical lines at the given positions", nargs="+", type=float)
     parser.add_argument("--hlines", help="Plot horizontal lines at the given positions", nargs="+", type=float)
     parser.add_argument("--xjitter", help="Amplitude of the uniform jitter to add to x-values", type=float, default=0.0)
     parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
