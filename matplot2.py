@@ -16,6 +16,7 @@ from collections import defaultdict
 import colorcet as cc
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
+import numexpr as ne
 import numpy as np
 import scipy.stats
 from numpy import linalg
@@ -1239,6 +1240,30 @@ def set_y_lim(ymin: float, ymax: float):
     axes.set_ylim([ymin, ymax])
 
 
+def plot_functions(expression_strings, xlims, npts=100, func_label=None, fontsize=None):
+    """
+    Plot a list of functions given as a list of expression strings
+    """
+    if func_label is None:
+        func_label = [None] * len(expression_strings)
+    for expression_string, label in zip(expression_strings, func_label):
+        plot_function(expression_string, xlims, npts=npts, label=label, fontsize=fontsize)
+
+
+def plot_function(expression_string, xlims, npts=100, color=None, label=None, fontsize=None):
+    """
+    Plot a function given as an expression string
+    """
+    if label is None:
+        label = expression_string
+    if "x" not in expression_string:
+        expression_string = expression_string + "+0*x"
+    x = np.linspace(xlims[0], xlims[1], num=npts)
+    y = ne.evaluate(expression_string)
+    plt.plot(x, y, label=label, color=color)
+    plt.legend(fontsize=fontsize)
+    return x, y
+
 if __name__ == "__main__":
     import argparse
 
@@ -1450,6 +1475,13 @@ if __name__ == "__main__":
     parser.add_argument("--yjitter", help="Amplitude of the uniform jitter to add to y-values", type=float, default=0.0)
     parser.add_argument("--class_average", help='Perform a class average of y-values per x-value. Useful for jitter plot (see: --xjitter, --xjitter)', action="store_true")
     parser.add_argument("--fill_between", help='Give the index of the dataset to fill between. E.g. 0 1 2 3 will fill the area between the dataset 0 and 1 and 2 and 3', type=int, nargs="+")
+    parser.add_argument(
+        "--func",
+        type=str,
+        default=None,
+        action="append",
+        help="Evaluate and plot the function given as a string. If you want to just plot the function without any piped data just run: 'cat /dev/null | plot -f 'x**2' --xmin 0 --xmax 10'. Multiple functions can be plotted at the same time by giving multiple expression with multiple -f option passed. Numpy functions can be used and given without np prefix (e.g. exp)",
+    )
     args = parser.parse_args()
 
     if args.vlines is not None:
@@ -1640,6 +1672,9 @@ if __name__ == "__main__":
         if args.grid:
             plt.grid(which='both', alpha=0.25)
             plt.grid(which='major', alpha=1.)
+        if args.func is not None:
+            xmin, xmax = plt.gca().get_xlim()  # type: ignore
+            plot_functions(expression_strings=args.func, xlims=[xmin, xmax], fontsize=args.fontsize)
         if args.save is None:
             plt.show()
         else:
