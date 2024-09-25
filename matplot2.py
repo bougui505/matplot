@@ -446,7 +446,9 @@ def scatter(data,
             xjitter=0,
             yjitter=0,
             semilog=None,
-            grid=False):
+            grid=False,
+            plot_xmean=False,
+            plot_ymean=False):
     """
     Scatter plot
     """
@@ -507,6 +509,18 @@ def scatter(data,
                     z.extend(kde_y)
                 x, y = np.asarray(x_new), np.asarray(y_new)
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
+            if plot_xmean:
+                xmean = float(x.mean())
+                plt.axvline(x=xmean,  # type: ignore
+                            color="black",
+                            linestyle="dotted",
+                            linewidth=1.0)
+            if plot_ymean:
+                ymean = float(y.mean())
+                plt.axhline(y=ymean,  # type: ignore
+                            color="black",
+                            linestyle="dotted",
+                            linewidth=1.0)
             if class_average:
                 xmean, ymean = [], []
                 for x_ in np.unique(x):
@@ -1294,6 +1308,8 @@ if __name__ == "__main__":
         action="store_true",
         help="Scatter plot of the (x,y) data",
     )
+    parser.add_argument("--xmean", help="Plot a vertical bar at the position of the mean values of x", action="store_true")
+    parser.add_argument("--ymean", help="Plot a vertical bar at the position of the mean values of y", action="store_true")
     parser.add_argument("--heatmap", action="store_true", help="Heatmap plotting")
     parser.add_argument("--pcr", help="Principal Component Regression. Linear regression using PCA", action="store_true")
     parser.add_argument(
@@ -1556,7 +1572,9 @@ if __name__ == "__main__":
                     xjitter=args.xjitter,
                     yjitter=args.yjitter,
                     semilog=args.semilog,
-                    grid=args.grid)
+                    grid=args.grid,
+                    plot_xmean=args.xmean,
+                    plot_ymean=args.ymean)
         elif args.moving_average is not None:
             moving_average(
                 DATA,
