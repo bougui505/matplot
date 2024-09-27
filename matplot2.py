@@ -1023,6 +1023,10 @@ def plot_pca(data,
     scale: scale of the ellipses
     """
     print("######## plot_pca ########")
+    ymin = _broadcast_(ymin, ndataset)
+    ymax = _broadcast_(ymax, ndataset)
+    xmin = _broadcast_(xmin, ndataset)
+    xmax = _broadcast_(xmax, ndataset)
     Sigma_Alist = []
     centerlist = []
     cmap = plt.get_cmap(plt.get_cmap().name)
@@ -1032,12 +1036,6 @@ def plot_pca(data,
         zorders = None
     for dataset in range(ndataset):
         print(f"{dataset=}")
-        xm = xmin[dataset] if xmin is not None else None
-        xM = xmax[dataset] if xmax is not None else None
-        ym = ymin[dataset] if ymin is not None else None
-        yM = ymax[dataset] if ymax is not None else None
-        set_x_lim(xm, xM)
-        set_y_lim(ym, yM)
         x = data[f"x{dataset}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
@@ -1121,6 +1119,16 @@ def plot_pca(data,
                 color = cmap(zval / zmax)
             plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
             plot_texts(data, dataset, fontsize=fontsize, ax=scatter_obj.axes)
+            xm = xmin[dataset] if xmin[dataset] is not None else None
+            xM = xmax[dataset] if xmax[dataset] is not None else None
+            ym = ymin[dataset] if ymin[dataset] is not None else None
+            yM = ymax[dataset] if ymax[dataset] is not None else None
+            print(f"{xm=}")
+            print(f"{xM=}")
+            print(f"{ym=}")
+            print(f"{yM=}")
+            set_x_lim(xm, xM)
+            set_y_lim(ym, yM)
             if plot_xmean:
                 doplot_xmean(x, fontsize)
             if plot_ymean:
@@ -1631,7 +1639,11 @@ if __name__ == "__main__":
                      size=args.size,  # type: ignore
                      plot_xmean=args.xmean,
                      plot_ymean=args.ymean,
-                     fontsize=args.fontsize)
+                     fontsize=args.fontsize,
+                     xmin=args.xmin,
+                     xmax=args.xmax,
+                     ymin=args.ymin,
+                     ymax=args.ymax)
         elif args.no_overlap:
             plot_pca(
                 DATA,
