@@ -1018,7 +1018,10 @@ def plot_pca(data,
              plot_overlap=True,
              scale=1.0,
              size=20.0,
-             labels=None):
+             labels=None,
+             plot_xmean=False,
+             plot_ymean=False,
+             fontsize=None):
     """
     Compute the pca for each dataset
     scale: scale of the ellipses
@@ -1115,6 +1118,19 @@ def plot_pca(data,
             else:
                 color = cmap(zval / zmax)
             plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
+            plot_texts(data, dataset, fontsize=fontsize, ax=scatter_obj.axes)
+            if plot_xmean:
+                xmean = float(x.mean())
+                plt.axvline(x=xmean,  # type: ignore
+                            color="black",
+                            linestyle="dotted",
+                            linewidth=1.0)
+            if plot_ymean:
+                ymean = float(y.mean())
+                plt.axhline(y=ymean,  # type: ignore
+                            color="black",
+                            linestyle="dotted",
+                            linewidth=1.0)
             print("--")
     if labels is not None:
         plt.legend()
@@ -1600,16 +1616,21 @@ if __name__ == "__main__":
                      NDATASET,
                      plot_overlap=True,
                      scale=args.scale,
-                     size=args.size)
+                     size=args.size,  # type: ignore
+                     plot_xmean=args.xmean,
+                     plot_ymean=args.ymean,
+                     fontsize=args.fontsize)
         elif args.no_overlap:
             plot_pca(
                 DATA,
                 NDATASET,
                 plot_overlap=False,
                 scale=args.scale,
-                size=args.size,
+                size=args.size,  # type: ignore
                 labels=args.labels,
-            )
+                plot_xmean=args.xmean,
+                plot_ymean=args.ymean,
+                fontsize=args.fontsize)
         elif args.histogram:
             histogram(DATA,
                       NDATASET,
