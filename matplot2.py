@@ -509,10 +509,6 @@ def scatter(data,
                     z.extend(kde_y)
                 x, y = np.asarray(x_new), np.asarray(y_new)
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
-            if plot_xmean:
-                doplot_xmean(x, fontsize)
-            if plot_ymean:
-                doplot_ymean(y, fontsize)
             if class_average:
                 xmean, ymean = [], []
                 for x_ in np.unique(x):
@@ -545,6 +541,20 @@ def scatter(data,
                     plt.yscale("log")
             set_x_lim(xmin[dataset], xmax[dataset])
             set_y_lim(ymin[dataset], ymax[dataset])
+        xm = xmin[dataset] if xmin[dataset] is not None else None
+        xM = xmax[dataset] if xmax[dataset] is not None else None
+        ym = ymin[dataset] if ymin[dataset] is not None else None
+        yM = ymax[dataset] if ymax[dataset] is not None else None
+        print(f"{xm=}")
+        print(f"{xM=}")
+        print(f"{ym=}")
+        print(f"{yM=}")
+        set_x_lim(xm, xM)
+        set_y_lim(ym, yM)
+        if plot_xmean:
+            doplot_xmean(x, fontsize)
+        if plot_ymean:
+            doplot_ymean(y, fontsize)
     if labels is not None:
         plt.legend(fontsize=fontsize)
     print("#########################")
