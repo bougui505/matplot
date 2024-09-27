@@ -543,8 +543,8 @@ def scatter(data,
         plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         if dopcr:
             pcr(x, y)
-        if orthonormal:
-            plt.axis("equal")
+        # if orthonormal:
+        #     plt.axis("equal")
         if subplots is not None:
             if semilog is not None:
                 if "x" in semilog:
@@ -1021,7 +1021,11 @@ def plot_pca(data,
              labels=None,
              plot_xmean=False,
              plot_ymean=False,
-             fontsize=None):
+             fontsize=None,
+             xmin=None,
+             xmax=None,
+             ymin=None,
+             ymax=None):
     """
     Compute the pca for each dataset
     scale: scale of the ellipses
@@ -1036,6 +1040,12 @@ def plot_pca(data,
         zorders = None
     for dataset in range(ndataset):
         print(f"{dataset=}")
+        xm = xmin[dataset] if xmin is not None else None
+        xM = xmax[dataset] if xmax is not None else None
+        ym = ymin[dataset] if ymin is not None else None
+        yM = ymax[dataset] if ymax is not None else None
+        set_x_lim(xm, xM)
+        set_y_lim(ym, yM)
         x = data[f"x{dataset}"]
         y = data[f"y{dataset}"]
         x = tofloat(x)
@@ -1145,13 +1155,15 @@ def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
         s=100,
         color=color,
         edgecolors="w",
-        zorder=99,
+        zorder=-99,
     )
     plt.plot(
         ellipse[0],
         ellipse[1],
         color=color,
-        path_effects=[pe.Stroke(linewidth=5, foreground="w"),
+        linewidth=1,
+        linestyle="--",
+        path_effects=[pe.Stroke(linewidth=2, foreground="w"),
                       pe.Normal()],
     )
     # see: https://stackoverflow.com/a/35762000/1679629
@@ -1532,8 +1544,6 @@ if __name__ == "__main__":
     if args.aspect_ratio is not None:
         print(f"{args.aspect_ratio=}")
         plt.figure(figsize=(args.aspect_ratio[0], args.aspect_ratio[1]))
-    if args.orthonormal:
-        plt.axis("equal")
     if "x" in args.semilog:
         plt.xscale("log")
     if "y" in args.semilog:
@@ -1714,6 +1724,8 @@ if __name__ == "__main__":
         if args.func is not None:
             xmin, xmax = plt.gca().get_xlim()  # type: ignore
             plot_functions(expression_strings=args.func, xlims=[xmin, xmax], fontsize=args.fontsize)
+        if args.orthonormal:
+            plt.gca().set_aspect('equal', adjustable='box')  # type: ignore
         if args.save is None:
             plt.show()
         else:
