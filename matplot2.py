@@ -510,17 +510,9 @@ def scatter(data,
                 x, y = np.asarray(x_new), np.asarray(y_new)
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
             if plot_xmean:
-                xmean = float(x.mean())
-                plt.axvline(x=xmean,  # type: ignore
-                            color="black",
-                            linestyle="dotted",
-                            linewidth=1.0)
+                doplot_xmean(x, fontsize)
             if plot_ymean:
-                ymean = float(y.mean())
-                plt.axhline(y=ymean,  # type: ignore
-                            color="black",
-                            linestyle="dotted",
-                            linewidth=1.0)
+                doplot_ymean(y, fontsize)
             if class_average:
                 xmean, ymean = [], []
                 for x_ in np.unique(x):
@@ -1130,21 +1122,31 @@ def plot_pca(data,
             plot_ellipse(ellipse, color, center=center, ax1=ax1, ax2=ax2)
             plot_texts(data, dataset, fontsize=fontsize, ax=scatter_obj.axes)
             if plot_xmean:
-                xmean = float(x.mean())
-                plt.axvline(x=xmean,  # type: ignore
-                            color="black",
-                            linestyle="dotted",
-                            linewidth=1.0)
+                doplot_xmean(x, fontsize)
             if plot_ymean:
-                ymean = float(y.mean())
-                plt.axhline(y=ymean,  # type: ignore
-                            color="black",
-                            linestyle="dotted",
-                            linewidth=1.0)
+                doplot_ymean(y, fontsize)
             print("--")
     if labels is not None:
         plt.legend()
     print("##########################")
+
+def doplot_xmean(x, fontsize):
+    xmean = float(x.mean())
+    plt.axvline(x=xmean,  # type: ignore
+                color="black",
+                linestyle="dotted",
+                linewidth=1.0)
+    yminax, ymaxax = plt.gca().get_ylim()  # type: ignore
+    plt.text(s=f"{xmean:.2g}", x=xmean, y=yminax+(ymaxax-yminax)/20, fontsize=fontsize)
+
+def doplot_ymean(y, fontsize):
+    ymean = float(y.mean())
+    plt.axhline(y=ymean,  # type: ignore
+                color="black",
+                linestyle="dotted",
+                linewidth=1.0)
+    xminax, xmaxax = plt.gca().get_xlim()  # type: ignore
+    plt.text(s=f"{ymean:.2g}", y=ymean, x=xminax+(xmaxax-xminax)/20, fontsize=fontsize)
 
 
 def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
