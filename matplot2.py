@@ -1162,7 +1162,7 @@ def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
         ellipse[1],
         color=color,
         linewidth=1,
-        linestyle="--",
+        linestyle="dotted",
         path_effects=[pe.Stroke(linewidth=2, foreground="w"),
                       pe.Normal()],
     )
@@ -1171,11 +1171,11 @@ def plot_ellipse(ellipse, color, center, ax1=None, ax2=None):
     if center is not None and ax1 is not None:
         xc, yc = center
         x1, y1 = center + ax1
-        plt.plot([xc, x1], [yc, y1], color="k", lw=1)
+        plt.plot([xc, x1], [yc, y1], color="k", lw=1, linestyle='dotted')
     if center is not None and ax2 is not None:
         xc, yc = center
         x2, y2 = center + ax2
-        plt.plot([xc, x2], [yc, y2], color="k", lw=1)
+        plt.plot([xc, x2], [yc, y2], color="k", lw=1, linestyle='dotted')
 
 
 def pca(X, outfilename=None):
