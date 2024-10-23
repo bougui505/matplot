@@ -528,7 +528,6 @@ def scatter(data,
                             markers=markers,
                             size=size,
                             labels=labels)
-        plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         if dopcr:
             pcr(x, y)
         # if orthonormal:
@@ -551,6 +550,7 @@ def scatter(data,
         print(f"{yM=}")
         set_x_lim(xm, xM)
         set_y_lim(ym, yM)
+        plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         if plot_xmean:
             doplot_xmean(x, fontsize)
         if plot_ymean:
