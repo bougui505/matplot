@@ -548,8 +548,10 @@ def scatter(data,
         print(f"{xM=}")
         print(f"{ym=}")
         print(f"{yM=}")
-        set_x_lim(xm, xM)
-        set_y_lim(ym, yM)
+        if xm is not None and xM is not None:
+            set_x_lim(xm, xM)
+        if ym is not None and yM is not None:
+            set_y_lim(ym, yM)
         plot_texts(data, dataset, fontsize=fontsize, ax=p.axes)
         if plot_xmean:
             doplot_xmean(x, fontsize)
