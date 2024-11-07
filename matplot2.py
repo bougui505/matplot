@@ -168,7 +168,7 @@ def plot_text(xytext):
     for x, y, text in xytext:
         x = float(x)
         y = float(y)
-        plttext = plt.text(x, y, text)
+        plttext = plt.text(x, y, text, horizontalalignment='center')
         # Add white line around text
         plttext.set_path_effects(
             [pe.withStroke(linewidth=2, foreground="w")])
