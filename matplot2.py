@@ -508,6 +508,12 @@ def scatter(data,
                     y_new.extend(y[selx])
                     z.extend(kde_y)
                 x, y = np.asarray(x_new), np.asarray(y_new)
+            if args.kde:
+                kde = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.stack((x, y), axis=-1))  # type: ignore
+                kde_y = np.exp(kde.score_samples(np.stack((x, y), axis=-1)))
+                print(f"{kde_y=}")
+                z=kde_y
+
             p = plt.scatter(x+epsilon_x, y+epsilon_y, c=z, marker=marker, s=size, alpha=alpha, label=label, cmap=cmap)
             if class_average:
                 xmean, ymean = [], []
