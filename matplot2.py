@@ -908,7 +908,9 @@ def moving_average(
     subfactory = Subplots_factory(subplots, subplots_assignment, ndataset, xlabels=xlabels, ylabels=ylabels, titles=title)
     for dataset in range(ndataset):
         if subplots is not None:
-            color = subfactory.setup(dataset, grid=False)
+            if grid is None:
+                grid = False
+            _ = subfactory.setup(dataset, grid=grid)
         print(f"{dataset=}")
         x = data[f"x{dataset}"] if f"x{dataset}" in data else data["x0"]
         y = data[f"y{dataset}"]
