@@ -176,8 +176,8 @@ if __name__ == '__main__':
         # negatives = np.random.uniform(size=49900)
         positives = np.random.normal(size=50000, loc=1)
         negatives = np.random.normal(size=49900, loc=2)
-        x, y, auc, pROC_auc = ROC(positives, negatives)
-        print_roc(x, y, auc, pROC_auc)
+        x, y, auc, pROC_auc, thresholds = ROC(positives, negatives)
+        print_roc(x, y, thresholds, auc, pROC_auc)
         sys.exit()
     data = np.genfromtxt(sys.stdin, invalid_raise=False, delimiter=',')
     negatives = data[:, 0]
