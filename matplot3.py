@@ -120,18 +120,18 @@ def toint(x):
 
 @app.command()
 def plot(
-    fields="x y",
-    labels="",
+    fields:str="x y",
+    labels:str="",
     moving_avg:int=0,
     delimiter=None,
-    fmt="",
+    fmt:str="",
     alpha:float=1.0,
     # output options
     save:str="",
-    xmin=None,
-    xmax=None,
-    ymin=None,
-    ymax=None,
+    xmin:float=None,
+    xmax:float=None,
+    ymin:float=None,
+    ymax:float=None,
 ):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
@@ -168,17 +168,17 @@ def plot(
 
 @app.command()
 def hist(
-    fields="y y",
-    labels="",
-    delimiter=None,
+    fields:str="y y",
+    labels:str="",
+    delimiter:str=None,
     bins="auto",
     alpha:float=1.0,
     # output options
     save:str="",
-    xmin=None,
-    xmax=None,
-    ymin=None,
-    ymax=None,
+    xmin:float=None,
+    xmax:float=None,
+    ymin:float=None,
+    ymax:float=None,
 ):
     """
     Compute and plot a histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
