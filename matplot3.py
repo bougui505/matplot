@@ -7,14 +7,15 @@
 #
 # creation_date: Mon Mar 31 13:12:22 2025
 
-import gzip
 import os
 import socket
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 import typer
+from numpy import linalg
 from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
 
@@ -176,6 +177,7 @@ def scatter(
     delimiter=None,
     alpha:float=1.0,
     cmap:str="viridis",
+    pcr:bool=False,
     # output options
     save:str="",
     xmin:float=None,
@@ -186,6 +188,12 @@ def scatter(
 ):
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
+
+    --fields: x y c s (c: code the color (see: --cmap), s: code the size)
+
+    --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)
+
+    --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps
     """
     data, datastr = read_data(delimiter)
     fields = fields.strip().split()
@@ -216,6 +224,8 @@ def scatter(
             else:
                 c = None
             plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
+            if pcr:
+                do_pcr(x,y)
             plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=colorbar)
 
@@ -269,6 +279,86 @@ def read_metadata(filename):
     datastr += im.info["data"]
     print(datastr)
     return datastr
+
+def do_pcr(x, y):
+    """
+    Principal Component Regression
+    See: https://en.wikipedia.org/wiki/Principal_component_regression
+    """
+    print("######## PCR ########")
+    X = np.stack([x, y]).T
+    eigenvalues, eigenvectors, center, anglex = pca(X)
+    a = eigenvectors[1, 0] / eigenvectors[0, 0]
+    print(f"{a=}")
+    b = center[1] - a * center[0]
+    print(f"{b=}")
+    xm = x.min()
+    ym = a*xm+b
+    xM = x.max()
+    yM = a*xM+b
+    plt.plot([xm, xM], [ym, yM], zorder=100, color="red")
+    v2_x = [center[0], center[0]+eigenvectors[0, 1]*np.sqrt(eigenvalues[1])]
+    v2_y = [center[1], center[1]+eigenvectors[1, 1]*np.sqrt(eigenvalues[1])]
+    # plt.plot(v2_x, v2_y)
+    explained_variance = eigenvalues[0]/eigenvalues.sum()
+    print(f"{explained_variance=}")
+    pearson = np.sum((x-x.mean())*(y-y.mean())) / (np.sqrt(np.sum((x-x.mean())**2)) * np.sqrt(np.sum((y-y.mean())**2)))
+    print(f"{pearson=}")
+    spearman = scipy.stats.spearmanr(a=x, b=y).statistic
+    print(f"{spearman=}")
+    R_squared = 1 - np.sum((y-a*x+b)**2) / np.sum((y-y.mean())**2)
+    print(f"{R_squared=}")
+    regstr = "y="
+    if f"{a:.1g}" == "1":
+        regstr+="x"
+    else:
+        regstr+=f"{a:.1g}x"
+    if float(f"{b:.1g}")<0:
+        regstr+=f"{b:.1g}"
+    elif float(f"{b:.1g}")>0:
+        regstr+=f"+{b:.1g}"
+    else:
+        pass
+    plt.title(f"ρ={format_nbr(pearson)}|ρₛ={format_nbr(spearman)}\n{regstr}")
+    # annotation=f"{a=:.2g}\n{b=:.2g}\n{explained_variance=:.2g}\n{pearson=:.2g}\n{R_squared=:.2g}"
+    # bbox = dict(boxstyle ="round", fc ="0.8")
+    # plt.annotate(annotation, (v2_x[1], v2_y[1]), bbox=bbox, fontsize="xx-small")
+    print("#####################")
+
+def format_nbr(x, precision='.1f'):
+    if float(format(x, precision))==round(x):
+        return f'{round(x)}'
+    else:
+        return format(x, precision)
+
+def pca(X, outfilename=None):
+    """
+    >>> X = np.random.normal(size=(10, 512))
+    >>> proj = compute_pca(X)
+    >>> proj.shape
+    (10, 2)
+    """
+    center = X.mean(axis=0)
+    cov = (X - center).T.dot(X - center) / X.shape[0]
+    eigenvalues, eigenvectors = linalg.eigh(cov)
+    sorter = np.argsort(eigenvalues)[::-1]
+    eigenvalues, eigenvectors = eigenvalues[sorter], eigenvectors[:, sorter]
+    print(f"{eigenvectors.shape=}")
+    dotprod1 = eigenvectors[:, 0].dot(np.asarray([1, 0]))
+    dotprod2 = eigenvectors[:, 1].dot(np.asarray([0, 1]))
+    eigenvectors[:, 0] *= np.sign(dotprod1)
+    eigenvectors[:, 1] *= np.sign(dotprod2)
+    anglesign = np.sign(eigenvectors[:, 0].dot(np.asarray([0, 1])))
+    anglex = anglesign * np.rad2deg(
+        np.arccos(eigenvectors[:, 0].dot(np.asarray([1, 0]))))
+    print(f"{anglex=:.4g}")
+    # angley = np.rad2deg(np.arccos(eigenvectors[:, 1].dot(np.asarray([0, 1]))))
+    # print(f"{angley=:.4g}")
+    if outfilename is not None:
+        np.savez(outfilename,
+                 eigenvalues=eigenvalues,
+                 eigenvectors=eigenvectors)
+    return eigenvalues, eigenvectors, center, anglex
 
 if __name__ == "__main__":
     import doctest
