@@ -104,6 +104,8 @@ def out(
     labels,
 ):
     set_limits(xmin, xmax, ymin, ymax)
+    if len(labels) > 0:
+        plt.legend()
     if save == "":
         plt.show()
     else:
@@ -122,6 +124,8 @@ def plot(
     labels="",
     moving_avg:int=0,
     delimiter=None,
+    fmt="",
+    alpha:float=1.0,
     # output options
     save:str="",
     xmin=None,
@@ -129,10 +133,16 @@ def plot(
     ymin=None,
     ymax=None,
 ):
-    """"""
+    """
+    Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+    """
     data, datastr = read_data(delimiter)
     fields = fields.strip().split()
     labels = labels.strip().split()
+    if fmt != "":
+        fmt = fmt.strip().split()
+    else:
+        fmt = [fmt] * len(data)
     plotid = 0
     for i, f1 in enumerate(fields):
         if f1 == "x":
@@ -152,7 +162,7 @@ def plot(
                 label = labels[plotid]
             else:
                 label = None
-            plt.plot(x, y, label=label)
+            plt.plot(x, y, fmt[plotid], label=label, alpha=alpha)
             plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
 
@@ -162,7 +172,7 @@ def hist(
     labels="",
     delimiter=None,
     bins="auto",
-    transparency:float=0.0,
+    alpha:float=1.0,
     # output options
     save:str="",
     xmin=None,
@@ -171,7 +181,7 @@ def hist(
     ymax=None,
 ):
     """
-    Plot histograms from y fields
+    Compute and plot a histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
     fields = fields.strip().split()
     labels = labels.strip().split()
@@ -186,7 +196,7 @@ def hist(
             label = labels[plotid]
         else:
             label = None
-        plt.hist(y, toint(bins), label=label, alpha=1.0 - transparency)
+        plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
         plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
 
