@@ -15,13 +15,35 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 import typer
-from PIL import Image
+from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
+
+# Reading data from a png with large number of points:
+# See: https://stackoverflow.com/a/61466412/1679629
+LARGE_ENOUGH_NUMBER = 100
+PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 app = typer.Typer(
     no_args_is_help=True,
     pretty_exceptions_show_locals=False,  # do not show local variable
 )
+
+@app.callback()
+def plot_setup(
+    xlabel:str="x",
+    ylabel:str="y",
+    semilog_x:bool=False,
+    semilog_y:bool=False,
+    grid:bool=False,
+):
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if semilog_x:
+        plt.semilogx()
+    if semilog_y:
+        plt.semilogy()
+    if grid:
+        plt.grid()
 
 def read_data(delimiter):
     data = defaultdict(list)
@@ -34,58 +56,26 @@ def read_data(delimiter):
         datastr += "\n"
     return data, datastr
 
-@app.command()
-def plot(
-    fields:str="x y",
-    delimiter:str=None,  # type: ignore
-    save:str="",  # type: ignore
-    xlabel:str="x",
-    ylabel:str="y",
-    labels:str="",
-    semilog_x:bool=False,
-    semilog_y:bool=False,
-):
-    """"""
-    fields = fields.strip().split()  # type: ignore
-    labels = labels.strip().split()  # type: ignore
-    data, datastr = read_data(delimiter)
-    plotid = 0
-    for i, f1 in enumerate(fields):
-        if f1 == "x":
-            x = np.float_(data[i])  # type: ignore
-        else:
-            continue
-        for j, f2 in enumerate(fields):
-            if f2 == "y":
-                y = np.float_(data[j])  # type: ignore
-            else:
-                continue
-            if len(labels) > 0:
-                label = labels[plotid]
-            else:
-                label = None
-            plt.plot(x, y, label=label)
-            plotid += 1
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    if semilog_x:
-        plt.semilogx()
-    if semilog_y:
-        plt.semilogy()
-    if len(labels) > 0:
-        plt.legend()
-    if save == "":
-        plt.show()
-    else:
-        saveplot(save, datastr)
+def set_limits(xmin=None, xmax=None, ymin=None, ymax=None):
+    limits = plt.axis()
+    if xmin is None:
+        xmin = limits[0]
+    if xmax is None:
+        xmax = limits[1]
+    plt.xlim([float(xmin), float(xmax)])
+    if ymin is None:
+        ymin = limits[-2]
+    if ymax is None:
+        ymax = limits[-1]
+    plt.ylim([float(ymin), float(ymax)])
 
-def saveplot(outfilename, datastr):
+def saveplot(outfilename, datastr, labels=None):
     plt.savefig(outfilename)
     ext = os.path.splitext(outfilename)[1]
     print(f"{ext=}")
     print(f"{outfilename=}")
     if ext == ".png":
-        add_metadata(outfilename, datastr)
+        add_metadata(outfilename, datastr, labels=labels)
 
 def add_metadata(filename, datastr, key="data", labels=None):
     """
@@ -102,6 +92,102 @@ def add_metadata(filename, datastr, key="data", labels=None):
     #     metadata.add_text("subsampling", "1st-column")
     targetImage = Image.open(filename)
     targetImage.save(filename, pnginfo=metadata)
+
+def out(
+    save,
+    xmin,
+    xmax,
+    ymin,
+    ymax,
+    datastr,
+    labels,
+):
+    set_limits(xmin, xmax, ymin, ymax)
+    if save == "":
+        plt.show()
+    else:
+        saveplot(save, datastr, labels)
+
+def toint(x):
+    try:
+        x = int(x)
+    except ValueError:
+        pass
+    return x
+
+@app.command()
+def plot(
+    fields="x y",
+    labels="",
+    moving_avg:int=0,
+    delimiter=None,
+    # output options
+    save:str="",
+    xmin=None,
+    xmax=None,
+    ymin=None,
+    ymax=None,
+):
+    """"""
+    data, datastr = read_data(delimiter)
+    fields = fields.strip().split()
+    labels = labels.strip().split()
+    plotid = 0
+    for i, f1 in enumerate(fields):
+        if f1 == "x":
+            x = np.float_(data[i])  # type: ignore
+            if moving_avg > 0:
+                x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
+        else:
+            continue
+        for j, f2 in enumerate(fields):
+            if f2 == "y":
+                y = np.float_(data[j])  # type: ignore
+                if moving_avg > 0:
+                    y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
+            else:
+                continue
+            if len(labels) > 0:
+                label = labels[plotid]
+            else:
+                label = None
+            plt.plot(x, y, label=label)
+            plotid += 1
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
+
+@app.command()
+def hist(
+    fields="y y",
+    labels="",
+    delimiter=None,
+    bins="auto",
+    transparency:float=0.0,
+    # output options
+    save:str="",
+    xmin=None,
+    xmax=None,
+    ymin=None,
+    ymax=None,
+):
+    """
+    Plot histograms from y fields
+    """
+    fields = fields.strip().split()
+    labels = labels.strip().split()
+    data, datastr = read_data(delimiter)
+    plotid = 0
+    for j, f2 in enumerate(fields):
+        if f2 == "y":
+            y = np.float_(data[j])  # type: ignore
+        else:
+            continue
+        if len(labels) > 0:
+            label = labels[plotid]
+        else:
+            label = None
+        plt.hist(y, toint(bins), label=label, alpha=1.0 - transparency)
+        plotid += 1
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
 
 @app.command()
 def read_metadata(filename):
