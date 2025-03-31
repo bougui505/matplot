@@ -102,8 +102,11 @@ def out(
     ymax,
     datastr,
     labels,
+    colorbar,
 ):
     set_limits(xmin, xmax, ymin, ymax)
+    if colorbar:
+        plt.colorbar()
     if len(labels) > 0:
         plt.legend()
     if save == "":
@@ -120,11 +123,11 @@ def toint(x):
 
 @app.command()
 def plot(
-    fields:str="x y",
-    labels:str="",
+    fields="x y",
+    labels="",
     moving_avg:int=0,
     delimiter=None,
-    fmt:str="",
+    fmt="",
     alpha:float=1.0,
     # output options
     save:str="",
@@ -164,13 +167,63 @@ def plot(
                 label = None
             plt.plot(x, y, fmt[plotid], label=label, alpha=alpha)
             plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
+
+@app.command()
+def scatter(
+    fields="x y",
+    labels="",
+    delimiter=None,
+    alpha:float=1.0,
+    cmap:str="viridis",
+    # output options
+    save:str="",
+    xmin:float=None,
+    xmax:float=None,
+    ymin:float=None,
+    ymax:float=None,
+    colorbar:bool=False,
+):
+    """
+    A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
+    """
+    data, datastr = read_data(delimiter)
+    fields = fields.strip().split()
+    labels = labels.strip().split()
+    plotid = 0
+    s_indices = np.where(np.asarray(fields)=="s")[0]
+    c_indices = np.where(np.asarray(fields)=="c")[0]
+    for i, f1 in enumerate(fields):
+        if f1 == "x":
+            x = np.float_(data[i])  # type: ignore
+        else:
+            continue
+        for j, f2 in enumerate(fields):
+            if f2 == "y":
+                y = np.float_(data[j])  # type: ignore
+            else:
+                continue
+            if len(labels) > 0:
+                label = labels[plotid]
+            else:
+                label = None
+            if len(s_indices) > 0:
+                s = np.float_(data[s_indices[plotid]])
+            else:
+                s = None
+            if len(c_indices) > 0:
+                c = np.float_(data[c_indices[plotid]])
+            else:
+                c = None
+            plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
+            plotid += 1
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=colorbar)
 
 @app.command()
 def hist(
-    fields:str="y y",
-    labels:str="",
-    delimiter:str=None,
+    fields="y y",
+    labels="",
+    delimiter=None,
     bins="auto",
     alpha:float=1.0,
     # output options
@@ -198,7 +251,7 @@ def hist(
             label = None
         plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
         plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels)
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
 def read_metadata(filename):
