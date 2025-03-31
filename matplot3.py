@@ -189,7 +189,7 @@ def scatter(
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
 
-    --fields: x y c s (c: code the color (see: --cmap), s: code the size)
+    --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)
 
     --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)
 
