@@ -26,6 +26,7 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 app = typer.Typer(
     no_args_is_help=True,
     pretty_exceptions_show_locals=False,  # do not show local variable
+    add_completion=False,
 )
 
 @app.callback()
