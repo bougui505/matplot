@@ -36,8 +36,7 @@ def plot_setup(
     ylabel:str="y",
     semilog_x:bool=False,
     semilog_y:bool=False,
-    grid:bool=False,
-):
+    grid:bool=False,):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     if semilog_x:
@@ -103,8 +102,7 @@ def out(
     ymax,
     datastr,
     labels,
-    colorbar,
-):
+    colorbar,):
     set_limits(xmin, xmax, ymin, ymax)
     if colorbar:
         plt.colorbar()
@@ -135,8 +133,7 @@ def plot(
     xmin:float=None,
     xmax:float=None,
     ymin:float=None,
-    ymax:float=None,
-):
+    ymax:float=None,):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
@@ -184,8 +181,7 @@ def scatter(
     xmax:float=None,
     ymin:float=None,
     ymax:float=None,
-    colorbar:bool=False,
-):
+    colorbar:bool=False,):
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
 
@@ -241,8 +237,7 @@ def hist(
     xmin:float=None,
     xmax:float=None,
     ymin:float=None,
-    ymax:float=None,
-):
+    ymax:float=None,):
     """
     Compute and plot a histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
@@ -262,6 +257,25 @@ def hist(
         plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
         plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
+
+@app.command()
+def jitter(
+    fields="x y",
+    labels="",
+    delimiter=None,
+    alpha:float=1.0,
+    # output options
+    save:str="",
+    xmin:float=None,
+    xmax:float=None,
+    ymin:float=None,
+    ymax:float=None,):
+    """
+    Jitter plot
+    """
+    fields = fields.strip().split()
+    labels = labels.strip().split()
+    data, datastr = read_data(delimiter)
 
 @app.command()
 def read_metadata(filename):
