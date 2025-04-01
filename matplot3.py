@@ -130,10 +130,11 @@ def plot(
     alpha:float=1.0,
     # output options
     save:str="",
-    xmin:float=None,
-    xmax:float=None,
-    ymin:float=None,
-    ymax:float=None,):
+    xmin:float=None,  # type:ignore
+    xmax:float=None,  # type:ignore
+    ymin:float=None,  # type:ignore
+    ymax:float=None,  # type:ignore
+):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
@@ -177,11 +178,12 @@ def scatter(
     pcr:bool=False,
     # output options
     save:str="",
-    xmin:float=None,
-    xmax:float=None,
-    ymin:float=None,
-    ymax:float=None,
-    colorbar:bool=False,):
+    xmin:float=None,  # type:ignore
+    xmax:float=None,  # type:ignore
+    ymin:float=None,  # type:ignore
+    ymax:float=None,  # type:ignore
+    colorbar:bool=False,
+):
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
 
@@ -212,11 +214,11 @@ def scatter(
             else:
                 label = None
             if len(s_indices) > 0:
-                s = np.float_(data[s_indices[plotid]])
+                s = np.float_(data[s_indices[plotid]])  # type: ignore
             else:
                 s = None
             if len(c_indices) > 0:
-                c = np.float_(data[c_indices[plotid]])
+                c = np.float_(data[c_indices[plotid]])  # type: ignore
             else:
                 c = None
             plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
@@ -234,10 +236,11 @@ def hist(
     alpha:float=1.0,
     # output options
     save:str="",
-    xmin:float=None,
-    xmax:float=None,
-    ymin:float=None,
-    ymax:float=None,):
+    xmin:float=None, # type:ignore
+    xmax:float=None, # type:ignore
+    ymin:float=None, # type:ignore
+    ymax:float=None, # type:ignore
+):
     """
     Compute and plot a histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
@@ -266,10 +269,11 @@ def jitter(
     alpha:float=1.0,
     # output options
     save:str="",
-    xmin:float=None,
-    xmax:float=None,
-    ymin:float=None,
-    ymax:float=None,):
+    xmin:float=None,  # type:ignore
+    xmax:float=None,  # type:ignore
+    ymin:float=None,  # type:ignore
+    ymax:float=None,  # type:ignore
+):
     """
     Jitter plot
     """
