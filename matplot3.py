@@ -38,7 +38,14 @@ def plot_setup(
     ylabel:str="y",
     semilog_x:bool=False,
     semilog_y:bool=False,
-    grid:bool=False,):
+    grid:bool=False,
+    aspect_ratio:str=None,  # type:ignore
+):
+    """
+    Setup the plot with the given parameters
+
+    --aspect_ratio: "16 9", set the aspect ratio of the plot
+    """
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     if semilog_x:
@@ -47,6 +54,9 @@ def plot_setup(
         plt.semilogy()
     if grid:
         plt.grid()
+    if aspect_ratio is not None:
+        xaspect, yaspect = aspect_ratio.split()
+        plt.figure(figsize=(float(xaspect), float(yaspect)))
 
 def read_data(delimiter):
     data = defaultdict(list)
