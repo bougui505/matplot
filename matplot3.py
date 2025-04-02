@@ -45,6 +45,7 @@ def plot_setup(
     semilog_y:bool=False,
     grid:bool=False,
     aspect_ratio:str=None,  # type:ignore
+    subplots:str="1 1",
 ):
     """
     Read data from stdin and plot them.
@@ -55,17 +56,21 @@ def plot_setup(
 
     --aspect_ratio: "16 9", set the aspect ratio of the plot
     """
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    if semilog_x:
-        plt.semilogx()
-    if semilog_y:
-        plt.semilogy()
-    if grid:
-        plt.grid()
     if aspect_ratio is not None:
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
+    global SUBPLOTS
+    SUBPLOTS = [int(e) for e in subplots.strip().split()]  # type:ignore
+    for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], i + 1)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        if semilog_x:
+            plt.semilogx()
+        if semilog_y:
+            plt.semilogy()
+        if grid:
+            plt.grid()
 
 def read_data(delimiter, fields, labels):
     """
@@ -76,14 +81,19 @@ def read_data(delimiter, fields, labels):
     datastr = ""
     imax = -1
     field_offset = 0
-    for line in sys.stdin.readlines():
+    lines = sys.stdin.readlines()
+    # remove all the last empty lines
+    while len(lines) > 0 and lines[-1].strip() == "":
+        lines.pop()
+    fields_original = fields
+    for line in lines:
         line = line.strip().split(delimiter)
         # check if the line is empty
         if len(line) == 0:
             # create new fields
             field_offset = imax + 1
             # duplicate the fields
-            fields += f" {fields}"
+            fields += f" {fields_original}"
         for i, e in enumerate(line):
             i += field_offset
             data[i].append(e)
@@ -96,8 +106,8 @@ def read_data(delimiter, fields, labels):
     ndataset = (np.asarray(fields_list)=="y").sum()
     if len(labels_list) == 0:
         labels_list = [""] * ndataset
-    assert len(data) == len(fields_list), "Number of fields and data does not match"
-    assert len(labels_list) == ndataset, "Number of y fields and labels does not match"
+    assert len(data) == len(fields_list), f"Number of fields ({len(fields_list)}) and data ({len(data)}) does not match"
+    assert len(labels_list) == ndataset, f"Number of y fields ({len(labels_list)}) and labels ({ndataset}) does not match"
     table = Table("ids", "lengths", "fields", "labels")
     j = 0
     for i in data.keys():
@@ -152,14 +162,9 @@ def add_metadata(filename, datastr, key="data", labels=None):
 
 def out(
     save,
-    xmin,
-    xmax,
-    ymin,
-    ymax,
     datastr,
     labels,
     colorbar,):
-    set_limits(xmin, xmax, ymin, ymax)
     if colorbar:
         plt.colorbar()
     if len(labels) > 0:
@@ -184,7 +189,6 @@ def plot(
     delimiter=None,
     fmt="",
     alpha:float=1.0,
-    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -226,7 +230,6 @@ def plot(
     assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
-    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
@@ -241,10 +244,11 @@ def plot(
             fmtstr = fmt[plotid]
         else:
             fmtstr = ""
-        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
+        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
 def scatter(
@@ -254,7 +258,6 @@ def scatter(
     alpha:float=1.0,
     cmap:str="viridis",
     pcr:bool=False,
-    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -302,7 +305,6 @@ def scatter(
     yfields = np.where(np.asarray(fields)=="y")[0]
     s_indices = np.where(np.asarray(fields)=="s")[0]
     c_indices = np.where(np.asarray(fields)=="c")[0]
-    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
         x = np.float_(data[xfield])  # type: ignore
@@ -319,12 +321,13 @@ def scatter(
             c = np.float_(data[c_indices[0]])  # type: ignore
         else:
             c = None
-        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
+        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=colorbar)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar)
 
 @app.command()
 def hist(
@@ -357,8 +360,9 @@ def hist(
         else:
             label = None
         plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
+        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
 def jitter(
@@ -367,10 +371,11 @@ def jitter(
     delimiter=None,
     xjitter:float=0.1,
     yjitter:float=0.0,
+    size:int=10,
     alpha:float=1.0,
     kde:bool=False,
+    kde_subset:int=1000,
     cmap:str="viridis",
-    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -406,23 +411,22 @@ def jitter(
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
     yfields = np.where(np.asarray(fields)=="y")[0]
-    if kde:
-        kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott")  # type: ignore
     kde_y = None
-    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
     plotid = 0
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
         if kde:
-            kde_ins = kde_ins.fit(y[:, None])  # type: ignore
+            kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
+            # kde_ins = kde_ins.fit(y[:, None])  # type: ignore
             kde_y = np.exp(kde_ins.score_samples(y[:, None]))  # type: ignore
         x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
-        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
-        plt.scatter(x, y, c=kde_y, alpha=alpha, cmap=cmap)
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
+        plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap)
+        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
 def read_metadata(filename):
