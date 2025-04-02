@@ -18,6 +18,8 @@ import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
+from rich.progress import track
+from sklearn.neighbors import KernelDensity
 
 # Reading data from a png with large number of points:
 # See: https://stackoverflow.com/a/61466412/1679629
@@ -266,20 +268,59 @@ def jitter(
     fields="x y",
     labels="",
     delimiter=None,
+    xjitter:float=0.1,
+    yjitter:float=0.0,
     alpha:float=1.0,
+    kde:bool=False,
+    cmap:str="viridis",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
     xmax:float=None,  # type:ignore
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
+    # test options
+    test:bool=False,
+    test_npts:int=1000,
+    test_ndata:int=3,
 ):
     """
     Jitter plot
     """
+    if test:
+        data = dict()
+        j = 0
+        k = 0
+        fields = ""
+        for i in range(test_ndata*2):
+            if i % 2 == 0:
+                data[i] = np.ones(test_npts) * j
+                fields += "x "
+                j += 1
+            else:
+                data[i] = np.random.normal(size=test_npts, loc=k, scale=1)
+                fields += "y "
+                k += 1
+        datastr = ""
+    else:
+        data, datastr = read_data(delimiter)
     fields = fields.strip().split()
     labels = labels.strip().split()
-    data, datastr = read_data(delimiter)
+    xfields = np.where(np.asarray(fields)=="x")[0]
+    yfields = np.where(np.asarray(fields)=="y")[0]
+    if kde:
+        kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott")  # type: ignore
+    kde_y = None
+    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
+        x = np.float_(data[xfield])  # type: ignore
+        y = np.float_(data[yfield])  # type: ignore
+        if kde:
+            kde_ins = kde_ins.fit(y[:, None])  # type: ignore
+            kde_y = np.exp(kde_ins.score_samples(y[:, None]))  # type: ignore
+        x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
+        y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
+        plt.scatter(x, y, c=kde_y, alpha=alpha, cmap=cmap)
+    out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
 def read_metadata(filename):
