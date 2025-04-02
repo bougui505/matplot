@@ -18,6 +18,7 @@ import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
+from rich import print
 from rich.progress import track
 from sklearn.neighbors import KernelDensity
 
@@ -146,38 +147,57 @@ def plot(
     xmax:float=None,  # type:ignore
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
+    # test options
+    test:bool=False,
+    test_npts:int=1000,
+    test_ndata:int=2,
 ):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
-    data, datastr = read_data(delimiter)
+    if test:
+        data = dict()
+        fields = ""
+        j = 0
+        data[j] = np.arange(test_npts)
+        fields += "x "
+        j += 1
+        for i in range(test_ndata):
+            data[j] = np.random.normal(size=test_npts, loc=i, scale=100) + np.arange(test_npts) + i*test_npts
+            fields += "y "
+            j += 1
+        datastr = ""
+    else:
+        data, datastr = read_data(delimiter)
     fields = fields.strip().split()
+    assert "x" in fields, "x field is required"
     labels = labels.strip().split()
     if fmt != "":
         fmt = fmt.strip().split()
     else:
         fmt = [fmt] * len(data)
     plotid = 0
-    for i, f1 in enumerate(fields):
-        if f1 == "x":
-            x = np.float_(data[i])  # type: ignore
-            if moving_avg > 0:
-                x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
+    xfields = np.where(np.asarray(fields)=="x")[0]
+    yfields = np.where(np.asarray(fields)=="y")[0]
+    assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
+    if len(xfields) < len(yfields) and len(xfields) == 1:
+        xfields = np.ones_like(yfields) * xfields[0]
+    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
+        x = np.float_(data[xfield])  # type: ignore
+        y = np.float_(data[yfield])  # type: ignore
+        if moving_avg > 0:
+            x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
+            y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
+        if len(labels) > 0:
+            label = labels[plotid]
         else:
-            continue
-        for j, f2 in enumerate(fields):
-            if f2 == "y":
-                y = np.float_(data[j])  # type: ignore
-                if moving_avg > 0:
-                    y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
-            else:
-                continue
-            if len(labels) > 0:
-                label = labels[plotid]
-            else:
-                label = None
-            plt.plot(x, y, fmt[plotid], label=label, alpha=alpha)
-            plotid += 1
+            label = None
+        if len(fmt) > 0:
+            fmtstr = fmt[plotid]
+        else:
+            fmtstr = ""
+        plt.plot(x, y, fmtstr, label=label, alpha=alpha)
+        plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
