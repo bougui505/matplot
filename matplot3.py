@@ -370,6 +370,7 @@ def jitter(
     alpha:float=1.0,
     kde:bool=False,
     cmap:str="viridis",
+    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -408,6 +409,8 @@ def jitter(
     if kde:
         kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott")  # type: ignore
     kde_y = None
+    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
+    plotid = 0
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
@@ -416,7 +419,9 @@ def jitter(
             kde_y = np.exp(kde_ins.score_samples(y[:, None]))  # type: ignore
         x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
+        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
         plt.scatter(x, y, c=kde_y, alpha=alpha, cmap=cmap)
+        plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
 
 @app.command()
