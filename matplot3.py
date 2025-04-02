@@ -377,7 +377,7 @@ def hist(
     ymax:float=None, # type:ignore
 ):
     """
-    Compute and plot a histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+    Compute and plot an histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
     fields = fields.strip().split()
     labels = labels.strip().split()
