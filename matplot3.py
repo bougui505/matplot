@@ -48,6 +48,7 @@ def plot_setup(
     subplots:str="1 1",
     sharex:bool=False,
     sharey:bool=False,
+    titles:str="",
 ):
     """
     Read data from stdin and plot them.
@@ -64,6 +65,9 @@ def plot_setup(
     global SUBPLOTS
     SUBPLOTS = [int(e) for e in subplots.strip().split()]  # type:ignore
     ax = None
+    titles = titles.strip().split()  # type:ignore
+    if len(titles) < SUBPLOTS[0] * SUBPLOTS[1]:
+        titles += [""] * (SUBPLOTS[0] * SUBPLOTS[1] - len(titles))  # type:ignore
     for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
         ax = plt.subplot(
             SUBPLOTS[0],
@@ -87,6 +91,8 @@ def plot_setup(
             plt.semilogy()
         if grid:
             plt.grid()
+        if titles != "":
+            plt.title(titles[i])
 
 def read_data(delimiter, fields, labels):
     """
