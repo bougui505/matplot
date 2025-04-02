@@ -60,7 +60,9 @@ def plot_setup(
 
     --aspect_ratio: "16 9", set the aspect ratio of the plot
     """
-    app.pretty_exceptions_show_locals = debug
+    global DEBUG
+    DEBUG = debug
+    app.pretty_exceptions_show_locals = DEBUG
     if aspect_ratio is not None:
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
