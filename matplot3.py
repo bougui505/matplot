@@ -72,8 +72,15 @@ def plot_setup(
             sharex=None if not sharex else ax,
             sharey=None if not sharey else ax,
             )
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
+        subplot_ij = np.unravel_index(i, SUBPLOTS)
+        if sharex and subplot_ij[0] == SUBPLOTS[0] - 1:
+            plt.xlabel(xlabel)
+        if not sharex:
+            plt.xlabel(xlabel)
+        if sharey and subplot_ij[1] == 0:
+            plt.ylabel(ylabel)
+        if not sharey:
+            plt.ylabel(ylabel)
         if semilog_x:
             plt.semilogx()
         if semilog_y:
