@@ -49,6 +49,7 @@ def plot_setup(
     sharex:bool=False,
     sharey:bool=False,
     titles:str="",
+    debug:bool=False,
 ):
     """
     Read data from stdin and plot them.
@@ -59,6 +60,7 @@ def plot_setup(
 
     --aspect_ratio: "16 9", set the aspect ratio of the plot
     """
+    app.pretty_exceptions_show_locals = debug
     if aspect_ratio is not None:
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
@@ -599,5 +601,4 @@ if __name__ == "__main__":
                         | doctest.REPORT_ONLY_FIRST_FAILURE \
                         | doctest.REPORT_NDIFF,
         )
-
     app()
