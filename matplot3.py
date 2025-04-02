@@ -167,6 +167,7 @@ def plot(
             fields += "y "
             j += 1
         datastr = ""
+        print(f"{fields=}")
     else:
         data, datastr = read_data(delimiter)
     fields = fields.strip().split()
@@ -215,6 +216,10 @@ def scatter(
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
     colorbar:bool=False,
+    # test options
+    test:bool=False,
+    test_npts:int=1000,
+    test_ndata:int=2,
 ):
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
@@ -225,38 +230,51 @@ def scatter(
 
     --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps
     """
-    data, datastr = read_data(delimiter)
+    if test:
+        data = dict()
+        fields = ""
+        j = 0
+        for i in range(test_ndata):
+            data[j] = np.random.normal(size=test_npts, loc=i*10, scale=1)
+            j += 1
+            fields += "x "
+            data[j] = np.random.normal(size=test_npts, loc=0, scale=1)
+            j += 1
+            fields += "y "
+            data[j] = np.random.normal(size=test_npts, loc=0, scale=1)
+            j += 1
+            fields += "c "
+            data[j] = np.random.normal(size=test_npts, loc=0, scale=50)
+            j += 1
+            fields += "s "
+        datastr = ""
+        print(f"{fields=}")
+    else:
+        data, datastr = read_data(delimiter)
     fields = fields.strip().split()
     labels = labels.strip().split()
-    plotid = 0
+    xfields = np.where(np.asarray(fields)=="x")[0]
+    yfields = np.where(np.asarray(fields)=="y")[0]
     s_indices = np.where(np.asarray(fields)=="s")[0]
     c_indices = np.where(np.asarray(fields)=="c")[0]
-    for i, f1 in enumerate(fields):
-        if f1 == "x":
-            x = np.float_(data[i])  # type: ignore
+    for xfield, yfield in zip(xfields, yfields):
+        x = np.float_(data[xfield])  # type: ignore
+        y = np.float_(data[yfield])  # type: ignore
+        if len(labels) > 0:
+            label = labels[0]
         else:
-            continue
-        for j, f2 in enumerate(fields):
-            if f2 == "y":
-                y = np.float_(data[j])  # type: ignore
-            else:
-                continue
-            if len(labels) > 0:
-                label = labels[plotid]
-            else:
-                label = None
-            if len(s_indices) > 0:
-                s = np.float_(data[s_indices[plotid]])  # type: ignore
-            else:
-                s = None
-            if len(c_indices) > 0:
-                c = np.float_(data[c_indices[plotid]])  # type: ignore
-            else:
-                c = None
-            plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
-            if pcr:
-                do_pcr(x,y)
-            plotid += 1
+            label = None
+        if len(s_indices) > 0:
+            s = np.float_(data[s_indices[0]])  # type: ignore
+        else:
+            s = None
+        if len(c_indices) > 0:
+            c = np.float_(data[c_indices[0]])  # type: ignore
+        else:
+            c = None
+        plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
+        if pcr:
+            do_pcr(x,y)
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=colorbar)
 
 @app.command()
