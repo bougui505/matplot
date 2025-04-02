@@ -19,8 +19,12 @@ from numpy import linalg
 from PIL import Image, PngImagePlugin
 from PIL.PngImagePlugin import PngInfo
 from rich import print
+from rich.console import Console
 from rich.progress import track
+from rich.table import Table
 from sklearn.neighbors import KernelDensity
+
+console = Console()
 
 # Reading data from a png with large number of points:
 # See: https://stackoverflow.com/a/61466412/1679629
@@ -29,7 +33,7 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 app = typer.Typer(
     no_args_is_help=True,
-    pretty_exceptions_show_locals=False,  # do not show local variable
+    pretty_exceptions_show_locals=True,  # do not show local variable
     add_completion=False,
 )
 
@@ -87,7 +91,12 @@ def read_data(delimiter, fields):
             if i > imax:
                 imax = i
         datastr += "\n"
-    print(f"{data=}")
+    fields_list = fields.strip().split()
+    table = Table("Id", "Length", "Field")
+    for k in data.keys():
+        table.add_row(str(k), str(len(data[k])), str(fields_list[k]))
+    console.print(table)
+    print(f"{fields=}")
     return data, datastr, fields
 
 def set_limits(xmin=None, xmax=None, ymin=None, ymax=None):
@@ -188,7 +197,6 @@ def plot(
             fields += "y "
             j += 1
         datastr = ""
-        print(f"{fields=}")
     else:
         data, datastr, fields = read_data(delimiter, fields)
     fields = fields.strip().split()
@@ -272,7 +280,6 @@ def scatter(
             j += 1
             fields += "s "
         datastr = ""
-        print(f"{fields=}")
     else:
         data, datastr, fields = read_data(delimiter, fields)
     fields = fields.strip().split()
