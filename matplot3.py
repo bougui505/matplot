@@ -43,6 +43,10 @@ def plot_setup(
     aspect_ratio:str=None,  # type:ignore
 ):
     """
+    Read data from stdin and plot them.
+
+    If an empty line is found, a new dataset is created.
+
     Setup the plot with the given parameters
 
     --aspect_ratio: "16 9", set the aspect ratio of the plot
@@ -59,16 +63,32 @@ def plot_setup(
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
 
-def read_data(delimiter):
+def read_data(delimiter, fields):
+    """
+    Read data from stdin and return a dictionary of data
+    if an empty line is found, new fields are created
+    """
     data = defaultdict(list)
     datastr = ""
+    imax = -1
+    field_offset = 0
     for line in sys.stdin.readlines():
         line = line.strip().split(delimiter)
+        # check if the line is empty
+        if len(line) == 0:
+            # create new fields
+            field_offset = imax + 1
+            # duplicate the fields
+            fields += f" {fields}"
         for i, e in enumerate(line):
+            i += field_offset
             data[i].append(e)
             datastr += e + ","
+            if i > imax:
+                imax = i
         datastr += "\n"
-    return data, datastr
+    print(f"{data=}")
+    return data, datastr, fields
 
 def set_limits(xmin=None, xmax=None, ymin=None, ymax=None):
     limits = plt.axis()
@@ -141,6 +161,7 @@ def plot(
     delimiter=None,
     fmt="",
     alpha:float=1.0,
+    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -169,7 +190,7 @@ def plot(
         datastr = ""
         print(f"{fields=}")
     else:
-        data, datastr = read_data(delimiter)
+        data, datastr, fields = read_data(delimiter, fields)
     fields = fields.strip().split()
     assert "x" in fields, "x field is required"
     labels = labels.strip().split()
@@ -183,6 +204,7 @@ def plot(
     assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
+    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
@@ -197,6 +219,7 @@ def plot(
             fmtstr = fmt[plotid]
         else:
             fmtstr = ""
+        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=False)
@@ -209,6 +232,7 @@ def scatter(
     alpha:float=1.0,
     cmap:str="viridis",
     pcr:bool=False,
+    subplots:str="1 1",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -250,13 +274,15 @@ def scatter(
         datastr = ""
         print(f"{fields=}")
     else:
-        data, datastr = read_data(delimiter)
+        data, datastr, fields = read_data(delimiter, fields)
     fields = fields.strip().split()
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
     yfields = np.where(np.asarray(fields)=="y")[0]
     s_indices = np.where(np.asarray(fields)=="s")[0]
     c_indices = np.where(np.asarray(fields)=="c")[0]
+    subplots = [int(e) for e in subplots.strip().split()]  # type:ignore
+    plotid = 0
     for xfield, yfield in zip(xfields, yfields):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
@@ -272,9 +298,11 @@ def scatter(
             c = np.float_(data[c_indices[0]])  # type: ignore
         else:
             c = None
+        plt.subplot(subplots[0], subplots[1], min(plotid+1, subplots[0]*subplots[1]))  # type:ignore
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
+        plotid += 1
     out(save=save, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, datastr=datastr, labels=labels, colorbar=colorbar)
 
 @app.command()
@@ -296,7 +324,7 @@ def hist(
     """
     fields = fields.strip().split()
     labels = labels.strip().split()
-    data, datastr = read_data(delimiter)
+    data, datastr, fields = read_data(delimiter, fields)
     plotid = 0
     for j, f2 in enumerate(fields):
         if f2 == "y":
@@ -351,7 +379,7 @@ def jitter(
                 k += 1
         datastr = ""
     else:
-        data, datastr = read_data(delimiter)
+        data, datastr, fields = read_data(delimiter, fields)
     fields = fields.strip().split()
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
