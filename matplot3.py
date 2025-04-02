@@ -33,7 +33,7 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 app = typer.Typer(
     no_args_is_help=True,
-    pretty_exceptions_show_locals=True,  # do not show local variable
+    pretty_exceptions_show_locals=False,  # do not show local variable
     add_completion=False,
 )
 
@@ -364,7 +364,7 @@ def scatter(
 
 @app.command()
 def hist(
-    fields="y y",
+    fields="y",
     labels="",
     delimiter=None,
     bins="auto",
@@ -375,16 +375,30 @@ def hist(
     xmax:float=None, # type:ignore
     ymin:float=None, # type:ignore
     ymax:float=None, # type:ignore
+    # test options
+    test:bool=False,
+    test_npts:int=1000,
+    test_ndata:int=2,
 ):
     """
     Compute and plot an histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
     """
+    if test:
+        data = dict()
+        fields = ""
+        j = 0
+        for i in range(test_ndata):
+            data[j] = np.random.normal(size=test_npts, loc=i*10, scale=1)
+            j += 1
+            fields += "y "
+        datastr = ""
+    else:
+        data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
     labels = labels.strip().split()
-    data, datastr, fields = read_data(delimiter, fields, labels)
     plotid = 0
-    for j, f2 in enumerate(fields):
-        if f2 == "y":
+    for j, field in enumerate(fields):
+        if field == "y":
             y = np.float_(data[j])  # type: ignore
         else:
             continue
@@ -392,7 +406,7 @@ def hist(
             label = labels[plotid]
         else:
             label = None
-        plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
+        plt.hist(y, toint(bins), label=label, alpha=alpha)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
