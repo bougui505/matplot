@@ -124,6 +124,7 @@ def read_data(delimiter, fields, labels):
             if i > imax:
                 imax = i
         datastr += "\n"
+    # Printing data as a table
     fields_list = fields.strip().split()
     labels_list = labels.strip().split()
     ndataset = (np.asarray(fields_list)=="y").sum()
