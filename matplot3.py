@@ -98,7 +98,7 @@ def read_data(delimiter, fields, labels):
         labels_list = [""] * ndataset
     assert len(data) == len(fields_list), "Number of fields and data does not match"
     assert len(labels_list) == ndataset, "Number of y fields and labels does not match"
-    table = Table("id", "lengths", "fields", "labels")
+    table = Table("ids", "lengths", "fields", "labels")
     j = 0
     for i in data.keys():
         field = fields_list[i]
