@@ -46,6 +46,8 @@ def plot_setup(
     grid:bool=False,
     aspect_ratio:str=None,  # type:ignore
     subplots:str="1 1",
+    sharex:bool=False,
+    sharey:bool=False,
 ):
     """
     Read data from stdin and plot them.
@@ -61,8 +63,15 @@ def plot_setup(
         plt.figure(figsize=(float(xaspect), float(yaspect)))
     global SUBPLOTS
     SUBPLOTS = [int(e) for e in subplots.strip().split()]  # type:ignore
+    ax = None
     for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
-        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], i + 1)
+        ax = plt.subplot(
+            SUBPLOTS[0],
+            SUBPLOTS[1],
+            i + 1,
+            sharex=None if not sharex else ax,
+            sharey=None if not sharey else ax,
+            )
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         if semilog_x:
@@ -164,7 +173,13 @@ def out(
     save,
     datastr,
     labels,
-    colorbar,):
+    colorbar,
+    xmin,
+    xmax,
+    ymin,
+    ymax,
+):
+    set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     if colorbar:
         plt.colorbar()
     if len(labels) > 0:
@@ -246,9 +261,8 @@ def plot(
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
-        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
 def scatter(
@@ -325,9 +339,8 @@ def scatter(
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
-        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
 def hist(
@@ -360,9 +373,8 @@ def hist(
         else:
             label = None
         plt.hist(y, toint(bins), label=label, alpha=1.0 - alpha)
-        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
 def jitter(
@@ -424,9 +436,8 @@ def jitter(
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap)
-        set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
 def read_metadata(filename):
