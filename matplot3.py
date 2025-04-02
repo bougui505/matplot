@@ -67,7 +67,7 @@ def plot_setup(
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
 
-def read_data(delimiter, fields):
+def read_data(delimiter, fields, labels):
     """
     Read data from stdin and return a dictionary of data
     if an empty line is found, new fields are created
@@ -92,9 +92,23 @@ def read_data(delimiter, fields):
                 imax = i
         datastr += "\n"
     fields_list = fields.strip().split()
-    table = Table("Id", "Length", "Field")
-    for k in data.keys():
-        table.add_row(str(k), str(len(data[k])), str(fields_list[k]))
+    labels_list = labels.strip().split()
+    ndataset = (np.asarray(fields_list)=="y").sum()
+    if len(labels_list) == 0:
+        labels_list = [""] * ndataset
+    assert len(data) == len(fields_list), "Number of fields and data does not match"
+    assert len(labels_list) == ndataset, "Number of y fields and labels does not match"
+    table = Table("id", "lengths", "fields", "labels")
+    j = 0
+    for i in data.keys():
+        field = fields_list[i]
+        if field == "y":
+            label = labels_list[j]
+            j += 1
+        else:
+            label = ""
+        length = len(data[i])
+        table.add_row(str(i), str(length), field, label)
     console.print(table)
     print(f"{fields=}")
     return data, datastr, fields
@@ -198,7 +212,7 @@ def plot(
             j += 1
         datastr = ""
     else:
-        data, datastr, fields = read_data(delimiter, fields)
+        data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
     assert "x" in fields, "x field is required"
     labels = labels.strip().split()
@@ -281,7 +295,7 @@ def scatter(
             fields += "s "
         datastr = ""
     else:
-        data, datastr, fields = read_data(delimiter, fields)
+        data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
@@ -331,7 +345,7 @@ def hist(
     """
     fields = fields.strip().split()
     labels = labels.strip().split()
-    data, datastr, fields = read_data(delimiter, fields)
+    data, datastr, fields = read_data(delimiter, fields, labels)
     plotid = 0
     for j, f2 in enumerate(fields):
         if f2 == "y":
@@ -386,7 +400,7 @@ def jitter(
                 k += 1
         datastr = ""
     else:
-        data, datastr, fields = read_data(delimiter, fields)
+        data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
