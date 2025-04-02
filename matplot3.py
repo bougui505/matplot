@@ -65,9 +65,10 @@ def plot_setup(
     global SUBPLOTS
     SUBPLOTS = [int(e) for e in subplots.strip().split()]  # type:ignore
     ax = None
-    titles = titles.strip().split()  # type:ignore
-    if len(titles) < SUBPLOTS[0] * SUBPLOTS[1]:
-        titles += [""] * (SUBPLOTS[0] * SUBPLOTS[1] - len(titles))  # type:ignore
+    global TITLES
+    TITLES = titles.strip().split()
+    if len(TITLES) < SUBPLOTS[0] * SUBPLOTS[1]:
+        TITLES += [""] * (SUBPLOTS[0] * SUBPLOTS[1] - len(TITLES))
     for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
         ax = plt.subplot(
             SUBPLOTS[0],
@@ -92,7 +93,7 @@ def plot_setup(
         if grid:
             plt.grid()
         if titles != "":
-            plt.title(titles[i])
+            plt.title(TITLES[i])
 
 def read_data(delimiter, fields, labels):
     """
@@ -128,19 +129,24 @@ def read_data(delimiter, fields, labels):
     ndataset = (np.asarray(fields_list)=="y").sum()
     if len(labels_list) == 0:
         labels_list = [""] * ndataset
+    titles_list = TITLES
+    if len(titles_list) < ndataset:
+        titles_list += [""] * (ndataset - len(titles_list))
     assert len(data) == len(fields_list), f"Number of fields ({len(fields_list)}) and data ({len(data)}) does not match"
     assert len(labels_list) == ndataset, f"Number of y fields ({len(labels_list)}) and labels ({ndataset}) does not match"
-    table = Table("ids", "lengths", "fields", "labels")
+    table = Table("ids", "lengths", "fields", "labels", "titles")
     j = 0
     for i in data.keys():
         field = fields_list[i]
         if field == "y":
             label = labels_list[j]
+            title = titles_list[j]
             j += 1
         else:
             label = ""
+            title = ""
         length = len(data[i])
-        table.add_row(str(i), str(length), field, label)
+        table.add_row(str(i), str(length), field, label, title)
     console.print(table)
     print(f"{fields=}")
     return data, datastr, fields
