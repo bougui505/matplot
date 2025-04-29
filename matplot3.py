@@ -478,6 +478,31 @@ def jitter(
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
+def umap(
+    n_neighbors:int=15,
+    min_dist:float=0.1,
+    metric:str="euclidean",
+    test:bool=False,
+    save:str="",
+    npy:str="",
+):
+    """
+    """
+    import umap
+    import umap.plot
+    if test:
+        data = np.random.normal(loc=(0,0,0), size=(100, 3))
+        data = np.concatenate((data, np.random.normal(loc=(1,1,1), size=(100, 3))), axis=0)
+    if npy != "":
+        data = np.load(npy)
+    print(f"{data.shape=}")
+    mapper = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
+    embedding = mapper.fit_transform(data)
+    umap.plot.points(mapper)
+    out(save=save, datastr="", labels="", colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None)
+
+
+@app.command()
 def read_metadata(filename):
     """
     Read metadata at least for a png file
