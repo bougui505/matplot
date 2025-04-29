@@ -485,6 +485,9 @@ def umap(
     test:bool=False,
     save:str="",
     npy:str="",
+    npz:str="",
+    data_key:str="data",
+    labels_key:str="",
     colorbar:bool=False,
     cmap:str="viridis",
     size:int=10,
@@ -495,20 +498,70 @@ def umap(
     ymax:float=None,  # type:ignore
 ):
     """
+    UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction technique.
+    See: https://umap-learn.readthedocs.io/en/latest/
+
+    n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
+
+    min_dist: The effective minimum distance between embedded points.
+
+    metric: The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)
+
+    test: Generate random data for testing
+
+    save: Save the plot to a file
+
+    npy: Load data from a numpy file
+
+    npz: Load data from a numpy file (compressed)
+
+    data_key: The key to use to load data from the npz file
+
+    labels_key: The key to use to load labels from the npz file
+
+    colorbar: Add a colorbar to the plot
+
+    cmap: The colormap to use for the plot
+
+    size: The size of the markers in the plot
+
+    alpha: The transparency of the markers in the plot
+
+    xmin: The minimum x value for the plot
+
+    xmax: The maximum x value for the plot
+
+    ymin: The minimum y value for the plot
+
+    ymax: The maximum y value for the plot
     """
     import umap
-    import umap.plot
+
     if test:
         data = np.random.normal(loc=(0,0,0), size=(100, 3))
         data = np.concatenate((data, np.random.normal(loc=(1,1,1), size=(100, 3))), axis=0)
     if npy != "":
         data = np.load(npy)
+    labels = None
+    if npz != "":
+        dataz = np.load(npz)
+        print(f"{dataz.files=}")
+        data = dataz[data_key]
+        if labels_key != "":
+            labels = dataz[labels_key]
     print(f"{data.shape=}")
+    print(f"{data.min()=}")
+    print(f"{data.max()=}")
     mapper = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
     embedding = mapper.fit_transform(data)
     # umap.plot.points(mapper, values=r_orig)
-    plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)
-    out(save=save, datastr="", labels="", colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    if labels is None:
+        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)
+    else:
+        for label in np.unique(labels):
+            sel = labels == label
+            plt.scatter(embedding[sel, 0], embedding[sel, 1], s=size, cmap=cmap, alpha=alpha, label=label)
+    out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 
 @app.command()
