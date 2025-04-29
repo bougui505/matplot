@@ -485,6 +485,14 @@ def umap(
     test:bool=False,
     save:str="",
     npy:str="",
+    colorbar:bool=False,
+    cmap:str="viridis",
+    size:int=10,
+    alpha:float=1.0,
+    xmin:float=None,  # type:ignore
+    xmax:float=None,  # type:ignore
+    ymin:float=None,  # type:ignore
+    ymax:float=None,  # type:ignore
 ):
     """
     """
@@ -498,8 +506,9 @@ def umap(
     print(f"{data.shape=}")
     mapper = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
     embedding = mapper.fit_transform(data)
-    umap.plot.points(mapper)
-    out(save=save, datastr="", labels="", colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None)
+    # umap.plot.points(mapper, values=r_orig)
+    plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)
+    out(save=save, datastr="", labels="", colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 
 @app.command()
