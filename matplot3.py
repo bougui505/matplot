@@ -232,12 +232,13 @@ def out(
     ymin,
     ymax,
     interactive_plot:bool=True,
+    legend:bool=True,
 ):
     set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     if colorbar:
         plt.colorbar()
     if labels is not None:
-        if len(labels) > 0:
+        if len(labels) > 0 and legend:
             plt.legend()
     if save == "":
         # build a kdtree for X, Y
@@ -611,6 +612,8 @@ def umap(
     npz:str="",
     data_key:str="data",
     labels_key:str="",
+    ilabels_key:str="",
+    legend:bool=True,
     colorbar:bool=False,
     cmap:str="viridis",
     size:int=10,
@@ -632,6 +635,7 @@ def umap(
     npz: Load data from a numpy file (compressed)\n
     data_key: The key to use to load data from the npz file\n
     labels_key: The key to use to load labels from the npz file\n
+    ilabels_key: The key to use to load interactive labels from the npz file\n
     colorbar: Add a colorbar to the plot\n
     cmap: The colormap to use for the plot\n
     size: The size of the markers in the plot\n
@@ -658,6 +662,8 @@ def umap(
         data = dataz[data_key]
         if labels_key != "":
             labels = dataz[labels_key]
+        if ilabels_key != "":
+            ilabels = dataz[ilabels_key]
     print(f"{data.shape=}")  # type:ignore
     print(f"{data.min()=}")  # type:ignore
     print(f"{data.max()=}")  # type:ignore
@@ -671,10 +677,16 @@ def umap(
     else:
         for label in np.unique(labels):
             sel = labels == label
-            plt.scatter(embedding[sel, 0], embedding[sel, 1], s=size, cmap=cmap, alpha=alpha, label=label)  # type:ignore
-            X.extend(list(embedding[sel, 0]))  # type:ignore
-            Y.extend(list(embedding[sel, 1]))  # type:ignore
-    out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+            x = embedding[sel, 0]  # type:ignore
+            y = embedding[sel, 1]  # type:ignore
+            plt.scatter(x, y, s=size, cmap=cmap, alpha=alpha, label=label)  # type:ignore
+            X.extend(list(x))
+            Y.extend(list(y))
+            if ilabels_key == "":
+                INTERACTIVE_LABELS.extend(list(labels[sel]))
+            else:
+                INTERACTIVE_LABELS.extend(list(ilabels[sel]))  # type:ignore
+    out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
 
 @app.command()
