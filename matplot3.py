@@ -470,10 +470,14 @@ def jitter(
     """
     Jitter plot
 
-    --fields: x y xt (x: The x field, y: The y field, xt: The xtick labels field)
-    --rotation: The rotation of the xtick labels in degrees (default: 45)
-    --median: Plot the median of the data
-    --median_sort: Sort by median values
+    --fields:\n
+        x: The x field\n
+        y: The y field\n
+        xt: The xtick labels field\n
+        m: The marker field (see: https://matplotlib.org/stable/api/markers_api.html)\n
+    --rotation: The rotation of the xtick labels in degrees (default: 45)\n
+    --median: Plot the median of the data\n
+    --median_sort: Sort by median values\n
     """
     if test:
         data = dict()
@@ -496,11 +500,13 @@ def jitter(
     labels = labels.strip().split()
     xfields = np.where(np.asarray(fields)=="x")[0]
     yfields = np.where(np.asarray(fields)=="y")[0]
+    mfields = np.where(np.asarray(fields)=="m")[0]
     kde_y = None
     plotid = 0
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
+        markers = data[mfields[plotid]] if len(mfields) > 0 else "o"
         if median:
             x = plot_median(x, y,
                             size=median_size,
@@ -516,7 +522,18 @@ def jitter(
         x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
-        plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap)
+        if markers == "o":
+            plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap, marker=markers)
+        else:
+            markers = np.asarray(markers)
+            unique_markers = np.unique(markers)
+            for marker in unique_markers:
+                sel = markers == marker
+                if kde_y is not None:
+                    c = kde_y[sel]
+                else:
+                    c = None
+                plt.scatter(x[sel], y[sel], c=c, s=size, alpha=alpha, cmap=cmap, marker=marker)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
