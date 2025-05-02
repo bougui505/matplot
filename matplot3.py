@@ -501,6 +501,7 @@ def jitter(
         y = np.float_(data[yfield])  # type: ignore
         if median:
             plot_median(x, y, size=median_size, color=median_color, marker=median_marker)
+        set_xtick_labels(fields, data, rotation=rotation)
         if kde:
             kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
             # kde_ins = kde_ins.fit(y[:, None])  # type: ignore
@@ -510,7 +511,6 @@ def jitter(
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
-    set_xtick_labels(fields, data, rotation=rotation)
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 def plot_median(x, y, size=100, color="black", marker="_"):
@@ -521,12 +521,14 @@ def plot_median(x, y, size=100, color="black", marker="_"):
     y = np.asarray(y)
     print(x)
     xunique = np.unique(x)
+    ymedians = []
     for i in range(len(xunique)):
         xsel = x == xunique[i]
         ysel = y[xsel]
         if len(ysel) > 0:
             ymedian = np.median(ysel)
-            plt.scatter(xunique[i], ymedian, color=color, marker=marker, s=size, label="median", zorder=100)
+            ymedians.append(ymedian)
+    plt.scatter(xunique, ymedians, color=color, marker=marker, s=size, label="median", zorder=100)
 
 @app.command()
 def umap(
