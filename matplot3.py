@@ -35,6 +35,7 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
 # Define X and Y as global variables
 X, Y = list(), list()
+INTERACTIVE_LABELS = list()
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -257,7 +258,11 @@ def onclick(event):
         dist, index = KDTREE.query([event.xdata, event.ydata], k=1)
         x = X[index]
         y = Y[index]
-        print(f"Nearest point: x={x:.2f}, y={y:.2f}, dist={dist:.2f}")
+        if len(INTERACTIVE_LABELS) > 0:
+            label = INTERACTIVE_LABELS[index]
+        else:
+            label = ""
+        print(f"Nearest point: {label} x={x:.2f}, y={y:.2f}, dist={dist:.2f}")
         # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
 
 def toint(x):
@@ -358,16 +363,15 @@ def scatter(
     test_ndata:int=2,
 ):
     """
-    A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html
-
-    --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)
-
-    --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)
-
-    --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps
+    A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html\n
+    --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)\n
+              il: a particular field with labels to display for interactive mode\n
+    --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)\n
+    --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps\n
     """
     global X
     global Y
+    global INTERACTIVE_LABELS
     if test:
         data = dict()
         fields = ""
@@ -385,6 +389,9 @@ def scatter(
             data[j] = np.random.normal(size=test_npts, loc=0, scale=50)
             j += 1
             fields += "s "
+            data[j] = np.arange(test_npts)
+            j += 1
+            fields += "il "
         datastr = ""
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
@@ -400,6 +407,8 @@ def scatter(
         y = np.float_(data[yfield])  # type: ignore
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
+        if "il" in fields:
+            INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if len(labels) > 0:
             label = labels[0]
         else:
@@ -505,10 +514,14 @@ def jitter(
         y: The y field\n
         xt: The xtick labels field\n
         c: The color field\n
+        il: The interactive labels field\n
     --rotation: The rotation of the xtick labels in degrees (default: 45)\n
     --median: Plot the median of the data\n
     --median_sort: Sort by median values\n
     """
+    global X
+    global Y
+    global INTERACTIVE_LABELS
     if test:
         data = dict()
         j = 0
@@ -536,8 +549,6 @@ def jitter(
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
-        X.extend(list(x))
-        Y.extend(list(y))
         c = np.float_(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
         if median:
             x = plot_median(x, y,
@@ -547,6 +558,10 @@ def jitter(
                             median_sort=median_sort)
             data[xfield] = x  # type: ignore
         set_xtick_labels(fields, data, rotation=rotation)
+        X.extend(list(x))  # type:ignore
+        Y.extend(list(y))  # type:ignore
+        if "il" in fields:
+            INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if kde:
             kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
             # kde_ins = kde_ins.fit(y[:, None])  # type: ignore
