@@ -22,6 +22,7 @@ from rich import print
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
+from scipy.spatial import cKDTree
 from sklearn.neighbors import KernelDensity
 from typing_extensions import Annotated
 
@@ -31,6 +32,9 @@ console = Console()
 # See: https://stackoverflow.com/a/61466412/1679629
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
+
+# Define X and Y as global variables
+X, Y = list(), list()
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -226,6 +230,7 @@ def out(
     xmax,
     ymin,
     ymax,
+    interactive_plot:bool=True,
 ):
     set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     if colorbar:
@@ -233,9 +238,27 @@ def out(
     if len(labels) > 0:
         plt.legend()
     if save == "":
+        # build a kdtree for X, Y
+        global KDTREE
+        KDTREE = None
+        if interactive_plot:
+            KDTREE = cKDTree(np.vstack((X, Y)).T)
+            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
         plt.show()
     else:
         saveplot(save, datastr, labels)
+
+def onclick(event):
+    """
+    Print the x, y coordinates of the mouse click on the plot
+    """
+    if event.xdata is not None and event.ydata is not None:
+        # find the nearest point in the kdtree
+        dist, index = KDTREE.query([event.xdata, event.ydata], k=1)
+        x = X[index]
+        y = Y[index]
+        print(f"Nearest point: x={x:.2f}, y={y:.2f}, dist={dist:.2f}")
+        # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
 
 def toint(x):
     try:
@@ -296,6 +319,8 @@ def plot(
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
+        X.extend(list(x))  # type:ignore
+        Y.extend(list(y))  # type:ignore
         if moving_avg > 0:
             x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
             y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
@@ -341,6 +366,8 @@ def scatter(
 
     --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps
     """
+    global X
+    global Y
     if test:
         data = dict()
         fields = ""
@@ -371,6 +398,8 @@ def scatter(
     for xfield, yfield in zip(xfields, yfields):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
+        X.extend(list(x))  # type:ignore
+        Y.extend(list(y))  # type:ignore
         if len(labels) > 0:
             label = labels[0]
         else:
@@ -428,6 +457,7 @@ def hist(
     for j, field in enumerate(fields):
         if field == "y":
             y = np.float_(data[j])  # type: ignore
+            Y.extend(list(y))  # type:ignore
         else:
             continue
         if len(labels) > 0:
@@ -506,6 +536,8 @@ def jitter(
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
+        X.extend(list(x))
+        Y.extend(list(y))
         c = np.float_(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
         if median:
             x = plot_median(x, y,
@@ -631,11 +663,13 @@ def umap(
     embedding = mapper.fit_transform(data)
     # umap.plot.points(mapper, values=r_orig)
     if labels is None:
-        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)
+        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)  # type:ignore
     else:
         for label in np.unique(labels):
             sel = labels == label
-            plt.scatter(embedding[sel, 0], embedding[sel, 1], s=size, cmap=cmap, alpha=alpha, label=label)
+            plt.scatter(embedding[sel, 0], embedding[sel, 1], s=size, cmap=cmap, alpha=alpha, label=label)  # type:ignore
+            X.extend(list(embedding[sel, 0]))  # type:ignore
+            Y.extend(list(embedding[sel, 1]))  # type:ignore
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 
