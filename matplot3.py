@@ -454,6 +454,7 @@ def jitter(
     median_size:int=100,
     median_color:str="black",
     median_marker:str="_",
+    median_sort:bool=False,
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -472,6 +473,7 @@ def jitter(
     --fields: x y xt (x: The x field, y: The y field, xt: The xtick labels field)
     --rotation: The rotation of the xtick labels in degrees (default: 45)
     --median: Plot the median of the data
+    --median_sort: Sort by median values
     """
     if test:
         data = dict()
@@ -500,7 +502,12 @@ def jitter(
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
         if median:
-            plot_median(x, y, size=median_size, color=median_color, marker=median_marker)
+            x = plot_median(x, y,
+                            size=median_size,
+                            color=median_color,
+                            marker=median_marker,
+                            median_sort=median_sort)
+            data[xfield] = x
         set_xtick_labels(fields, data, rotation=rotation)
         if kde:
             kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
@@ -513,13 +520,12 @@ def jitter(
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
-def plot_median(x, y, size=100, color="black", marker="_"):
+def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=False):
     """
     Plot the median of the data
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    print(x)
     xunique = np.unique(x)
     ymedians = []
     for i in range(len(xunique)):
@@ -528,7 +534,16 @@ def plot_median(x, y, size=100, color="black", marker="_"):
         if len(ysel) > 0:
             ymedian = np.median(ysel)
             ymedians.append(ymedian)
+    sorter = None
+    if median_sort:
+        sorter = np.argsort(ymedians)
+        ymedians = np.asarray(ymedians)[sorter]
+        # repeat the sorter for the x values
+        mapper = dict(zip(sorter, xunique))
+        x = np.asarray([mapper[xi] for xi in x])
+        x = np.float_(x)
     plt.scatter(xunique, ymedians, color=color, marker=marker, s=size, label="median", zorder=100)
+    return x
 
 @app.command()
 def umap(
