@@ -23,6 +23,7 @@ from rich.console import Console
 from rich.progress import track
 from rich.table import Table
 from sklearn.neighbors import KernelDensity
+from typing_extensions import Annotated
 
 console = Console()
 
@@ -103,6 +104,11 @@ def read_data(delimiter, fields, labels):
     """
     Read data from stdin and return a dictionary of data
     if an empty line is found, new fields are created
+
+    :param delimiter: The delimiter to use to split the data
+    :param fields: The fields to read
+    :param labels: The labels to use for the data
+    :return: A dictionary of data, a string of data, and the fields
     """
     data = defaultdict(list)
     datastr = ""
@@ -192,6 +198,24 @@ def add_metadata(filename, datastr, key="data", labels=None):
     #     metadata.add_text("subsampling", "1st-column")
     targetImage = Image.open(filename)
     targetImage.save(filename, pnginfo=metadata)
+
+def set_xtick_labels(fields, data, rotation=45):
+    """
+    Set the xtick labels for the plot
+    """
+    xticks = []
+    xticklabels = []
+    if 'xt' in fields:
+        xtickslabels = data[fields.index('xt')]
+        xval = np.float_(data[fields.index('x')])
+        xval, unique_indices = np.unique(xval, return_index=True)
+        xtickslabels = np.array(xtickslabels)[unique_indices]
+        plt.xticks(xval, xtickslabels)
+        # rotate the labels
+        plt.setp(plt.gca().get_xticklabels(),
+                 rotation=rotation,
+                 ha="right",
+                 rotation_mode="anchor")
 
 def out(
     save,
@@ -432,6 +456,7 @@ def jitter(
     xmax:float=None,  # type:ignore
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
+    rotation:int=45,
     # test options
     test:bool=False,
     test_npts:int=1000,
@@ -439,6 +464,9 @@ def jitter(
 ):
     """
     Jitter plot
+
+    --fields: x y xt (x: The x field, y: The y field, xt: The xtick labels field)
+    --rotation: The rotation of the xtick labels in degrees (default: 45)
     """
     if test:
         data = dict()
@@ -475,6 +503,7 @@ def jitter(
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=kde_y, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
+    set_xtick_labels(fields, data, rotation=rotation)
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 @app.command()
