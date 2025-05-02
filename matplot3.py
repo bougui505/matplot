@@ -236,8 +236,9 @@ def out(
     set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     if colorbar:
         plt.colorbar()
-    if len(labels) > 0:
-        plt.legend()
+    if labels is not None:
+        if len(labels) > 0:
+            plt.legend()
     if save == "":
         # build a kdtree for X, Y
         global KDTREE
@@ -640,6 +641,9 @@ def umap(
     ymin: The minimum y value for the plot\n
     ymax: The maximum y value for the plot\n
     """
+    global X
+    global Y
+    global INTERACTIVE_LABELS
     import umap
 
     if test:
@@ -662,6 +666,8 @@ def umap(
     # umap.plot.points(mapper, values=r_orig)
     if labels is None:
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)  # type:ignore
+        X.extend(list(embedding[:, 0]))  # type:ignore
+        Y.extend(list(embedding[:, 1]))  # type:ignore
     else:
         for label in np.unique(labels):
             sel = labels == label
