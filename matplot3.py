@@ -450,6 +450,10 @@ def jitter(
     kde:bool=False,
     kde_subset:int=1000,
     cmap:str="viridis",
+    median:bool=False,
+    median_size:int=100,
+    median_color:str="black",
+    median_marker:str="_",
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -467,6 +471,7 @@ def jitter(
 
     --fields: x y xt (x: The x field, y: The y field, xt: The xtick labels field)
     --rotation: The rotation of the xtick labels in degrees (default: 45)
+    --median: Plot the median of the data
     """
     if test:
         data = dict()
@@ -494,6 +499,8 @@ def jitter(
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
+        if median:
+            plot_median(x, y, size=median_size, color=median_color, marker=median_marker)
         if kde:
             kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
             # kde_ins = kde_ins.fit(y[:, None])  # type: ignore
@@ -505,6 +512,21 @@ def jitter(
         plotid += 1
     set_xtick_labels(fields, data, rotation=rotation)
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+
+def plot_median(x, y, size=100, color="black", marker="_"):
+    """
+    Plot the median of the data
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+    print(x)
+    xunique = np.unique(x)
+    for i in range(len(xunique)):
+        xsel = x == xunique[i]
+        ysel = y[xsel]
+        if len(ysel) > 0:
+            ymedian = np.median(ysel)
+            plt.scatter(xunique[i], ymedian, color=color, marker=marker, s=size, label="median", zorder=100)
 
 @app.command()
 def umap(
