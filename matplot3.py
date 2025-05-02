@@ -620,42 +620,25 @@ def umap(
     ymax:float=None,  # type:ignore
 ):
     """
-    UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction technique.
-    See: https://umap-learn.readthedocs.io/en/latest/
-
-    n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
-
-    min_dist: The effective minimum distance between embedded points.
-
-    metric: The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)
-
-    test: Generate random data for testing
-
-    save: Save the plot to a file
-
-    npy: Load data from a numpy file
-
-    npz: Load data from a numpy file (compressed)
-
-    data_key: The key to use to load data from the npz file
-
-    labels_key: The key to use to load labels from the npz file
-
-    colorbar: Add a colorbar to the plot
-
-    cmap: The colormap to use for the plot
-
-    size: The size of the markers in the plot
-
-    alpha: The transparency of the markers in the plot
-
-    xmin: The minimum x value for the plot
-
-    xmax: The maximum x value for the plot
-
-    ymin: The minimum y value for the plot
-
-    ymax: The maximum y value for the plot
+    UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction technique.\n
+    See: https://umap-learn.readthedocs.io/en/latest/\n
+    n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.\n
+    min_dist: The effective minimum distance between embedded points.\n
+    metric: The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)\n
+    test: Generate random data for testing\n
+    save: Save the plot to a file\n
+    npy: Load data from a numpy file\n
+    npz: Load data from a numpy file (compressed)\n
+    data_key: The key to use to load data from the npz file\n
+    labels_key: The key to use to load labels from the npz file\n
+    colorbar: Add a colorbar to the plot\n
+    cmap: The colormap to use for the plot\n
+    size: The size of the markers in the plot\n
+    alpha: The transparency of the markers in the plot\n
+    xmin: The minimum x value for the plot\n
+    xmax: The maximum x value for the plot\n
+    ymin: The minimum y value for the plot\n
+    ymax: The maximum y value for the plot\n
     """
     import umap
 
@@ -671,11 +654,11 @@ def umap(
         data = dataz[data_key]
         if labels_key != "":
             labels = dataz[labels_key]
-    print(f"{data.shape=}")
-    print(f"{data.min()=}")
-    print(f"{data.max()=}")
+    print(f"{data.shape=}")  # type:ignore
+    print(f"{data.min()=}")  # type:ignore
+    print(f"{data.max()=}")  # type:ignore
     mapper = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
-    embedding = mapper.fit_transform(data)
+    embedding = mapper.fit_transform(data)  # type:ignore
     # umap.plot.points(mapper, values=r_orig)
     if labels is None:
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)  # type:ignore
