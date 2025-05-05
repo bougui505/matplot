@@ -562,8 +562,6 @@ def jitter(
                             median_sort=median_sort)
             data[xfield] = x  # type: ignore
         set_xtick_labels(fields, data, rotation=rotation)
-        X.extend(list(x))  # type:ignore
-        Y.extend(list(y))  # type:ignore
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if kde:
@@ -581,6 +579,8 @@ def jitter(
             c = np.asarray(c)
         x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
+        X.extend(list(x))  # type:ignore
+        Y.extend(list(y))  # type:ignore
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
