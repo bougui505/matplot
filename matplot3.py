@@ -490,6 +490,7 @@ def jitter(
     alpha:float=1.0,
     kde:bool=False,
     kde_subset:int=1000,
+    kde_normalize:bool=False,
     cmap:str="viridis",
     median:bool=False,
     median_size:int=100,
@@ -520,6 +521,7 @@ def jitter(
     --rotation: The rotation of the xtick labels in degrees (default: 45)\n
     --median: Plot the median of the data\n
     --median_sort: Sort by median values\n
+    --kde_normalize: Normalize the KDE values\n
     """
     global X
     global Y
@@ -548,7 +550,7 @@ def jitter(
     cfields = np.where(np.asarray(fields)=="c")[0]
     kde_y = None
     plotid = 0
-    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Jittering..."):
+    for xfield, yfield in zip(xfields, yfields):
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
         c = np.float_(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
@@ -565,10 +567,18 @@ def jitter(
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if kde:
-            kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(y, size=min(kde_subset, len(y)))[:, None])  # type: ignore
-            # kde_ins = kde_ins.fit(y[:, None])  # type: ignore
-            kde_y = np.exp(kde_ins.score_samples(y[:, None]))  # type: ignore
-            c = kde_y
+            c = np.zeros_like(y)
+            xunique = np.unique(x)
+            for xu in track(xunique, description="KDE..."):
+                sel = x == xu
+                ysel = y[sel]  # type: ignore
+                kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(ysel, size=min(kde_subset, len(ysel)))[:, None])  # type: ignore
+                kde_y = np.exp(kde_ins.score_samples(ysel[:, None]))  # type: ignore
+                if kde_normalize:
+                    kde_y -= kde_y.min()
+                    kde_y /= kde_y.max()
+                c[sel] = kde_y
+            c = np.asarray(c)
         x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
         y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
