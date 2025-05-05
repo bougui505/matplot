@@ -22,8 +22,7 @@ from rich import print
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
-from scipy.spatial import cKDTree
-from sklearn.neighbors import KernelDensity
+from sklearn.neighbors import KernelDensity, NearestNeighbors
 from typing_extensions import Annotated
 
 console = Console()
@@ -242,10 +241,11 @@ def out(
             plt.legend()
     if save == "":
         # build a kdtree for X, Y
-        global KDTREE
-        KDTREE = None
+        global NEIGH
+        NEIGH = None
         if interactive_plot:
-            KDTREE = cKDTree(np.vstack((X, Y)).T)
+            NEIGH = NearestNeighbors(n_neighbors=1, algorithm='auto')
+            NEIGH.fit(np.vstack((X, Y)).T)
             cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
         plt.show()
     else:
@@ -258,7 +258,9 @@ def onclick(event):
     if event.xdata is not None and event.ydata is not None:
         # find the nearest point in the kdtree
         print(event.xdata, event.ydata)
-        dist, index = KDTREE.query([event.xdata, event.ydata], k=1)
+        dist, index = NEIGH.kneighbors(np.asarray([event.xdata, event.ydata]).reshape(1, -1))
+        index = index.squeeze()
+        dist = dist.squeeze()
         x = X[index]
         y = Y[index]
         if len(INTERACTIVE_LABELS) > 0:
