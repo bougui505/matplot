@@ -257,6 +257,7 @@ def onclick(event):
     """
     if event.xdata is not None and event.ydata is not None:
         # find the nearest point in the kdtree
+        print(event.xdata, event.ydata)
         dist, index = KDTREE.query([event.xdata, event.ydata], k=1)
         x = X[index]
         y = Y[index]
