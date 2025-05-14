@@ -292,6 +292,8 @@ def plot(
     xmax:float=None,  # type:ignore
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
+    shade:str=None,  # type: ignore
+    alpha_shade:float=0.2,
     # test options
     test:bool=False,
     test_npts:int=1000,
@@ -304,6 +306,11 @@ def plot(
     x: The x field\n
     y: The y field\n
     ts: The x field is a timestamp (in seconds since epoch)\n
+    --shade:
+    give 0 (no shade) or 1 (shade) to shade the area under the curve\n
+    Give 1 value per y field\n
+    e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field\n
+    --alpha-shade: The alpha value for the shaded area (default: 0.2)\n
     """
     if test:
         data = dict()
@@ -320,6 +327,12 @@ def plot(
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
+    if shade is not None:
+        shade = shade.strip().split()  # type:ignore
+        shade = np.bool_(np.int_(shade))  # type:ignore
+        print(f"{shade=}")
+    else:
+        shade = np.zeros(len(fields), dtype=bool)
     xfmt = None
     if "ts" in fields:
         xfmt = "ts"
@@ -359,6 +372,10 @@ def plot(
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
+        if shade[plotid]:
+            # get the color of the last plot:
+            color = plt.gca().lines[-1].get_color()
+            plt.fill_between(x, y, alpha=alpha_shade, color=color)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
