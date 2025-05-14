@@ -10,6 +10,7 @@
 import os
 import socket
 from collections import defaultdict
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -298,6 +299,11 @@ def plot(
 ):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+
+    --fields:\n
+    x: The x field\n
+    y: The y field\n
+    ts: The x field is a timestamp (in seconds since epoch)\n
     """
     if test:
         data = dict()
@@ -314,6 +320,10 @@ def plot(
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()
+    xfmt = None
+    if "ts" in fields:
+        xfmt = "ts"
+        fields = [f if f != "ts" else "x" for f in fields]
     assert "x" in fields, "x field is required"
     labels = labels.strip().split()
     if fmt != "":
@@ -343,7 +353,12 @@ def plot(
         else:
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
+        if xfmt == "ts":
+            print(f"{x=}")
+            x = np.asarray([datetime.fromtimestamp(e) for e in x]) 
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
+        if xfmt == "ts":
+            plt.gcf().autofmt_xdate()
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
