@@ -330,7 +330,6 @@ def plot(
     if shade is not None:
         shade = shade.strip().split()  # type:ignore
         shade = np.bool_(np.int_(shade))  # type:ignore
-        print(f"{shade=}")
     else:
         shade = np.zeros(len(fields), dtype=bool)
     xfmt = None
@@ -367,7 +366,6 @@ def plot(
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         if xfmt == "ts":
-            print(f"{x=}")
             x = np.asarray([datetime.fromtimestamp(e) for e in x]) 
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
