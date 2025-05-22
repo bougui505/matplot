@@ -510,7 +510,7 @@ def hist(
             label = None
         plt.hist(y, toint(bins), label=label, alpha=alpha)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False)
 
 @app.command()
 def jitter(
