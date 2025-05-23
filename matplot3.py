@@ -610,8 +610,8 @@ def jitter(
                     kde_y /= kde_y.max()
                 c[sel] = kde_y
             c = np.asarray(c)
-        x += np.random.normal(size=x.shape, loc=0, scale=xjitter)
-        y += np.random.normal(size=y.shape, loc=0, scale=yjitter)
+        x += np.random.uniform(size=x.shape, low=-xjitter/2, high=xjitter/2)
+        y += np.random.uniform(size=y.shape, low=-yjitter/2, high=yjitter/2)
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
