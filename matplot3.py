@@ -26,6 +26,8 @@ from rich.table import Table
 from sklearn.neighbors import KernelDensity, NearestNeighbors
 from typing_extensions import Annotated
 
+from ROC import ROC
+
 console = Console()
 
 # Reading data from a png with large number of points:
@@ -167,18 +169,21 @@ def read_data(delimiter, fields, labels):
     print(f"{fields=}")
     return data, datastr, fields
 
-def set_limits(xmin=None, xmax=None, ymin=None, ymax=None):
+def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect:bool=False):
     limits = plt.axis()
     if xmin is None:
         xmin = limits[0]
     if xmax is None:
         xmax = limits[1]
-    plt.xlim([float(xmin), float(xmax)])
+    ax = plt.gca()
+    ax.set_xlim([float(xmin), float(xmax)])
     if ymin is None:
         ymin = limits[-2]
     if ymax is None:
         ymax = limits[-1]
-    plt.ylim([float(ymin), float(ymax)])
+    ax.set_ylim([float(ymin), float(ymax)])
+    if equal_aspect:
+        ax.set_aspect('equal')
 
 def saveplot(outfilename, datastr, labels=None):
     plt.savefig(outfilename)
@@ -234,8 +239,9 @@ def out(
     cbar_label=None,
     interactive_plot:bool=True,
     legend:bool=True,
+    equal_aspect:bool=False,
 ):
-    set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
     if colorbar:
         cbar = plt.colorbar()
         if cbar_label is not None:
@@ -648,6 +654,49 @@ def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=Fals
         x = np.float_(x)
     plt.scatter(xunique, ymedians, color=color, marker=marker, s=size, label="median", zorder=100)
     return x
+
+@app.command()
+def roc(
+    fields="y a",
+    labels:str="",
+    delimiter=None,
+    test:bool=False,
+    save:str="",
+    xmin:float=0.0,
+    xmax:float=1.0,
+    ymin:float=0.0,
+    ymax:float=1.0,
+
+    ):
+    """
+    Plot a ROC curve (Receiver Operating Characteristic curve) for binary classification.\n
+
+    --fields: y a (y: The value (the lower the better by default), a: 1 for active, 0 for inactive)\n
+    """
+    global X
+    global Y
+    global INTERACTIVE_LABELS
+    data, datastr, fields = read_data(delimiter=delimiter, fields=fields, labels=labels)
+    fields = fields.strip().split()
+    labels = labels.strip().split()  # type:ignore
+    yfields = np.where(np.asarray(fields)=="y")[0]
+    afields = np.where(np.asarray(fields)=="a")[0]
+    for i, (yfield, afield) in enumerate(zip(yfields, afields)):
+        y = np.float_(data[yfield])  # type: ignore
+        a = np.int_(data[afield])  # type: ignore
+        active_values = y[a == 1]  # type: ignore
+        inactive_values = y[a == 0]  # type: ignore
+        x, y, auc, pROC_auc, thresholds = ROC(active_values, inactive_values)
+        X.extend(list(x))  # type:ignore
+        Y.extend(list(y))  # type:ignore
+        label = labels[i] if len(labels) > 0 else None
+        if label is None:
+            label = f"AUC={auc:.2f}, pROC={pROC_auc:.2f}"
+        else:
+            label += f" (AUC={auc:.2f}, pROC={pROC_auc:.2f})"
+        plt.plot(x, y, label=label)
+    plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")  # type:ignore
+    out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
 @app.command()
 def umap(
