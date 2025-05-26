@@ -690,12 +690,15 @@ def roc(
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
         label = labels[i] if len(labels) > 0 else None
-        if label is None:
+        if label is None or label == "":
             label = f"AUC={auc:.2f}, pROC={pROC_auc:.2f}"
+            labels.append(label)  # type: ignore
         else:
             label += f" (AUC={auc:.2f}, pROC={pROC_auc:.2f})"
         plt.plot(x, y, label=label)
     plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")  # type:ignore
+    plt.xlabel("False positive rate")
+    plt.ylabel("True positive rate")
     out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
 @app.command()
