@@ -681,7 +681,7 @@ def roc(
     labels = labels.strip().split()  # type:ignore
     yfields = np.where(np.asarray(fields)=="y")[0]
     afields = np.where(np.asarray(fields)=="a")[0]
-    for i, (yfield, afield) in enumerate(zip(yfields, afields)):
+    for plotid, (yfield, afield) in enumerate(zip(yfields, afields)):
         y = np.float_(data[yfield])  # type: ignore
         a = np.int_(data[afield])  # type: ignore
         active_values = y[a == 1]  # type: ignore
@@ -689,16 +689,26 @@ def roc(
         x, y, auc, pROC_auc, thresholds = ROC(active_values, inactive_values)
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
-        label = labels[i] if len(labels) > 0 else None
+        label = labels[plotid] if len(labels) > 0 else None
         if label is None or label == "":
             label = f"AUC={auc:.2f}, pROC={pROC_auc:.2f}"
             labels.append(label)  # type: ignore
         else:
             label += f" (AUC={auc:.2f}, pROC={pROC_auc:.2f})"
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.plot(x, y, label=label)
-    plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")  # type:ignore
-    plt.xlabel("False positive rate")
-    plt.ylabel("True positive rate")
+        plt.xlabel("False positive rate")
+        plt.ylabel("True positive rate")
+        if SUBPLOTS[0]*SUBPLOTS[1] > 1:
+            set_limits(xmin, xmax, ymin, ymax)
+            ax = plt.gca()
+            ax.set_aspect('equal')  # type: ignore
+            plt.title(label)
+            plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")  # type:ignore
+    if SUBPLOTS[0]*SUBPLOTS[1] == 1:
+        plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")  # type:ignore
+    else:
+        labels = []  # type: ignore
     out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
 @app.command()
