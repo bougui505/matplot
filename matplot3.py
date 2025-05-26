@@ -231,12 +231,15 @@ def out(
     xmax,
     ymin,
     ymax,
+    cbar_label=None,
     interactive_plot:bool=True,
     legend:bool=True,
 ):
     set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     if colorbar:
-        plt.colorbar()
+        cbar = plt.colorbar()
+        if cbar_label is not None:
+            cbar.set_label(cbar_label)
     if labels is not None:
         if len(labels) > 0 and legend:
             plt.legend()
@@ -538,6 +541,7 @@ def jitter(
     ymax:float=None,  # type:ignore
     rotation:int=45,
     colorbar:bool=False,
+    cbar_label:str=None,  # type:ignore
     # test options
     test:bool=False,
     test_npts:int=1000,
@@ -618,7 +622,7 @@ def jitter(
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=False):
     """
