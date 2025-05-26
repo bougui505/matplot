@@ -537,6 +537,7 @@ def jitter(
     ymin:float=None,  # type:ignore
     ymax:float=None,  # type:ignore
     rotation:int=45,
+    colorbar:bool=False,
     # test options
     test:bool=False,
     test_npts:int=1000,
@@ -617,7 +618,7 @@ def jitter(
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=False):
     """
