@@ -595,6 +595,7 @@ def jitter(
     kde_y = None
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         x = np.float_(data[xfield])  # type: ignore
         y = np.float_(data[yfield])  # type: ignore
         c = np.float_(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
@@ -625,7 +626,6 @@ def jitter(
         y += np.random.uniform(size=y.shape, low=-yjitter/2, high=yjitter/2)
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
-        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label)
