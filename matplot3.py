@@ -479,6 +479,7 @@ def hist(
     delimiter=None,
     bins="auto",
     alpha:float=1.0,
+    density:bool=False,
     # output options
     save:str="",
     xmin:float=None, # type:ignore
@@ -517,7 +518,7 @@ def hist(
             label = labels[plotid]
         else:
             label = None
-        plt.hist(y, toint(bins), label=label, alpha=alpha)
+        plt.hist(y, toint(bins), label=label, alpha=alpha, density=density)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False)
 
