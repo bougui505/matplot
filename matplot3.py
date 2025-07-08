@@ -277,7 +277,7 @@ def onclick(event):
             label = INTERACTIVE_LABELS[index]
         else:
             label = ""
-        print(f"Nearest point: {label} x={x:.2g}, y={y:.2g}, dist={dist:.2g}")
+        print(f"Nearest point: {label} x={x}, y={y}, dist={dist:.2g}")
         # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
 
 def toint(x):
