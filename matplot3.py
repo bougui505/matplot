@@ -295,6 +295,7 @@ def plot(
     delimiter=None,
     fmt="",
     alpha:float=1.0,
+    rotation:int=45,
     # output options
     save:str="",
     xmin:float=None,  # type:ignore
@@ -314,6 +315,7 @@ def plot(
     --fields:\n
     x: The x field\n
     y: The y field\n
+    xt: The xtick labels field\n
     ts: The x field is a timestamp (in seconds since epoch)\n
     --shade:
     give 0 (no shade) or 1 (shade) to shade the area under the curve\n
@@ -383,6 +385,7 @@ def plot(
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
+        set_xtick_labels(fields, data, rotation=rotation)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
