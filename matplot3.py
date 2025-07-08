@@ -413,6 +413,7 @@ def scatter(
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html\n
     --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)\n
               il: a particular field with labels to display for interactive mode\n
+              t: a field with text labels to display on the plot\n
     --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)\n
     --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps\n
     """
@@ -469,6 +470,9 @@ def scatter(
         else:
             c = None
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
+        if "t" in fields:
+            for x_,y_,t_ in zip(x,y,data[fields.index("t")]):
+                plt.text(x_, y_, t_)
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
