@@ -475,8 +475,13 @@ def scatter(
         if "t" in fields:
             texts_to_drag = list()
             for x_,y_,t_ in zip(x,y,data[fields.index("t")]):
-                texts_to_drag.append(plt.text(x_, y_, t_, 
+                texts_to_drag.append(plt.annotate(t_, (x_,y_),
                                               zorder=10,
+                                              arrowprops=dict(
+                                                  arrowstyle='-',    # Crucially, this creates a plain line without an arrowhead
+                                                  color='red',       # Sets the color of the line to red
+                                                  linewidth=0.8,     # Sets the width of the line to make it thin
+                                                  )
                                               # bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5")
                                               )
                                      )
