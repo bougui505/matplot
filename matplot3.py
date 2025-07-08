@@ -26,6 +26,7 @@ from rich.table import Table
 from sklearn.neighbors import KernelDensity, NearestNeighbors
 from typing_extensions import Annotated
 
+from draggable_text import DraggableText
 from ROC import ROC
 
 console = Console()
@@ -414,6 +415,7 @@ def scatter(
     --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)\n
               il: a particular field with labels to display for interactive mode\n
               t: a field with text labels to display on the plot\n
+                 text is draggable with the mouse to avoid overlaps\n
     --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)\n
     --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps\n
     """
@@ -471,8 +473,24 @@ def scatter(
             c = None
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         if "t" in fields:
+            texts_to_drag = list()
             for x_,y_,t_ in zip(x,y,data[fields.index("t")]):
-                plt.text(x_, y_, t_)
+                texts_to_drag.append(plt.text(x_, y_, t_, 
+                                              zorder=10,
+                                              # bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5")
+                                              )
+                                     )
+                # text_to_drag = plt.text(0.5, 0.5, 'Hello Draggable!', # Source
+                #             fontsize=22, ha='center', va='center', color='darkblue',
+                #             bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5"),
+                #             zorder=10 # Ensures text is drawn on top [6]
+                #             )
+            draggable_text_instances = list()
+            for text_to_drag in texts_to_drag:
+                draggable_text_instances.append(DraggableText(text_to_drag))
+            for draggable_text_instance in draggable_text_instances:
+                draggable_text_instance.connect()
+            
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
