@@ -24,8 +24,7 @@ from rich.console import Console
 from rich.progress import track
 from rich.table import Table
 from sklearn.neighbors import KernelDensity, NearestNeighbors
-from typing_extensions import Annotated
-from typing import Optional
+from typing import Optional, Annotated
 
 from draggable_text import DraggableText
 from ROC import ROC
