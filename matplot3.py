@@ -848,6 +848,7 @@ def roc(
         ymin (float): The minimum y value for the plot.
         ymax (float): The maximum y value for the plot.
     """
+    # AI! add a test
     global X
     global Y
     global INTERACTIVE_LABELS
