@@ -196,13 +196,12 @@ def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect: bool = 
     if xmax is None:
         xmax = limits[1]
     ax = plt.gca()
-    # AI! Fix this linting error: Argument of type "list[float]" cannot be assigned to parameter "left" of type "float | tuple[float, float] | None" in function "set_xlim"
-    ax.set_xlim([float(xmin), float(xmax)])
+    ax.set_xlim(left=float(xmin), right=float(xmax))
     if ymin is None:
         ymin = limits[-2]
     if ymax is None:
         ymax = limits[-1]
-    ax.set_ylim([float(ymin), float(ymax)])
+    ax.set_ylim(bottom=float(ymin), top=float(ymax))
     if equal_aspect:
         ax.set_aspect('equal')
 
