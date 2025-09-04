@@ -854,6 +854,7 @@ def roc(
     global Y
     global INTERACTIVE_LABELS
     if test:
+        # AI! use test_ndata in the test
         data = dict()
         fields = ""
         j = 0
