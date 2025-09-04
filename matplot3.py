@@ -414,22 +414,23 @@ def plot(
         datastr = ""
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
-    fields = fields.strip().split()
+
+    fields = fields.strip().split()  #type: ignore
     if shade is not None:
-        shade = shade.strip().split()
-        shade = np.bool_(np.int_(shade))
+        shade = shade.strip().split()  #type: ignore
+        shade = np.bool_(np.int_(shade))  #type: ignore
     else:
-        shade = np.zeros(len(fields), dtype=bool)
+        shade = np.zeros(len(fields), dtype=bool)  #type: ignore
     xfmt = None
     if "ts" in fields:
         xfmt = "ts"
-        fields = [f if f != "ts" else "x" for f in fields]
+        fields = [f if f != "ts" else "x" for f in fields]  #type: ignore
     assert "x" in fields, "x field is required"
-    labels = labels.strip().split()
+    labels = labels.strip().split()  #type: ignore
     if fmt != "":
-        fmt = fmt.strip().split()
+        fmt = fmt.strip().split()  #type: ignore
     else:
-        fmt = [fmt] * len(data)
+        fmt = [fmt] * len(data)  #type: ignore
     plotid = 0
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
@@ -437,10 +438,10 @@ def plot(
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
-        x = np.float64(data[xfield])
-        y = np.float64(data[yfield])
-        X.extend(list(x))
-        Y.extend(list(y))
+        x = np.float64(data[xfield])  #type: ignore
+        y = np.float64(data[yfield])  #type: ignore
+        X.extend(list(x))  #type: ignore
+        Y.extend(list(y))  #type: ignore
         if moving_avg > 0:
             x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
             y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
@@ -454,11 +455,11 @@ def plot(
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if xfmt == "ts":
-            x = np.asarray([datetime.fromtimestamp(e) for e in x])
+            x = np.asarray([datetime.fromtimestamp(e) for e in x])  #type: ignore
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
-        if shade[plotid]:
+        if shade[plotid]:  #type: ignore
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
@@ -470,16 +471,16 @@ def plot(
 def scatter(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot")] = "x y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str, typer.Option(help="The delimiter to use to split the data")] = None,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
     pcr: Annotated[bool, typer.Option(help="Principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)")] = False,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = None,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
     colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
@@ -532,18 +533,18 @@ def scatter(
         datastr = ""
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
-    fields = fields.strip().split()
-    labels = labels.strip().split()
+    fields = fields.strip().split()  # type: ignore
+    labels = labels.strip().split()  # type: ignore
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
     s_indices = np.where(np.asarray(fields) == "s")[0]
     c_indices = np.where(np.asarray(fields) == "c")[0]
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
-        x = np.float64(data[xfield])
-        y = np.float64(data[yfield])
-        X.extend(list(x))
-        Y.extend(list(y))
+        x = np.float64(data[xfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
+        X.extend(list(x))  # type: ignore
+        Y.extend(list(y))  # type: ignore
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if len(labels) > 0:
@@ -551,17 +552,17 @@ def scatter(
         else:
             label = None
         if len(s_indices) > 0:
-            s = np.float64(data[s_indices[0]])
+            s = np.float64(data[s_indices[0]])  # type: ignore
         else:
             s = None
         if len(c_indices) > 0:
-            c = np.float64(data[c_indices[0]])
+            c = np.float64(data[c_indices[0]])  # type: ignore
         else:
             c = None
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if "t" in fields:
             texts_to_drag = list()
-            for x_, y_, t_ in zip(x, y, data[fields.index("t")]):
+            for x_, y_, t_ in zip(x, y, data[fields.index("t")]):  # type: ignore
                 texts_to_drag.append(plt.annotate(t_, (x_, y_),
                                               zorder=10,
                                               arrowprops=dict(
@@ -596,16 +597,16 @@ def scatter(
 def hist(
     fields: Annotated[str, typer.Option(help="The fields to read")] = "y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str, typer.Option(help="The delimiter to use to split the data")] = None,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     bins: Annotated[str, typer.Option(help="The number of bins to use for the histogram")] = "auto",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     density: Annotated[bool, typer.Option(help="Normalize the histogram")] = False,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = None,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
@@ -641,13 +642,13 @@ def hist(
         datastr = ""
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
-    fields = fields.strip().split()
-    labels = labels.strip().split()
+    fields = fields.strip().split()  # type: ignore
+    labels = labels.strip().split())  # type: ignore
     plotid = 0
     for j, field in enumerate(fields):
         if field == "y":
-            y = np.float64(data[j])
-            Y.extend(list(y))
+            y = np.float64(data[j]))  # type: ignore
+            Y.extend(list(y)))  # type: ignore
         else:
             continue
         if len(labels) > 0:
@@ -662,7 +663,7 @@ def hist(
 def jitter(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, c: The color field, il: The interactive labels field")] = "x y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str, typer.Option(help="The delimiter to use to split the data")] = None,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     xjitter: Annotated[float, typer.Option(help="The amount of jitter to add to the x values")] = 0.1,
     yjitter: Annotated[float, typer.Option(help="The amount of jitter to add to the y values")] = 0.0,
     size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
@@ -678,13 +679,13 @@ def jitter(
     median_sort: Annotated[bool, typer.Option(help="Sort by median values")] = False,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = None,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
     colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
-    cbar_label: Annotated[str, typer.Option(help="The label for the colorbar")] = None,
+    cbar_label: Annotated[str | None, typer.Option(help="The label for the colorbar")] = None,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
@@ -742,8 +743,8 @@ def jitter(
         datastr = ""
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
-    fields = fields.strip().split()
-    labels = labels.strip().split()
+    fields = fields.strip().split()  # type: ignore
+    labels = labels.strip().split()  # type: ignore
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
     cfields = np.where(np.asarray(fields) == "c")[0]
@@ -751,16 +752,16 @@ def jitter(
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
-        x = np.float64(data[xfield])
-        y = np.float64(data[yfield])
-        c = np.float64(data[cfields[0]]) if len(cfields) > 0 else None
+        x = np.float64(data[xfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
+        c = np.float64(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
         if median:
             x = plot_median(x, y,
                             size=median_size,
                             color=median_color,
                             marker=median_marker,
                             median_sort=median_sort)
-            data[xfield] = x
+            data[xfield] = x  # type: ignore
         set_xtick_labels(fields, data, rotation=rotation)
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
@@ -769,8 +770,8 @@ def jitter(
             xunique = np.unique(x)
             for xu in track(xunique, description="KDE..."):
                 sel = x == xu
-                ysel = y[sel]
-                kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(ysel, size=min(kde_subset, len(ysel)))[:, None])
+                ysel = y[sel]  # type: ignore
+                kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(ysel, size=min(kde_subset, len(ysel)))[:, None])  # type: ignore
                 kde_y = np.exp(kde_ins.score_samples(ysel[:, None]))
                 if kde_normalize:
                     kde_y -= kde_y.min()
@@ -825,8 +826,7 @@ def plot_median(x, y, size=100, color="black", marker="_", median_sort: bool = F
 def roc(
     fields: Annotated[str, typer.Option(help="y: The value (the lower the better by default), a: 1 for active, 0 for inactive")] = "y a",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str, typer.Option(help="The delimiter to use to split the data")] = None,
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = 0.0,
     xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = 1.0,
@@ -852,22 +852,22 @@ def roc(
     global Y
     global INTERACTIVE_LABELS
     data, datastr, fields = read_data(delimiter=delimiter, fields=fields, labels=labels)
-    fields = fields.strip().split()
-    labels = labels.strip().split()
+    fields = fields.strip().split()  # type: ignore
+    labels = labels.strip().split()  # type: ignore
     yfields = np.where(np.asarray(fields) == "y")[0]
     afields = np.where(np.asarray(fields) == "a")[0]
     for plotid, (yfield, afield) in enumerate(zip(yfields, afields)):
-        y = np.float64(data[yfield])
-        a = np.int_(data[afield])
-        active_values = y[a == 1]
-        inactive_values = y[a == 0]
+        y = np.float64(data[yfield])  # type: ignore
+        a = np.int_(data[afield])  # type: ignore
+        active_values = y[a == 1]  # type: ignore
+        inactive_values = y[a == 0]  # type: ignore
         x, y, auc, pROC_auc, thresholds = ROC(active_values, inactive_values)
         X.extend(list(x))
         Y.extend(list(y))
         label = labels[plotid] if len(labels) > 0 else None
         if label is None or label == "":
             label = f"AUC={auc:.2f}, pROC={pROC_auc:.2f}"
-            labels.append(label)
+            labels.append(label)  # type: ignore
         else:
             label += f" (AUC={auc:.2f}, pROC={pROC_auc:.2f})"
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
@@ -883,7 +883,7 @@ def roc(
     if SUBPLOTS[0]*SUBPLOTS[1] == 1:
         plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")
     else:
-        labels = []
+        labels = []  # type: ignore
     out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
 @app.command()
@@ -903,10 +903,10 @@ def umap(
     cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
     size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
     alpha: Annotated[float, typer.Option(help="The transparency of the markers in the plot")] = 1.0,
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = None,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
 ):
     """
     Create a UMAP plot from data in standard input.
@@ -937,13 +937,13 @@ def umap(
     global INTERACTIVE_LABELS
     import umap
 
+    labels = None
     if test:
         data = np.random.normal(loc=(0, 0, 0), size=(100, 3))
         data = np.concatenate((data, np.random.normal(loc=(1, 1, 1), size=(100, 3))), axis=0)
-    if npy != "":
+    elif npy != "":
         data = np.load(npy)
-    labels = None
-    if npz != "":
+    elif npz != "":
         dataz = np.load(npz)
         print(f"{dataz.files=}")
         data = dataz[data_key]
@@ -951,6 +951,9 @@ def umap(
             labels = dataz[labels_key]
         if ilabels_key != "":
             ilabels = dataz[ilabels_key]
+    else:
+        print("No data provided, use --test, --npy or --npz")
+        sys.exit(1)
     print(f"{data.shape=}")
     print(f"{data.min()=}")
     print(f"{data.max()=}")
@@ -958,21 +961,21 @@ def umap(
     embedding = mapper.fit_transform(data)
     # umap.plot.points(mapper, values=r_orig)
     if labels is None:
-        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)
-        X.extend(list(embedding[:, 0]))
-        Y.extend(list(embedding[:, 1]))
+        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)  # type: ignore
+        X.extend(list(embedding[:, 0]))  # type: ignore
+        Y.extend(list(embedding[:, 1]))  # type: ignore
     else:
         for label in np.unique(labels):
             sel = labels == label
-            x = embedding[sel, 0]
-            y = embedding[sel, 1]
+            x = embedding[sel, 0]  # type: ignore
+            y = embedding[sel, 1]  # type: ignore
             plt.scatter(x, y, s=size, cmap=cmap, alpha=alpha, label=label)
             X.extend(list(x))
             Y.extend(list(y))
             if ilabels_key == "":
                 INTERACTIVE_LABELS.extend(list(labels[sel]))
             else:
-                INTERACTIVE_LABELS.extend(list(ilabels[sel]))
+                INTERACTIVE_LABELS.extend(list(ilabels[sel]))  # type: ignore
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
 @app.command()
