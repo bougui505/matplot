@@ -290,25 +290,25 @@ def toint(x):
 
 @app.command()
 def plot(
-    fields="x y",
-    labels="",
-    moving_avg:int=0,
-    delimiter=None,
-    fmt="",
-    alpha:float=1.0,
-    rotation:int=45,
+    fields:Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")]="x y",
+    labels:Annotated[str, typer.Option(help="The labels to use for the data")]="",
+    moving_avg:Annotated[int, typer.Option(help="The size of the moving average window")]=0,
+    delimiter:Annotated[str, typer.Option(help="The delimiter to use to split the data")]=None,
+    fmt:Annotated[str, typer.Option(help="The format string to use for the plot")]="",
+    alpha:Annotated[float, typer.Option(help="The alpha value for the plot")]=1.0,
+    rotation:Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")]=45,
     # output options
-    save:str="",
-    xmin:float=None,  # type:ignore
-    xmax:float=None,  # type:ignore
-    ymin:float=None,  # type:ignore
-    ymax:float=None,  # type:ignore
-    shade:str=None,  # type: ignore
-    alpha_shade:float=0.2,
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,  # type:ignore
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,  # type:ignore
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
+    shade:Annotated[str, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")]=None,  # type: ignore
+    alpha_shade:Annotated[float, typer.Option(help="The alpha value for the shaded area")]=0.2,
     # test options
-    test:bool=False,
-    test_npts:int=1000,
-    test_ndata:int=2,
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
+    test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
     """
     Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
@@ -378,7 +378,7 @@ def plot(
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
         if xfmt == "ts":
-            x = np.asarray([datetime.fromtimestamp(e) for e in x]) 
+            x = np.asarray([datetime.fromtimestamp(e) for e in x])
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
@@ -392,23 +392,23 @@ def plot(
 
 @app.command()
 def scatter(
-    fields="x y",
-    labels="",
-    delimiter=None,
-    alpha:float=1.0,
-    cmap:str="viridis",
-    pcr:bool=False,
+    fields:Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot")]="x y",
+    labels:Annotated[str, typer.Option(help="The labels to use for the data")]="",
+    delimiter:Annotated[str, typer.Option(help="The delimiter to use to split the data")]=None,
+    alpha:Annotated[float, typer.Option(help="The alpha value for the plot")]=1.0,
+    cmap:Annotated[str, typer.Option(help="The colormap to use for the plot")]="viridis",
+    pcr:Annotated[bool, typer.Option(help="Principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)")]=False,
     # output options
-    save:str="",
-    xmin:float=None,  # type:ignore
-    xmax:float=None,  # type:ignore
-    ymin:float=None,  # type:ignore
-    ymax:float=None,  # type:ignore
-    colorbar:bool=False,
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,  # type:ignore
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,  # type:ignore
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
+    colorbar:Annotated[bool, typer.Option(help="Add a colorbar to the plot")]=False,
     # test options
-    test:bool=False,
-    test_npts:int=1000,
-    test_ndata:int=2,
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
+    test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
     """
     A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html\n
@@ -498,7 +498,7 @@ def scatter(
                 draggable_text_instances.append(DraggableText(text_to_drag))
             for draggable_text_instance in draggable_text_instances:
                 draggable_text_instance.connect()
-            
+
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x,y)
@@ -507,22 +507,22 @@ def scatter(
 
 @app.command()
 def hist(
-    fields="y",
-    labels="",
-    delimiter=None,
-    bins="auto",
-    alpha:float=1.0,
-    density:bool=False,
+    fields:Annotated[str, typer.Option(help="The fields to read")]="y",
+    labels:Annotated[str, typer.Option(help="The labels to use for the data")]="",
+    delimiter:Annotated[str, typer.Option(help="The delimiter to use to split the data")]=None,
+    bins:Annotated[str, typer.Option(help="The number of bins to use for the histogram")]="auto",
+    alpha:Annotated[float, typer.Option(help="The alpha value for the plot")]=1.0,
+    density:Annotated[bool, typer.Option(help="Normalize the histogram")]=False,
     # output options
-    save:str="",
-    xmin:float=None, # type:ignore
-    xmax:float=None, # type:ignore
-    ymin:float=None, # type:ignore
-    ymax:float=None, # type:ignore
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None, # type:ignore
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None, # type:ignore
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None, # type:ignore
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None, # type:ignore
     # test options
-    test:bool=False,
-    test_npts:int=1000,
-    test_ndata:int=2,
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
+    test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
     """
     Compute and plot an histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
@@ -557,35 +557,35 @@ def hist(
 
 @app.command()
 def jitter(
-    fields="x y",
-    labels="",
-    delimiter=None,
-    xjitter:float=0.1,
-    yjitter:float=0.0,
-    size:int=10,
-    alpha:float=1.0,
-    kde:bool=False,
-    kde_subset:int=1000,
-    kde_normalize:bool=False,
-    cmap:str="viridis",
-    median:bool=False,
-    median_size:int=100,
-    median_color:str="black",
-    median_marker:str="_",
-    median_sort:bool=False,
+    fields:Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, c: The color field, il: The interactive labels field")]="x y",
+    labels:Annotated[str, typer.Option(help="The labels to use for the data")]="",
+    delimiter:Annotated[str, typer.Option(help="The delimiter to use to split the data")]=None,
+    xjitter:Annotated[float, typer.Option(help="The amount of jitter to add to the x values")]=0.1,
+    yjitter:Annotated[float, typer.Option(help="The amount of jitter to add to the y values")]=0.0,
+    size:Annotated[int, typer.Option(help="The size of the markers in the plot")]=10,
+    alpha:Annotated[float, typer.Option(help="The alpha value for the plot")]=1.0,
+    kde:Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")]=False,
+    kde_subset:Annotated[int, typer.Option(help="The number of points to use for the KDE")]=1000,
+    kde_normalize:Annotated[bool, typer.Option(help="Normalize the KDE values")]=False,
+    cmap:Annotated[str, typer.Option(help="The colormap to use for the plot")]="viridis",
+    median:Annotated[bool, typer.Option(help="Plot the median of the data")]=False,
+    median_size:Annotated[int, typer.Option(help="The size of the median markers in the plot")]=100,
+    median_color:Annotated[str, typer.Option(help="The color of the median markers in the plot")]="black",
+    median_marker:Annotated[str, typer.Option(help="The marker to use for the median markers in the plot")]="_",
+    median_sort:Annotated[bool, typer.Option(help="Sort by median values")]=False,
     # output options
-    save:str="",
-    xmin:float=None,  # type:ignore
-    xmax:float=None,  # type:ignore
-    ymin:float=None,  # type:ignore
-    ymax:float=None,  # type:ignore
-    rotation:int=45,
-    colorbar:bool=False,
-    cbar_label:str=None,  # type:ignore
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,  # type:ignore
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,  # type:ignore
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
+    rotation:Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")]=45,
+    colorbar:Annotated[bool, typer.Option(help="Add a colorbar to the plot")]=False,
+    cbar_label:Annotated[str, typer.Option(help="The label for the colorbar")]=None,  # type:ignore
     # test options
-    test:bool=False,
-    test_npts:int=1000,
-    test_ndata:int=3,
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
+    test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=3,
 ):
     """
     Jitter plot
@@ -691,15 +691,15 @@ def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=Fals
 
 @app.command()
 def roc(
-    fields="y a",
-    labels:str="",
-    delimiter=None,
-    test:bool=False,
-    save:str="",
-    xmin:float=0.0,
-    xmax:float=1.0,
-    ymin:float=0.0,
-    ymax:float=1.0,
+    fields:Annotated[str, typer.Option(help="y: The value (the lower the better by default), a: 1 for active, 0 for inactive")]="y a",
+    labels:Annotated[str, typer.Option(help="The labels to use for the data")]="",
+    delimiter:Annotated[str, typer.Option(help="The delimiter to use to split the data")]=None,
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=0.0,
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=1.0,
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=0.0,
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=1.0,
 
     ):
     """
@@ -747,25 +747,25 @@ def roc(
 
 @app.command()
 def umap(
-    n_neighbors:int=15,
-    min_dist:float=0.1,
-    metric:str="euclidean",
-    test:bool=False,
-    save:str="",
-    npy:str="",
-    npz:str="",
-    data_key:str="data",
-    labels_key:str="",
-    ilabels_key:str="",
-    legend:bool=True,
-    colorbar:bool=False,
-    cmap:str="viridis",
-    size:int=10,
-    alpha:float=1.0,
-    xmin:float=None,  # type:ignore
-    xmax:float=None,  # type:ignore
-    ymin:float=None,  # type:ignore
-    ymax:float=None,  # type:ignore
+    n_neighbors:Annotated[int, typer.Option(help="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation")]=15,
+    min_dist:Annotated[float, typer.Option(help="The effective minimum distance between embedded points")]=0.1,
+    metric:Annotated[str, typer.Option(help="The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)")]="euclidean",
+    test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
+    save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
+    npy:Annotated[str, typer.Option(help="Load data from a numpy file")]="",
+    npz:Annotated[str, typer.Option(help="Load data from a numpy file (compressed)")]="",
+    data_key:Annotated[str, typer.Option(help="The key to use to load data from the npz file")]="data",
+    labels_key:Annotated[str, typer.Option(help="The key to use to load labels from the npz file")]="",
+    ilabels_key:Annotated[str, typer.Option(help="The key to use to load interactive labels from the npz file")]="",
+    legend:Annotated[bool, typer.Option(help="Add a legend to the plot")]=True,
+    colorbar:Annotated[bool, typer.Option(help="Add a colorbar to the plot")]=False,
+    cmap:Annotated[str, typer.Option(help="The colormap to use for the plot")]="viridis",
+    size:Annotated[int, typer.Option(help="The size of the markers in the plot")]=10,
+    alpha:Annotated[float, typer.Option(help="The transparency of the markers in the plot")]=1.0,
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,  # type:ignore
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,  # type:ignore
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
 ):
     """
     UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction technique.\n
@@ -832,9 +832,8 @@ def umap(
                 INTERACTIVE_LABELS.extend(list(ilabels[sel]))  # type:ignore
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
-
 @app.command()
-def read_metadata(filename):
+def read_metadata(filename:Annotated[str, typer.Option(help="The filename to read the metadata from")]):
     """
     Read metadata at least for a png file
     """
@@ -946,7 +945,7 @@ if __name__ == "__main__":
         )
 
     @app.command()
-    def test_func(func:str):
+    def test_func(func:Annotated[str, typer.Option(help="The function to test")]):
         """
         Test the given function
         """
