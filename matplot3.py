@@ -53,8 +53,7 @@ def plot_setup(
     semilog_x:bool=False,
     semilog_y:bool=False,
     grid:bool=False,
-    # AI! I have this linter warning 'Expression of type "None" cannot be assigned to parameter of type "str"    "None" is not assignable to "str" ', how to fix it ?
-    aspect_ratio:str=None,
+    aspect_ratio:Optional[str]=None,
     subplots:str="1 1",
     sharex:bool=False,
     sharey:bool=False,
