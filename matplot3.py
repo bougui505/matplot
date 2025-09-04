@@ -60,15 +60,6 @@ def plot_setup(
     titles:str="",
     debug:bool=False,
 ):
-    """
-    Read data from stdin and plot them.
-
-    If an empty line is found, a new dataset is created.
-
-    Setup the plot with the given parameters
-
-    --aspect_ratio: "16 9", set the aspect ratio of the plot
-    """
     global DEBUG
     DEBUG = debug
     app.pretty_exceptions_show_locals = DEBUG
@@ -109,15 +100,6 @@ def plot_setup(
             plt.title(TITLES[i])
 
 def read_data(delimiter, fields, labels):
-    """
-    Read data from stdin and return a dictionary of data
-    if an empty line is found, new fields are created
-
-    :param delimiter: The delimiter to use to split the data
-    :param fields: The fields to read
-    :param labels: The labels to use for the data
-    :return: A dictionary of data, a string of data, and the fields
-    """
     data = defaultdict(list)
     datastr = ""
     imax = -1
@@ -195,9 +177,6 @@ def saveplot(outfilename, datastr, labels=None):
         add_metadata(outfilename, datastr, labels=labels)
 
 def add_metadata(filename, datastr, key="data", labels=None):
-    """
-    Add metadata to a png file
-    """
     metadata = PngInfo()
     metadata.add_text(key, datastr, zip=True)
     if labels is not None:
@@ -211,9 +190,6 @@ def add_metadata(filename, datastr, key="data", labels=None):
     targetImage.save(filename, pnginfo=metadata)
 
 def set_xtick_labels(fields, data, rotation=45):
-    """
-    Set the xtick labels for the plot
-    """
     xticks = []
     xticklabels = []
     if 'xt' in fields:
@@ -263,9 +239,6 @@ def out(
         saveplot(save, datastr, labels)
 
 def onclick(event):
-    """
-    Print the x, y coordinates of the mouse click on the plot
-    """
     if event.xdata is not None and event.ydata is not None:
         # find the nearest point in the kdtree
         print(event.xdata, event.ydata)
@@ -310,20 +283,6 @@ def plot(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
-    """
-    Plot y versus x as lines and/or markers, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
-
-    --fields:\n
-    x: The x field\n
-    y: The y field\n
-    xt: The xtick labels field\n
-    ts: The x field is a timestamp (in seconds since epoch)\n
-    --shade:
-    give 0 (no shade) or 1 (shade) to shade the area under the curve\n
-    Give 1 value per y field\n
-    e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field\n
-    --alpha-shade: The alpha value for the shaded area (default: 0.2)\n
-    """
     if test:
         data = dict()
         fields = ""
@@ -410,15 +369,6 @@ def scatter(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
-    """
-    A scatter plot of y vs. x with varying marker size and/or color, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html\n
-    --fields: x y c s (c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2)\n
-              il: a particular field with labels to display for interactive mode\n
-              t: a field with text labels to display on the plot\n
-                 text is draggable with the mouse to avoid overlaps\n
-    --pcr: principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)\n
-    --cmap: see: https://matplotlib.org/stable/users/explain/colors/colormaps.html#classes-of-colormaps\n
-    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -524,9 +474,6 @@ def hist(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
-    """
-    Compute and plot an histogram, see: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
-    """
     if test:
         data = dict()
         fields = ""
@@ -587,20 +534,6 @@ def jitter(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=3,
 ):
-    """
-    Jitter plot
-
-    --fields:\n
-        x: The x field\n
-        y: The y field\n
-        xt: The xtick labels field\n
-        c: The color field\n
-        il: The interactive labels field\n
-    --rotation: The rotation of the xtick labels in degrees (default: 45)\n
-    --median: Plot the median of the data\n
-    --median_sort: Sort by median values\n
-    --kde_normalize: Normalize the KDE values\n
-    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -665,9 +598,6 @@ def jitter(
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=False):
-    """
-    Plot the median of the data
-    """
     x = np.asarray(x)
     y = np.asarray(y)
     xunique = np.unique(x)
@@ -702,11 +632,6 @@ def roc(
     ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=1.0,
 
     ):
-    """
-    Plot a ROC curve (Receiver Operating Characteristic curve) for binary classification.\n
-
-    --fields: y a (y: The value (the lower the better by default), a: 1 for active, 0 for inactive)\n
-    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -767,28 +692,6 @@ def umap(
     ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
     ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
 ):
-    """
-    UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction technique.\n
-    See: https://umap-learn.readthedocs.io/en/latest/\n
-    n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.\n
-    min_dist: The effective minimum distance between embedded points.\n
-    metric: The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)\n
-    test: Generate random data for testing\n
-    save: Save the plot to a file\n
-    npy: Load data from a numpy file\n
-    npz: Load data from a numpy file (compressed)\n
-    data_key: The key to use to load data from the npz file\n
-    labels_key: The key to use to load labels from the npz file\n
-    ilabels_key: The key to use to load interactive labels from the npz file\n
-    colorbar: Add a colorbar to the plot\n
-    cmap: The colormap to use for the plot\n
-    size: The size of the markers in the plot\n
-    alpha: The transparency of the markers in the plot\n
-    xmin: The minimum x value for the plot\n
-    xmax: The maximum x value for the plot\n
-    ymin: The minimum y value for the plot\n
-    ymax: The maximum y value for the plot\n
-    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -834,9 +737,6 @@ def umap(
 
 @app.command()
 def read_metadata(filename:Annotated[str, typer.Option(help="The filename to read the metadata from")]):
-    """
-    Read metadata at least for a png file
-    """
     im = Image.open(filename)
     im.load()
     datastr = f'#hostname:{im.info["hostname"]}\n'
@@ -850,10 +750,6 @@ def read_metadata(filename:Annotated[str, typer.Option(help="The filename to rea
     return datastr
 
 def do_pcr(x, y):
-    """
-    Principal Component Regression
-    See: https://en.wikipedia.org/wiki/Principal_component_regression
-    """
     print("######## PCR ########")
     X = np.stack([x, y]).T
     eigenvalues, eigenvectors, center, anglex = pca(X)
@@ -901,12 +797,6 @@ def format_nbr(x, precision='.1f'):
         return format(x, precision)
 
 def pca(X, outfilename=None):
-    """
-    >>> X = np.random.normal(size=(10, 512))
-    >>> proj = compute_pca(X)
-    >>> proj.shape
-    (10, 2)
-    """
     center = X.mean(axis=0)
     cov = (X - center).T.dot(X - center) / X.shape[0]
     eigenvalues, eigenvectors = linalg.eigh(cov)
@@ -935,9 +825,6 @@ if __name__ == "__main__":
 
     @app.command()
     def test():
-        """
-        Test the code
-        """
         doctest.testmod(
             optionflags=doctest.ELLIPSIS \
                         | doctest.REPORT_ONLY_FIRST_FAILURE \
@@ -946,9 +833,6 @@ if __name__ == "__main__":
 
     @app.command()
     def test_func(func:Annotated[str, typer.Option(help="The function to test")]):
-        """
-        Test the given function
-        """
         print(f"Testing {func}")
         f = getattr(sys.modules[__name__], func)
         doctest.run_docstring_examples(
