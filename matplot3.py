@@ -14,7 +14,7 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
- import scipy
+import scipy
 import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
