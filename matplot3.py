@@ -643,12 +643,12 @@ def hist(
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()  # type: ignore
-    labels = labels.strip().split())  # type: ignore
+    labels = labels.strip().split()  # type: ignore
     plotid = 0
     for j, field in enumerate(fields):
         if field == "y":
-            y = np.float64(data[j]))  # type: ignore
-            Y.extend(list(y)))  # type: ignore
+            y = np.float64(data[j])  # type: ignore
+            Y.extend(list(y))  # type: ignore
         else:
             continue
         if len(labels) > 0:
