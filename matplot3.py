@@ -832,7 +832,9 @@ def roc(
     xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = 1.0,
     ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = 0.0,
     ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = 1.0,
-
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
 ):
     """
     Create a ROC curve from data in standard input.
@@ -848,11 +850,22 @@ def roc(
         ymin (float): The minimum y value for the plot.
         ymax (float): The maximum y value for the plot.
     """
-    # AI! add a test
     global X
     global Y
     global INTERACTIVE_LABELS
-    data, datastr, fields = read_data(delimiter=delimiter, fields=fields, labels=labels)
+    if test:
+        data = dict()
+        fields = ""
+        j = 0
+        data[j] = np.random.normal(size=test_npts, loc=0, scale=1)
+        fields += "y "
+        j += 1
+        data[j] = np.random.randint(0, 2, size=test_npts)
+        fields += "a "
+        j += 1
+        datastr = ""
+    else:
+        data, datastr, fields = read_data(delimiter=delimiter, fields=fields, labels=labels)
     fields = fields.strip().split()  # type: ignore
     labels = labels.strip().split()  # type: ignore
     yfields = np.where(np.asarray(fields) == "y")[0]
