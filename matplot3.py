@@ -25,6 +25,7 @@ from rich.progress import track
 from rich.table import Table
 from sklearn.neighbors import KernelDensity, NearestNeighbors
 from typing_extensions import Annotated
+from typing import Optional
 
 from draggable_text import DraggableText
 from ROC import ROC
@@ -83,7 +84,7 @@ def plot_setup(
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
     global SUBPLOTS
-    SUBPLOTS = [int(e) for e in subplots.strip().split()]  # type:ignore
+    SUBPLOTS = [int(e) for e in subplots.strip().split()]
     ax = None
     global TITLES
     TITLES = titles.strip().split()
@@ -366,11 +367,11 @@ def plot(
     rotation:Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")]=45,
     # output options
     save:Annotated[str, typer.Option(help="The filename to save the plot to")]="",
-    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,  # type:ignore
-    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,  # type:ignore
-    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
-    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
-    shade:Annotated[str, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")]=None,  # type: ignore
+    xmin:Annotated[float, typer.Option(help="The minimum x value for the plot")]=None,
+    xmax:Annotated[float, typer.Option(help="The maximum x value for the plot")]=None,
+    ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,
+    ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,
+    shade:Annotated[str, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")]=None,
     alpha_shade:Annotated[float, typer.Option(help="The alpha value for the shaded area")]=0.2,
     # test options
     test:Annotated[bool, typer.Option(help="Generate random data for testing")]=False,
