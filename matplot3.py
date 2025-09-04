@@ -8,6 +8,7 @@
 # creation_date: Mon Mar 31 13:12:22 2025
 
 import os
+import sys
 import socket
 from collections import defaultdict
 from datetime import datetime
@@ -1117,35 +1118,4 @@ def pca(X, outfilename=None):
     return eigenvalues, eigenvectors, center, anglex
 
 if __name__ == "__main__":
-    import doctest
-    import sys
-
-    @app.command()
-    def test():
-        """
-        Run doctests for the module.
-        """
-        doctest.testmod(
-            optionflags=doctest.ELLIPSIS \
-                        | doctest.REPORT_ONLY_FIRST_FAILURE \
-                        | doctest.REPORT_NDIFF
-        )
-
-    @app.command()
-    def test_func(func: Annotated[str, typer.Option(help="The function to test")]):
-        """
-        Run doctests for a specific function.
-
-        Args:
-            func (str): The function to test.
-        """
-        print(f"Testing {func}")
-        f = getattr(sys.modules[__name__], func)
-        doctest.run_docstring_examples(
-            f,
-            globals(),
-            optionflags=doctest.ELLIPSIS \
-                        | doctest.REPORT_ONLY_FIRST_FAILURE \
-                        | doctest.REPORT_NDIFF,
-        )
     app()
