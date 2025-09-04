@@ -218,7 +218,7 @@ def set_xtick_labels(fields, data, rotation=45):
     xticklabels = []
     if 'xt' in fields:
         xtickslabels = data[fields.index('xt')]
-        xval = np.float_(data[fields.index('x')])
+        xval = np.float64(data[fields.index('x')])
         xval, unique_indices = np.unique(xval, return_index=True)
         xtickslabels = np.array(xtickslabels)[unique_indices]
         plt.xticks(xval, xtickslabels)
@@ -361,8 +361,8 @@ def plot(
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
-        x = np.float_(data[xfield])  # type: ignore
-        y = np.float_(data[yfield])  # type: ignore
+        x = np.float64(data[xfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
         if moving_avg > 0:
@@ -453,8 +453,8 @@ def scatter(
     c_indices = np.where(np.asarray(fields)=="c")[0]
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
-        x = np.float_(data[xfield])  # type: ignore
-        y = np.float_(data[yfield])  # type: ignore
+        x = np.float64(data[xfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
         X.extend(list(x))  # type:ignore
         Y.extend(list(y))  # type:ignore
         if "il" in fields:
@@ -464,11 +464,11 @@ def scatter(
         else:
             label = None
         if len(s_indices) > 0:
-            s = np.float_(data[s_indices[0]])  # type: ignore
+            s = np.float64(data[s_indices[0]])  # type: ignore
         else:
             s = None
         if len(c_indices) > 0:
-            c = np.float_(data[c_indices[0]])  # type: ignore
+            c = np.float64(data[c_indices[0]])  # type: ignore
         else:
             c = None
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
@@ -481,6 +481,9 @@ def scatter(
                                                   arrowstyle='-',    # Crucially, this creates a plain line without an arrowhead
                                                   color='red',       # Sets the color of the line to red
                                                   linewidth=0.8,     # Sets the width of the line to make it thin
+                                                  # This is the key: relpos=(0, 0) anchors the line's *start* to the
+                                                  # bottom-left of the 'xytext' (text body's) bounding box.
+                                                  relpos=(0, 0)
                                                   )
                                               # bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5")
                                               )
@@ -540,7 +543,7 @@ def hist(
     plotid = 0
     for j, field in enumerate(fields):
         if field == "y":
-            y = np.float_(data[j])  # type: ignore
+            y = np.float64(data[j])  # type: ignore
             Y.extend(list(y))  # type:ignore
         else:
             continue
@@ -627,9 +630,9 @@ def jitter(
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))  # type:ignore
-        x = np.float_(data[xfield])  # type: ignore
-        y = np.float_(data[yfield])  # type: ignore
-        c = np.float_(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
+        x = np.float64(data[xfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
+        c = np.float64(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
         if median:
             x = plot_median(x, y,
                             size=median_size,
@@ -682,7 +685,7 @@ def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=Fals
         # repeat the sorter for the x values
         mapper = dict(zip(sorter, xunique))
         x = np.asarray([mapper[xi] for xi in x])
-        x = np.float_(x)
+        x = np.float64(x)
     plt.scatter(xunique, ymedians, color=color, marker=marker, s=size, label="median", zorder=100)
     return x
 
@@ -713,7 +716,7 @@ def roc(
     yfields = np.where(np.asarray(fields)=="y")[0]
     afields = np.where(np.asarray(fields)=="a")[0]
     for plotid, (yfield, afield) in enumerate(zip(yfields, afields)):
-        y = np.float_(data[yfield])  # type: ignore
+        y = np.float64(data[yfield])  # type: ignore
         a = np.int_(data[afield])  # type: ignore
         active_values = y[a == 1]  # type: ignore
         inactive_values = y[a == 0]  # type: ignore
