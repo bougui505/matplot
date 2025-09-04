@@ -259,8 +259,7 @@ def set_xtick_labels(fields, data, rotation=45):
         xval = np.float64(data[fields.index('x')])
         xval, unique_indices = np.unique(xval, return_index=True)
         xtickslabels = np.array(xtickslabels)[unique_indices]
-        # AI! Fix linting error: Argument of type "ndarray[_AnyShape, dtype[Unknown]]" cannot be assigned to parameter "labels" of type "Sequence[str] | None" in function "xticks" 
-        plt.xticks(xval, xtickslabels)
+        plt.xticks(xval, xtickslabels.astype(str))
         # rotate the labels
         plt.setp(plt.gca().get_xticklabels(),
                  rotation=rotation,
