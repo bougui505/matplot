@@ -259,7 +259,7 @@ def set_xtick_labels(fields, data, rotation=45):
         xval = np.float64(data[fields.index('x')])
         xval, unique_indices = np.unique(xval, return_index=True)
         xtickslabels = np.array(xtickslabels)[unique_indices]
-        plt.xticks(xval, xtickslabels.astype(str))
+        plt.xticks(xval, xtickslabels.astype(str).tolist())
         # rotate the labels
         plt.setp(plt.gca().get_xticklabels(),
                  rotation=rotation,
@@ -327,17 +327,18 @@ def onclick(event):
     if event.xdata is not None and event.ydata is not None:
         # find the nearest point in the kdtree
         print(event.xdata, event.ydata)
-        dist, index = NEIGH.kneighbors(np.asarray([event.xdata, event.ydata]).reshape(1, -1))
-        index = index.squeeze()
-        dist = dist.squeeze()
-        x = X[index]
-        y = Y[index]
-        if len(INTERACTIVE_LABELS) > 0:
-            label = INTERACTIVE_LABELS[index]
-        else:
-            label = ""
-        print(f"Nearest point: {label} x={x}, y={y}, dist={dist:.2g}")
-        # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
+        if NEIGH is not None:
+            dist, index = NEIGH.kneighbors(np.asarray([event.xdata, event.ydata]).reshape(1, -1))
+            index = index.squeeze()
+            dist = dist.squeeze()
+            x = X[index]
+            y = Y[index]
+            if len(INTERACTIVE_LABELS) > 0:
+                label = INTERACTIVE_LABELS[index]
+            else:
+                label = ""
+            print(f"Nearest point: {label} x={x}, y={y}, dist={dist:.2g}")
+            # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
 
 def toint(x):
     """
@@ -360,17 +361,17 @@ def plot(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
     moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
-    delimiter: Annotated[str, typer.Option(help="The delimiter to use to split the data")] = None,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = None,
-    shade: Annotated[str, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
     alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
