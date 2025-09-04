@@ -856,14 +856,18 @@ def roc(
     if test:
         data = dict()
         fields = ""
+        labels = ""
         j = 0
-        data[j] = np.random.normal(size=test_npts, loc=0, scale=1)
-        fields += "y "
-        j += 1
-        data[j] = np.random.randint(0, 2, size=test_npts)
-        fields += "a "
-        j += 1
+        for test_dataidx in range(test_ndata):
+            data[j] = np.random.normal(size=test_npts, loc=0, scale=1)
+            fields += "y "
+            j += 1
+            data[j] = np.random.randint(0, 2, size=test_npts)
+            fields += "a "
+            j += 1
+            labels += f"DS{test_dataidx} "
         datastr = ""
+        print(f"{fields=}")
     else:
         data, datastr, fields = read_data(delimiter=delimiter, fields=fields, labels=labels)
     fields = fields.strip().split()  # type: ignore
