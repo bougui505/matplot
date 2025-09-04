@@ -60,6 +60,22 @@ def plot_setup(
     titles:str="",
     debug:bool=False,
 ):
+    """
+    Set up the plot with the given parameters.
+
+    Args:
+        xlabel (str): The label for the x-axis.
+        ylabel (str): The label for the y-axis.
+        semilog_x (bool): If True, set the x-axis to a logarithmic scale.
+        semilog_y (bool): If True, set the y-axis to a logarithmic scale.
+        grid (bool): If True, display a grid on the plot.
+        aspect_ratio (str): The aspect ratio of the plot in the format "xaspect yaspect".
+        subplots (str): The number of subplots in the format "rows columns".
+        sharex (bool): If True, share the x-axis among subplots.
+        sharey (bool): If True, share the y-axis among subplots.
+        titles (str): The titles for the subplots, separated by spaces.
+        debug (bool): If True, enable debug mode.
+    """
     global DEBUG
     DEBUG = debug
     app.pretty_exceptions_show_locals = DEBUG
@@ -100,6 +116,17 @@ def plot_setup(
             plt.title(TITLES[i])
 
 def read_data(delimiter, fields, labels):
+    """
+    Read data from standard input and organize it into a dictionary.
+
+    Args:
+        delimiter (str): The delimiter used to split the data.
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels for the data, separated by spaces.
+
+    Returns:
+        tuple: A tuple containing the data dictionary, the data string, and the fields.
+    """
     data = defaultdict(list)
     datastr = ""
     imax = -1
@@ -153,6 +180,16 @@ def read_data(delimiter, fields, labels):
     return data, datastr, fields
 
 def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect:bool=False):
+    """
+    Set the limits of the plot.
+
+    Args:
+        xmin (float): The minimum x value.
+        xmax (float): The maximum x value.
+        ymin (float): The minimum y value.
+        ymax (float): The maximum y value.
+        equal_aspect (bool): If True, set the aspect ratio of the plot to equal.
+    """
     limits = plt.axis()
     if xmin is None:
         xmin = limits[0]
@@ -169,6 +206,14 @@ def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect:bool=Fal
         ax.set_aspect('equal')
 
 def saveplot(outfilename, datastr, labels=None):
+    """
+    Save the plot to a file.
+
+    Args:
+        outfilename (str): The filename to save the plot to.
+        datastr (str): The data string to add to the plot.
+        labels (list): The labels for the data.
+    """
     plt.savefig(outfilename)
     ext = os.path.splitext(outfilename)[1]
     print(f"{ext=}")
@@ -177,6 +222,15 @@ def saveplot(outfilename, datastr, labels=None):
         add_metadata(outfilename, datastr, labels=labels)
 
 def add_metadata(filename, datastr, key="data", labels=None):
+    """
+    Add metadata to a PNG file.
+
+    Args:
+        filename (str): The filename of the PNG file.
+        datastr (str): The data string to add to the PNG file.
+        key (str): The key to use for the data string.
+        labels (list): The labels for the data.
+    """
     metadata = PngInfo()
     metadata.add_text(key, datastr, zip=True)
     if labels is not None:
@@ -190,6 +244,14 @@ def add_metadata(filename, datastr, key="data", labels=None):
     targetImage.save(filename, pnginfo=metadata)
 
 def set_xtick_labels(fields, data, rotation=45):
+    """
+    Set the x-tick labels of the plot.
+
+    Args:
+        fields (list): The fields of the data.
+        data (dict): The data dictionary.
+        rotation (int): The rotation of the x-tick labels in degrees.
+    """
     xticks = []
     xticklabels = []
     if 'xt' in fields:
@@ -218,6 +280,23 @@ def out(
     legend:bool=True,
     equal_aspect:bool=False,
 ):
+    """
+    Display or save the plot.
+
+    Args:
+        save (str): The filename to save the plot to.
+        datastr (str): The data string to add to the plot.
+        labels (list): The labels for the data.
+        colorbar (bool): If True, add a colorbar to the plot.
+        xmin (float): The minimum x value.
+        xmax (float): The maximum x value.
+        ymin (float): The minimum y value.
+        ymax (float): The maximum y value.
+        cbar_label (str): The label for the colorbar.
+        interactive_plot (bool): If True, enable interactive plot.
+        legend (bool): If True, display a legend on the plot.
+        equal_aspect (bool): If True, set the aspect ratio of the plot to equal.
+    """
     set_limits(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
     if colorbar:
         cbar = plt.colorbar()
@@ -239,6 +318,12 @@ def out(
         saveplot(save, datastr, labels)
 
 def onclick(event):
+    """
+    Handle a click event on the plot.
+
+    Args:
+        event: The click event.
+    """
     if event.xdata is not None and event.ydata is not None:
         # find the nearest point in the kdtree
         print(event.xdata, event.ydata)
@@ -255,6 +340,15 @@ def onclick(event):
         # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
 
 def toint(x):
+    """
+    Convert a value to an integer if possible.
+
+    Args:
+        x: The value to convert.
+
+    Returns:
+        int: The converted value, or the original value if conversion is not possible.
+    """
     try:
         x = int(x)
     except ValueError:
@@ -283,6 +377,28 @@ def plot(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
+    """
+    Plot data from standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        moving_avg (int): The size of the moving average window.
+        delimiter (str): The delimiter to use to split the data.
+        fmt (str): The format string to use for the plot, separated by spaces.
+        alpha (float): The alpha value for the plot.
+        rotation (int): The rotation of the xtick labels in degrees.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+        shade (str): The values to shade the area under the curve, separated by spaces.
+        alpha_shade (float): The alpha value for the shaded area.
+        test (bool): If True, generate random data for testing.
+        test_npts (int): The number of points to generate for testing.
+        test_ndata (int): The number of datasets to generate for testing.
+    """
     if test:
         data = dict()
         fields = ""
@@ -369,6 +485,26 @@ def scatter(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
+    """
+    Create a scatter plot from data in standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        delimiter (str): The delimiter to use to split the data.
+        alpha (float): The alpha value for the plot.
+        cmap (str): The colormap to use for the plot.
+        pcr (bool): If True, perform principal component regression.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+        colorbar (bool): If True, add a colorbar to the plot.
+        test (bool): If True, generate random data for testing.
+        test_npts (int): The number of points to generate for testing.
+        test_ndata (int): The number of datasets to generate for testing.
+    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -474,6 +610,25 @@ def hist(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=2,
 ):
+    """
+    Create a histogram from data in standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        delimiter (str): The delimiter to use to split the data.
+        bins (str): The number of bins to use for the histogram.
+        alpha (float): The alpha value for the plot.
+        density (bool): If True, normalize the histogram.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+        test (bool): If True, generate random data for testing.
+        test_npts (int): The number of points to generate for testing.
+        test_ndata (int): The number of datasets to generate for testing.
+    """
     if test:
         data = dict()
         fields = ""
@@ -534,6 +689,38 @@ def jitter(
     test_npts:Annotated[int, typer.Option(help="The number of points to generate for testing")]=1000,
     test_ndata:Annotated[int, typer.Option(help="The number of datasets to generate for testing")]=3,
 ):
+    """
+    Create a jitter plot from data in standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        delimiter (str): The delimiter to use to split the data.
+        xjitter (float): The amount of jitter to add to the x values.
+        yjitter (float): The amount of jitter to add to the y values.
+        size (int): The size of the markers in the plot.
+        alpha (float): The alpha value for the plot.
+        kde (bool): If True, use kernel density estimation to color the points.
+        kde_subset (int): The number of points to use for the KDE.
+        kde_normalize (bool): If True, normalize the KDE values.
+        cmap (str): The colormap to use for the plot.
+        median (bool): If True, plot the median of the data.
+        median_size (int): The size of the median markers in the plot.
+        median_color (str): The color of the median markers in the plot.
+        median_marker (str): The marker to use for the median markers in the plot.
+        median_sort (bool): If True, sort by median values.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+        rotation (int): The rotation of the xtick labels in degrees.
+        colorbar (bool): If True, add a colorbar to the plot.
+        cbar_label (str): The label for the colorbar.
+        test (bool): If True, generate random data for testing.
+        test_npts (int): The number of points to generate for testing.
+        test_ndata (int): The number of datasets to generate for testing.
+    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -598,6 +785,20 @@ def jitter(
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort:bool=False):
+    """
+    Plot the median of the data.
+
+    Args:
+        x (array-like): The x values.
+        y (array-like): The y values.
+        size (int): The size of the median markers.
+        color (str): The color of the median markers.
+        marker (str): The marker to use for the median markers.
+        median_sort (bool): If True, sort by median values.
+
+    Returns:
+        array-like: The sorted x values if median_sort is True, otherwise the original x values.
+    """
     x = np.asarray(x)
     y = np.asarray(y)
     xunique = np.unique(x)
@@ -632,6 +833,20 @@ def roc(
     ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=1.0,
 
     ):
+    """
+    Create a ROC curve from data in standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        delimiter (str): The delimiter to use to split the data.
+        test (bool): If True, generate random data for testing.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -692,6 +907,30 @@ def umap(
     ymin:Annotated[float, typer.Option(help="The minimum y value for the plot")]=None,  # type:ignore
     ymax:Annotated[float, typer.Option(help="The maximum y value for the plot")]=None,  # type:ignore
 ):
+    """
+    Create a UMAP plot from data in standard input.
+
+    Args:
+        n_neighbors (int): The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
+        min_dist (float): The effective minimum distance between embedded points.
+        metric (str): The metric to use to compute distance in high dimensional space.
+        test (bool): If True, generate random data for testing.
+        save (str): The filename to save the plot to.
+        npy (str): The filename to load data from a numpy file.
+        npz (str): The filename to load data from a numpy file (compressed).
+        data_key (str): The key to use to load data from the npz file.
+        labels_key (str): The key to use to load labels from the npz file.
+        ilabels_key (str): The key to use to load interactive labels from the npz file.
+        legend (bool): If True, add a legend to the plot.
+        colorbar (bool): If True, add a colorbar to the plot.
+        cmap (str): The colormap to use for the plot.
+        size (int): The size of the markers in the plot.
+        alpha (float): The transparency of the markers in the plot.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+    """
     global X
     global Y
     global INTERACTIVE_LABELS
@@ -737,6 +976,15 @@ def umap(
 
 @app.command()
 def read_metadata(filename:Annotated[str, typer.Option(help="The filename to read the metadata from")]):
+    """
+    Read metadata from a PNG file.
+
+    Args:
+        filename (str): The filename to read the metadata from.
+
+    Returns:
+        str: The metadata string.
+    """
     im = Image.open(filename)
     im.load()
     datastr = f'#hostname:{im.info["hostname"]}\n'
@@ -750,6 +998,13 @@ def read_metadata(filename:Annotated[str, typer.Option(help="The filename to rea
     return datastr
 
 def do_pcr(x, y):
+    """
+    Perform principal component regression.
+
+    Args:
+        x (array-like): The x values.
+        y (array-like): The y values.
+    """
     print("######## PCR ########")
     X = np.stack([x, y]).T
     eigenvalues, eigenvectors, center, anglex = pca(X)
@@ -791,12 +1046,32 @@ def do_pcr(x, y):
     print("#####################")
 
 def format_nbr(x, precision='.1f'):
+    """
+    Format a number.
+
+    Args:
+        x (float): The number to format.
+        precision (str): The precision to use for formatting.
+
+    Returns:
+        str: The formatted number.
+    """
     if float(format(x, precision))==round(x):
         return f'{round(x)}'
     else:
         return format(x, precision)
 
 def pca(X, outfilename=None):
+    """
+    Perform principal component analysis.
+
+    Args:
+        X (array-like): The data to analyze.
+        outfilename (str): The filename to save the results to.
+
+    Returns:
+        tuple: A tuple containing the eigenvalues, eigenvectors, center, and angle of the first eigenvector.
+    """
     center = X.mean(axis=0)
     cov = (X - center).T.dot(X - center) / X.shape[0]
     eigenvalues, eigenvectors = linalg.eigh(cov)
@@ -825,6 +1100,9 @@ if __name__ == "__main__":
 
     @app.command()
     def test():
+        """
+        Run doctests for the module.
+        """
         doctest.testmod(
             optionflags=doctest.ELLIPSIS \
                         | doctest.REPORT_ONLY_FIRST_FAILURE \
@@ -833,6 +1111,12 @@ if __name__ == "__main__":
 
     @app.command()
     def test_func(func:Annotated[str, typer.Option(help="The function to test")]):
+        """
+        Run doctests for a specific function.
+
+        Args:
+            func (str): The function to test.
+        """
         print(f"Testing {func}")
         f = getattr(sys.modules[__name__], func)
         doctest.run_docstring_examples(
