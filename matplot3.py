@@ -506,6 +506,7 @@ def scatter(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False, 
 ):
     """
     Create a scatter plot from data in standard input.
@@ -613,7 +614,7 @@ def scatter(
         set_xtick_labels(fields, data)
         set_ytick_labels(fields, data)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
 @app.command()
 def hist(
