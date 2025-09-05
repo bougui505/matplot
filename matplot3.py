@@ -371,7 +371,7 @@ def plot(
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
     shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
     alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
     # test options
@@ -591,6 +591,7 @@ def scatter(
         plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
+        set_xtick_labels(fields, data)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
