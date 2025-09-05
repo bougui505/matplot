@@ -470,7 +470,7 @@ def plot(
 
 @app.command()
 def scatter(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot")] = "x y",
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot, xt: the xticks labels")] = "x y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
