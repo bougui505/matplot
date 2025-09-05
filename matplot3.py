@@ -253,8 +253,6 @@ def set_xtick_labels(fields, data, rotation=45):
         data (dict): The data dictionary.
         rotation (int): The rotation of the x-tick labels in degrees.
     """
-    xticks = []
-    xticklabels = []
     if 'xt' in fields:
         xtickslabels = data[fields.index('xt')]
         xval = np.float64(data[fields.index('x')])
@@ -263,6 +261,27 @@ def set_xtick_labels(fields, data, rotation=45):
         plt.xticks(xval, xtickslabels.astype(str).tolist())
         # rotate the labels
         plt.setp(plt.gca().get_xticklabels(),
+                 rotation=rotation,
+                 ha="right",
+                 rotation_mode="anchor")
+
+def set_ytick_labels(fields, data, rotation=0):
+    """
+    Set the y-tick labels of the plot.
+
+    Args:
+        fields (list): The fields of the data.
+        data (dict): The data dictionary.
+        rotation (int): The rotation of the y-tick labels in degrees.
+    """
+    if 'yt' in fields:
+        ytickslabels = data[fields.index('yt')]
+        yval = np.float64(data[fields.index('y')])
+        yval, unique_indices = np.unique(yval, return_index=True)
+        ytickslabels = np.array(ytickslabels)[unique_indices]
+        plt.yticks(yval, ytickslabels.astype(str).tolist())
+        # rotate the labels
+        plt.setp(plt.gca().get_yticklabels(),
                  rotation=rotation,
                  ha="right",
                  rotation_mode="anchor")
