@@ -611,6 +611,7 @@ def scatter(
         if pcr:
             do_pcr(x, y)
         set_xtick_labels(fields, data)
+        set_ytick_labels(fields, data)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
