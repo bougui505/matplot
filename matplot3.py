@@ -1221,15 +1221,7 @@ def chord_diagram(
             link_kws=dict(ec="black", lw=0.5, direction=1),
         )
         fig = circos.plotfig()
-        if save == "":
-            plt.show()
-        else:
-            fig.savefig(save)
-            ext = os.path.splitext(save)[1]
-            print(f"{ext=}")
-            print(f"{save=}")
-            if ext == ".png":
-                add_metadata(save, "", labels=None)
+        out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
 
 
 
