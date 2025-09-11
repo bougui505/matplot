@@ -1142,6 +1142,7 @@ def pca(X, outfilename=None):
 @app.command()
 def chord_diagram(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
 ):
     """"""
     try:
@@ -1172,7 +1173,15 @@ def chord_diagram(
             link_kws=dict(ec="black", lw=0.5, direction=1),
         )
         fig = circos.plotfig()
-        fig.show()
+        if save == "":
+            plt.show()
+        else:
+            fig.savefig(save)
+            ext = os.path.splitext(save)[1]
+            print(f"{ext=}")
+            print(f"{save=}")
+            if ext == ".png":
+                add_metadata(save, "", labels=None)
 
 
 if __name__ == "__main__":
