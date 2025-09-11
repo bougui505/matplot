@@ -1140,6 +1140,7 @@ def pca(X, outfilename=None):
     return eigenvalues, eigenvectors, center, anglex
 
 @app.command()
+# AI! update the fields argument accordingly to the code
 def chord_diagram(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot, xt: the xticks labels")] = "x y",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
@@ -1190,6 +1191,20 @@ def chord_diagram(
                 add_metadata(save, "", labels=None)
     else:
         data, datastr, fields = read_data(delimiter, fields, labels)
+        fields = fields.strip().split()  # type: ignore
+        labels = labels.strip().split()  # type: ignore
+        data_fields = np.where(np.asarray(fields) == "d")[0]
+        col_labels = data[fields.index('c')]
+        row_labels = data[fields.index('r')]
+        cols = np.unique(col_labels)
+        rows = np.unique(row_labels)
+        ncols = len(cols)
+        nrows = len(rows)
+        cols_mapping = dict(zip(cols, range(ncols)))
+        rows_mapping = dict(zip(rows, range(nrows)))
+        matrix_data = np.zeros((nrows, ncols))
+
+
 
 
 
