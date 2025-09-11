@@ -1210,8 +1210,25 @@ def chord_diagram(
             i = rows_mapping[row_name]
             j = cols_mapping[col_name]
             matrix_data[i, j] = v
-        matrix_df = pd.DataFrame(matrix_data, index=row_names, columns=col_names)
-        # AI! complete according to the test
+        matrix_df = pd.DataFrame(matrix_data, index=rows, columns=cols)
+        # Initialize Circos instance for chord diagram plot
+        circos = Circos.chord_diagram(
+            matrix_df,
+            space=5,
+            cmap="tab10",
+            label_kws=dict(size=12),
+            link_kws=dict(ec="black", lw=0.5, direction=1),
+        )
+        fig = circos.plotfig()
+        if save == "":
+            plt.show()
+        else:
+            fig.savefig(save)
+            ext = os.path.splitext(save)[1]
+            print(f"{ext=}")
+            print(f"{save=}")
+            if ext == ".png":
+                add_metadata(save, "", labels=None)
 
 
 
