@@ -1223,9 +1223,5 @@ def chord_diagram(
         fig = circos.plotfig()
         out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
 
-
-
-
-
 if __name__ == "__main__":
     app()
