@@ -1141,6 +1141,7 @@ def pca(X, outfilename=None):
 
 @app.command()
 def chord_diagram(
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot, xt: the xticks labels")] = "x y",
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
 ):
@@ -1157,7 +1158,6 @@ def chord_diagram(
         sys.exit(2)
     import pandas as pd
     if test:
-
         # Create matrix dataframe (3 x 6)
         row_names = ["F1", "F2", "F3"]
         col_names = ["T1", "T2", "T3", "T4", "T5", "T6"]
@@ -1186,6 +1186,10 @@ def chord_diagram(
             print(f"{save=}")
             if ext == ".png":
                 add_metadata(save, "", labels=None)
+    else:
+        # AI! add missing arguments
+        data, datastr, fields = read_data(delimiter, fields, labels)
+
 
 
 if __name__ == "__main__":
