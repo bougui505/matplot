@@ -1140,6 +1140,7 @@ def pca(X, outfilename=None):
     return eigenvalues, eigenvectors, center, anglex
 
 @app.command()
+# AI! put the rows before the columns
 def chord_diagram(
     fields: Annotated[str, typer.Option(help="d: The data field (matrix values), c: The column labels field, r: The row labels field")] = "d c r",
     labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
@@ -1193,10 +1194,10 @@ def chord_diagram(
         fields = fields.strip().split()  # type: ignore
         labels = labels.strip().split()  # type: ignore
         data_fields = np.where(np.asarray(fields) == "d")[0]
-        col_labels = data[fields.index('c')]
         row_labels = data[fields.index('r')]
-        cols = np.unique(col_labels)
+        col_labels = data[fields.index('c')]
         rows = np.unique(row_labels)
+        cols = np.unique(col_labels)
         ncols = len(cols)
         nrows = len(rows)
         cols_mapping = dict(zip(cols, range(ncols)))
