@@ -1139,5 +1139,41 @@ def pca(X, outfilename=None):
                  eigenvectors=eigenvectors)
     return eigenvalues, eigenvectors, center, anglex
 
+@app.command()
+def chord_diagram(
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+):
+    """"""
+    try:
+        from pycirclize import Circos
+    except ImportError:
+        print("You need to install pyCirclize")
+        print("see: https://github.com/moshi4/pyCirclize")
+        sys.exit(2)
+    import pandas as pd
+    if test:
+
+        # Create matrix dataframe (3 x 6)
+        row_names = ["F1", "F2", "F3"]
+        col_names = ["T1", "T2", "T3", "T4", "T5", "T6"]
+        matrix_data = [
+            [10, 16, 7, 7, 10, 8],
+            [4, 9, 10, 12, 12, 7],
+            [17, 13, 7, 4, 20, 4],
+        ]
+        matrix_df = pd.DataFrame(matrix_data, index=row_names, columns=col_names)
+
+        # Initialize Circos instance for chord diagram plot
+        circos = Circos.chord_diagram(
+            matrix_df,
+            space=5,
+            cmap="tab10",
+            label_kws=dict(size=12),
+            link_kws=dict(ec="black", lw=0.5, direction=1),
+        )
+        fig = circos.plotfig()
+        fig.show()
+
+
 if __name__ == "__main__":
     app()
