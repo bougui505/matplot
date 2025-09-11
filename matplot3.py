@@ -1193,15 +1193,25 @@ def chord_diagram(
         fields = fields.strip().split()  # type: ignore
         labels = labels.strip().split()  # type: ignore
         data_fields = np.where(np.asarray(fields) == "d")[0]
-        row_labels = data[fields.index('r')]
-        col_labels = data[fields.index('c')]
-        rows = np.unique(row_labels)
-        cols = np.unique(col_labels)
-        ncols = len(cols)
+        row_names = data[fields.index('r')]
+        col_names = data[fields.index('c')]
+        rows = np.unique(row_names)
+        cols = np.unique(col_names)
         nrows = len(rows)
-        cols_mapping = dict(zip(cols, range(ncols)))
+        ncols = len(cols)
         rows_mapping = dict(zip(rows, range(nrows)))
+        cols_mapping = dict(zip(cols, range(ncols)))
         matrix_data = np.zeros((nrows, ncols))
+        datavalues = data[data_fields[0]]
+        for i in range(len(datavalues)):
+            v = datavalues[i]
+            row_name = row_names[i]
+            col_name = col_names[i]
+            i = rows_mapping[row_name]
+            j = cols_mapping[col_name]
+            matrix_data[i, j] = v
+        matrix_df = pd.DataFrame(matrix_data, index=row_names, columns=col_names)
+        # AI! complete according to the test
 
 
 
