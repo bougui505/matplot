@@ -1150,6 +1150,10 @@ def chord_diagram(
     except ImportError:
         print("You need to install pyCirclize")
         print("see: https://github.com/moshi4/pyCirclize")
+        print("Just clone https://github.com/moshi4/pyCirclize, in the matplot source code directory")
+        print("and link pyCirclize/src/pycirclize in that directory:")
+        print("git clone git@github.com:moshi4/pyCirclize.git")
+        print("ln -s pyCirclize/src/pycirclize .")
         sys.exit(2)
     import pandas as pd
     if test:
