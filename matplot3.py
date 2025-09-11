@@ -1211,6 +1211,7 @@ def chord_diagram(
             j = cols_mapping[col_name]
             matrix_data[i, j] = v
         matrix_df = pd.DataFrame(matrix_data, index=rows, columns=cols)
+        print(matrix_df)
         # Initialize Circos instance for chord diagram plot
         circos = Circos.chord_diagram(
             matrix_df,
