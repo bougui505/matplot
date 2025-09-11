@@ -1142,6 +1142,8 @@ def pca(X, outfilename=None):
 @app.command()
 def chord_diagram(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot, xt: the xticks labels")] = "x y",
+    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
 ):
@@ -1187,7 +1189,6 @@ def chord_diagram(
             if ext == ".png":
                 add_metadata(save, "", labels=None)
     else:
-        # AI! add missing arguments
         data, datastr, fields = read_data(delimiter, fields, labels)
 
 
