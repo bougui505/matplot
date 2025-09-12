@@ -22,3 +22,9 @@ pyCirclize:
 
 pycirclize: pyCirclize
 	ln -s pyCirclize/src/pycirclize
+
+pyvenn:
+	git clone git@github.com:tctianchi/pyvenn.git
+
+venn: pyvenn
+	ln -s pyvenn/venn.py

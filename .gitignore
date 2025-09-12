@@ -6,3 +6,5 @@ test.png
 .aider*
 pyCirclize/
 pycirclize
+pyvenn/
+venn.py
