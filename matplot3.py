@@ -1261,6 +1261,21 @@ def venn_diagram(
         print("pip install pyvenn")
         sys.exit(1)
 
+    def print_labels_dict(labels_dict, names_for_venn):
+        nset = len(names_for_venn)
+        for i in range(nset):
+            logic = ['0',] * nset
+            logic[i] = '1'
+            logic = ''.join(logic)
+            print(f"{logic}={names_for_venn[i]}")
+        print("--")
+        for logic in labels_dict:
+            value = labels_dict[logic].replace("\n", ",").strip()
+            if logic+":" in value:
+                value = value.replace(logic+": ", "")
+            print(f"{logic}={value}")
+            print("--")
+
     venn_options = {}
     if colors:
         venn_options['colors'] = colors.split(',')
@@ -1316,6 +1331,7 @@ def venn_diagram(
             sys.exit(1)
 
         labels_dict = venn.get_labels(sets_data, fill=labels_fill_list, sortkey=sortkey)
+        print_labels_dict(labels_dict, names_for_venn)
 
         venn_func = getattr(venn, f"venn{num_sets}")
         fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
