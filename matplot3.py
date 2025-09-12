@@ -1153,10 +1153,8 @@ def chord_diagram(
     except ImportError:
         print("You need to install pyCirclize")
         print("see: https://github.com/moshi4/pyCirclize")
-        print("Just clone https://github.com/moshi4/pyCirclize, in the matplot source code directory")
-        print("and link pyCirclize/src/pycirclize in that directory:")
-        print("git clone git@github.com:moshi4/pyCirclize.git")
-        print("ln -s pyCirclize/src/pycirclize .")
+        print("You can run:")
+        print("make pycirclize")
         sys.exit(2)
     import pandas as pd
     if test:
@@ -1222,6 +1220,108 @@ def chord_diagram(
         )
         fig = circos.plotfig()
         out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
+
+@app.command()
+def venn_diagram(
+    fields: Annotated[str, typer.Option(help="d: The data field (set components), l: The set label field (Unique label for each set, maximum 6 labels, 6 sets)")] = "d l",
+    labels_fill: Annotated[str, typer.Option(help="Comma-separated options for filling labels: 'number', 'logic', 'percent'. E.g., 'number,percent'")] = "number",
+    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    test_ndata: Annotated[int, typer.Option(help="The number of sets to generate for testing (2 to 6)")] = 3,
+    test_npts: Annotated[int, typer.Option(help="The number of points in each test set")] = 10,
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
+    colors: Annotated[str, typer.Option(help="Comma-separated list of colors (e.g., 'red,blue,green'). Uses default colors if not specified.")] = "",
+    figsize: Annotated[str, typer.Option(help="Figure size in inches (e.g., '9 7'). Uses default if not specified.")] = "",
+    dpi: Annotated[int, typer.Option(help="Resolution of the figure in dots per inch.")] = 96,
+    fontsize: Annotated[int, typer.Option(help="Font size for labels.")] = 14,
+):
+    """
+    Create a Venn diagram from data in standard input or generated test data.
+
+    Args:
+        fields (str): Specifies the columns for data components ('d') and set labels ('l').
+        labels_fill (str): Comma-separated options for filling Venn diagram labels (e.g., 'number', 'logic', 'percent').
+        save (str): The filename to save the plot to.
+        test (bool): If True, generate random data for testing.
+        test_ndata (int): The number of sets to generate for testing (2 to 6).
+        test_npts (int): The number of points in each test set for testing.
+        delimiter (str): The delimiter to use to split the data.
+        colors (str): Comma-separated list of colors for the sets.
+        figsize (str): Figure size in inches (e.g., '9 7').
+        dpi (int): Resolution of the figure in dots per inch.
+        fontsize (int): Font size for labels.
+    """
+    try:
+        import venn
+    except ImportError:
+        print("You need to install pyvenn")
+        print("See: https://github.com/tctianchi/pyvenn")
+        print("You can run:")
+        print("pip install pyvenn")
+        sys.exit(1)
+
+    venn_options = {}
+    if colors:
+        venn_options['colors'] = colors.split(',')
+    if figsize:
+        xaspect, yaspect = figsize.split()
+        venn_options['figsize'] = (float(xaspect), float(yaspect))
+    venn_options['dpi'] = dpi
+    venn_options['fontsize'] = fontsize
+    labels_fill_list = labels_fill.split(',')
+
+    if test:
+        if not (2 <= test_ndata <= 6):
+            print(f"Warning: test_ndata must be between 2 and 6. Using 3 sets for test.")
+            test_ndata = 3
+
+        sets_data = []
+        names_for_venn = []
+        for i in range(test_ndata):
+            start = i * (test_npts // 2)
+            end = start + test_npts
+            sets_data.append(set(range(start, end)))
+            names_for_venn.append(f'Set {chr(65 + i)}')
+
+        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list)
+        venn_func = getattr(venn, f"venn{test_ndata}")
+        fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
+        out(save=save, datastr="", labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
+    else:
+        data_dict, datastr, parsed_fields_str = read_data(delimiter, fields, "")
+        parsed_fields = parsed_fields_str.strip().split()
+
+        d_field_indices = np.where(np.asarray(parsed_fields) == "d")[0]
+        l_field_indices = np.where(np.asarray(parsed_fields) == "l")[0]
+
+        if len(d_field_indices) == 0 or len(l_field_indices) == 0:
+            print("Error: 'd' (data component) and 'l' (set label) fields are required for venn_diagram.")
+            sys.exit(1)
+
+        set_components = [str(x) for x in data_dict[d_field_indices[0]]]
+        set_labels_raw = [str(x) for x in data_dict[l_field_indices[0]]]
+
+        sets_grouped_by_name = defaultdict(list)
+        for component, label in zip(set_components, set_labels_raw):
+            sets_grouped_by_name[label].append(component)
+
+        names_for_venn = sorted(sets_grouped_by_name.keys())
+        sets_data = [set(sets_grouped_by_name[name]) for name in names_for_venn]
+
+        num_sets = len(sets_data)
+
+        if not (2 <= num_sets <= 6):
+            print(f"Error: Venn diagrams currently support 2 to 6 sets. Found {num_sets} sets.")
+            sys.exit(1)
+
+        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list)
+
+        venn_func = getattr(venn, f"venn{num_sets}")
+        fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
+
+        out(save=save, datastr=datastr, labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
+
+
 
 if __name__ == "__main__":
     app()
