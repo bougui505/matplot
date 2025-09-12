@@ -24,7 +24,7 @@ pycirclize: pyCirclize
 	ln -s pyCirclize/src/pycirclize
 
 pyvenn:
-	git clone git@github.com:tctianchi/pyvenn.git
+	git clone git@github.com:bougui505/pyvenn.git
 
 venn: pyvenn
 	ln -s pyvenn/venn.py
