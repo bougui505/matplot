@@ -1286,7 +1286,7 @@ def venn_diagram(
         labels_dict = venn.get_labels(sets_data, fill=labels_fill_list)
         venn_func = getattr(venn, f"venn{test_ndata}")
         fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
-        out(save=save, datastr="", labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
+        out(save=save, datastr="", labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False, legend=False)
     else:
         data_dict, datastr, parsed_fields_str = read_data(delimiter, fields, "")
         parsed_fields = parsed_fields_str.strip().split()
@@ -1319,7 +1319,7 @@ def venn_diagram(
         venn_func = getattr(venn, f"venn{num_sets}")
         fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
 
-        out(save=save, datastr=datastr, labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
+        out(save=save, datastr=datastr, labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False, legend=False)
 
 
 
