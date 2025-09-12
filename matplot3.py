@@ -1147,7 +1147,16 @@ def chord_diagram(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
 ):
-    """"""
+    """
+    Create a chord diagram from data in standard input.
+
+    Args:
+        fields (str): Specifies the columns for data components ('d'), row labels ('r'), and column labels ('c').
+        labels (str): The labels to use for the data.
+        delimiter (str): The delimiter to use to split the data.
+        test (bool): If True, generate random data for testing.
+        save (str): The filename to save the plot to.
+    """
     try:
         from pycirclize import Circos
     except ImportError:
@@ -1262,9 +1271,17 @@ def venn_diagram(
         sys.exit(1)
 
     def print_labels_dict(labels_dict, names_for_venn):
+        """
+        Prints the content of the labels dictionary for the Venn diagram.
+
+        Args:
+            labels_dict (dict): Dictionary where keys are logic strings (e.g., '100')
+                                and values are formatted labels (e.g., "Set A: 5 elements").
+            names_for_venn (list): List of set names, used for initial mapping.
+        """
         nset = len(names_for_venn)
         for i in range(nset):
-            logic = ['0',] * nset
+            logic = ['0'] * nset
             logic[i] = '1'
             logic = ''.join(logic)
             print(f"{logic}={names_for_venn[i]}")
