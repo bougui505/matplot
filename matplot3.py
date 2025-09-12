@@ -1224,7 +1224,7 @@ def chord_diagram(
 @app.command()
 def venn_diagram(
     fields: Annotated[str, typer.Option(help="d: The data field (set components), l: The set label field (Unique label for each set, maximum 6 labels, 6 sets)")] = "d l",
-    labels_fill: Annotated[str, typer.Option(help="Comma-separated options for filling labels: 'number', 'logic', 'percent'. E.g., 'number,percent'")] = "number",
+    labels_fill: Annotated[str, typer.Option(help="Comma-separated options for filling labels: 'number', 'logic', 'percent', 'elements'. E.g., 'number,percent'")] = "number",
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_ndata: Annotated[int, typer.Option(help="The number of sets to generate for testing (2 to 6)")] = 3,
@@ -1240,7 +1240,7 @@ def venn_diagram(
 
     Args:
         fields (str): Specifies the columns for data components ('d') and set labels ('l').
-        labels_fill (str): Comma-separated options for filling Venn diagram labels (e.g., 'number', 'logic', 'percent').
+        labels_fill (str): Comma-separated options for filling Venn diagram labels (e.g., 'number', 'logic', 'percent', 'elements').
         save (str): The filename to save the plot to.
         test (bool): If True, generate random data for testing.
         test_ndata (int): The number of sets to generate for testing (2 to 6).
