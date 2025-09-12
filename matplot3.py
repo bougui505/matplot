@@ -1234,6 +1234,7 @@ def venn_diagram(
     figsize: Annotated[str, typer.Option(help="Figure size in inches (e.g., '9 7'). Uses default if not specified.")] = "",
     dpi: Annotated[int, typer.Option(help="Resolution of the figure in dots per inch.")] = 96,
     fontsize: Annotated[int, typer.Option(help="Font size for labels.")] = 14,
+    sortkey: Annotated[int, typer.Option(help="Key to sort elements in 'elements' fill option. Defaults to 0 for string slicing.")] = 0,
 ):
     """
     Create a Venn diagram from data in standard input or generated test data.
@@ -1283,7 +1284,7 @@ def venn_diagram(
             sets_data.append(set(range(start, end)))
             names_for_venn.append(f'Set {chr(65 + i)}')
 
-        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list)
+        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list, sortkey=sortkey)
         venn_func = getattr(venn, f"venn{test_ndata}")
         fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
         out(save=save, datastr="", labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False, legend=False)
@@ -1314,7 +1315,7 @@ def venn_diagram(
             print(f"Error: Venn diagrams currently support 2 to 6 sets. Found {num_sets} sets.")
             sys.exit(1)
 
-        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list)
+        labels_dict = venn.get_labels(sets_data, fill=labels_fill_list, sortkey=sortkey)
 
         venn_func = getattr(venn, f"venn{num_sets}")
         fig, ax = venn_func(labels_dict, names=names_for_venn, **venn_options)
