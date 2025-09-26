@@ -220,7 +220,7 @@ echo "1 10\n2 12\n3 5" | ./matplot3.py plot
 
 ### Scatter plot with custom labels and PCR
 ```bash
-echo "1 10\n2 12\n3 5" | ./matplot3.py scatter --pcr --labels "My Data"
+echo "1 10\n2 12\n3 5" | ./matplot3.py scatter --pcr --labels "MyData"
 ```
 
 ### Jitter plot with KDE coloring
