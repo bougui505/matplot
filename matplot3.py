@@ -399,7 +399,7 @@ def plot(
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
 ):
     """
-    Plot data from standard input.
+    Plot data from standard input. A new dataset can be defined by separating the data by an empty line.
 
     Args:
         fields (str): The fields to read, separated by spaces.
