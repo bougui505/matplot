@@ -62,20 +62,7 @@ def plot_setup(
     debug: bool = False,
 ):
     """
-    Set up the plot with the given parameters.
-
-    Args:
-        xlabel (str): The label for the x-axis.
-        ylabel (str): The label for the y-axis.
-        semilog_x (bool): If True, set the x-axis to a logarithmic scale.
-        semilog_y (bool): If True, set the y-axis to a logarithmic scale.
-        grid (bool): If True, display a grid on the plot.
-        aspect_ratio (str): The aspect ratio of the plot in the format "xaspect yaspect".
-        subplots (str): The number of subplots in the format "rows columns".
-        sharex (bool): If True, share the x-axis among subplots.
-        sharey (bool): If True, share the y-axis among subplots.
-        titles (str): The titles for the subplots, separated by spaces.
-        debug (bool): If True, enable debug mode.
+    A new dataset can be defined by separating the data by an empty line.
     """
     global DEBUG
     DEBUG = debug
@@ -399,7 +386,7 @@ def plot(
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
 ):
     """
-    Plot data from standard input. A new dataset can be defined by separating the data by an empty line.
+    Plot data from standard input.
 
     Args:
         fields (str): The fields to read, separated by spaces.
