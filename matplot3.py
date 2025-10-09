@@ -389,6 +389,7 @@ def plot(
     function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
     func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
     func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
+    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
     legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
 ):
     """
@@ -509,7 +510,7 @@ def plot(
         # Plot the function on the first subplot
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1)
         current_func_label = func_label if func_label else function
-        plt.plot(x_func, y_func, color='r', linestyle=func_linestyle, label=current_func_label)
+        plt.plot(x_func, y_func, color=func_color, linestyle=func_linestyle, label=current_func_label)
         if not labels_list and current_func_label: # If no labels from data and a function label is provided
              labels_list = [current_func_label] # So that out() triggers the legend
 
