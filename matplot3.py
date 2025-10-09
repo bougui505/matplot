@@ -49,17 +49,17 @@ app = typer.Typer(
 
 @app.callback()
 def plot_setup(
-    xlabel: str = "x",
-    ylabel: str = "y",
-    semilog_x: bool = False,
-    semilog_y: bool = False,
-    grid: bool = False,
-    aspect_ratio: Optional[str] = None,
-    subplots: str = "1 1",
-    sharex: bool = False,
-    sharey: bool = False,
-    titles: str = "",
-    debug: bool = False,
+    xlabel: Annotated[str, typer.Option(help="Label for the x-axis")] = "x",
+    ylabel: Annotated[str, typer.Option(help="Label for the y-axis")] = "y",
+    semilog_x: Annotated[bool, typer.Option(help="Set x-axis to log scale")] = False,
+    semilog_y: Annotated[bool, typer.Option(help="Set y-axis to log scale")] = False,
+    grid: Annotated[bool, typer.Option(help="Add a grid to the plot")] = False,
+    aspect_ratio: Annotated[Optional[str], typer.Option(help="Set the figure size (e.g., '10 5' for 10x5 inches)")] = None,
+    subplots: Annotated[str, typer.Option(help="Define subplot grid (e.g., '2 2' for a 2x2 grid)")] = "1 1",
+    sharex: Annotated[bool, typer.Option(help="Share the x-axis across subplots")] = False,
+    sharey: Annotated[bool, typer.Option(help="Share the y-axis across subplots")] = False,
+    titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces")] = "",
+    debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
 ):
     """
     A new dataset can be defined by separating the data by an empty line.
