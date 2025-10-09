@@ -388,6 +388,7 @@ def plot(
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
     function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
     func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
+    legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function.
@@ -511,7 +512,7 @@ def plot(
         if not labels_list and current_func_label: # If no labels from data and a function label is provided
              labels_list = [current_func_label] # So that out() triggers the legend
 
-    out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
+    out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect, legend=legend)
 
 @app.command()
 def scatter(
