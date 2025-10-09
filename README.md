@@ -45,7 +45,7 @@ These options apply globally to all commands and can be set before any subcomman
 ### Commands
 
 #### `plot`
-Plot data from standard input.
+Plot data from standard input, and optionally an arbitrary mathematical function.
 
 **Options:**
 *   `--fields <TEXT>`: x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch) (default: "x y")
@@ -66,6 +66,11 @@ Plot data from standard input.
 *   `--test-npts <INTEGER>`: The number of points to generate for testing (default: 1000)
 *   `--test-ndata <INTEGER>`: The number of datasets to generate for testing (default: 2)
 *   `--equal-aspect`: Set the aspect ratio of the plot to equal
+*   `--function <TEXT>`: Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.
+*   `--func-label <TEXT>`: Label for the plotted function in the legend.
+*   `--func-linestyle <TEXT>`: Linestyle for the plotted function (e.g., '-', '--', '-.', ':'). (default: "-")
+*   `--func-color <TEXT>`: Color for the plotted function (e.g., 'red', 'blue', '#FF00FF'). (default: "r")
+*   `--legend`: Display legend on the plot (default: True)
 
 #### `scatter`
 Create a scatter plot from data in standard input.
