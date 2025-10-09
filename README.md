@@ -35,7 +35,7 @@ These options apply globally to all commands and can be set before any subcomman
 *   `--semilog-x`: If True, set the x-axis to a logarithmic scale.
 *   `--semilog-y`: If True, set the y-axis to a logarithmic scale.
 *   `--grid`: If True, display a grid on the plot.
-*   `--aspect-ratio <TEXT>`: The aspect ratio of the plot in the format "xaspect yaspect".
+*   `--aspect-ratio <TEXT>`: Set the figure size (e.g., '10 5' for 10x5 inches).
 *   `--subplots <TEXT>`: The number of subplots in the format "rows columns" (default: "1 1")
 *   `--sharex`: If True, share the x-axis among subplots.
 *   `--sharey`: If True, share the y-axis among subplots.
@@ -65,6 +65,7 @@ Plot data from standard input.
 *   `--test`: Generate random data for testing
 *   `--test-npts <INTEGER>`: The number of points to generate for testing (default: 1000)
 *   `--test-ndata <INTEGER>`: The number of datasets to generate for testing (default: 2)
+*   `--equal-aspect`: Set the aspect ratio of the plot to equal
 
 #### `scatter`
 Create a scatter plot from data in standard input.
@@ -105,6 +106,7 @@ Create a histogram from data in standard input.
 *   `--test`: Generate random data for testing
 *   `--test-npts <INTEGER>`: The number of points to generate for testing (default: 1000)
 *   `--test-ndata <INTEGER>`: The number of datasets to generate for testing (default: 2)
+*   `--equal-aspect`: Set the aspect ratio of the plot to equal
 
 #### `jitter`
 Create a jitter plot from data in standard input.
@@ -137,6 +139,7 @@ Create a jitter plot from data in standard input.
 *   `--test`: Generate random data for testing
 *   `--test-npts <INTEGER>`: The number of points to generate for testing (default: 1000)
 *   `--test-ndata <INTEGER>`: The number of datasets to generate for testing (default: 3)
+*   `--equal-aspect`: Set the aspect ratio of the plot to equal
 
 #### `roc`
 Create a ROC curve from data in standard input.
@@ -153,6 +156,7 @@ Create a ROC curve from data in standard input.
 *   `--test`: Generate random data for testing
 *   `--test-npts <INTEGER>`: The number of points to generate for testing (default: 1000)
 *   `--test-ndata <INTEGER>`: The number of datasets to generate for testing (default: 2)
+*   `--equal-aspect`: Set the aspect ratio of the plot to equal
 
 #### `umap`
 Create a UMAP plot from data in standard input.
