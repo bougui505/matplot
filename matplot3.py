@@ -12,6 +12,7 @@ import sys
 import socket
 from collections import defaultdict
 from datetime import datetime
+import math # Added for arbitrary function plotting
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -385,9 +386,11 @@ def plot(
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
+    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
 ):
     """
-    Plot data from standard input.
+    Plot data from standard input, and optionally an arbitrary function.
 
     Args:
         fields (str): The fields to read, separated by spaces.
@@ -434,31 +437,34 @@ def plot(
         xfmt = "ts"
         fields = [f if f != "ts" else "x" for f in fields]  #type: ignore
     assert "x" in fields, "x field is required"
-    labels = labels.strip().split()  #type: ignore
+    labels_list = labels.strip().split()  #type: ignore
     if fmt != "":
-        fmt = fmt.strip().split()  #type: ignore
+        fmt_list = fmt.strip().split()  #type: ignore
     else:
-        fmt = [fmt] * len(data)  #type: ignore
+        fmt_list = [fmt] * len(data)  #type: ignore
     plotid = 0
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
     assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
-    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting..."):
+
+    all_x_data = [] # To store all x values for function plotting range
+    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting data..."):
         x = np.float64(data[xfield])  #type: ignore
         y = np.float64(data[yfield])  #type: ignore
+        all_x_data.extend(list(x)) # Collect x data for potential function plotting range
         X.extend(list(x))  #type: ignore
         Y.extend(list(y))  #type: ignore
         if moving_avg > 0:
             x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
             y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
-        if len(labels) > 0:
-            label = labels[plotid]
+        if len(labels_list) > 0:
+            label = labels_list[plotid]
         else:
             label = None
-        if len(fmt) > 0:
-            fmtstr = fmt[plotid]
+        if len(fmt_list) > 0:
+            fmtstr = fmt_list[plotid]
         else:
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
@@ -473,7 +479,39 @@ def plot(
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
         set_xtick_labels(fields, data, rotation=rotation)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
+
+    if function is not None:
+        if xmin is None and xmax is None:
+            # Use the range of the plotted data
+            if len(all_x_data) > 0:
+                func_xmin = np.min(all_x_data)
+                func_xmax = np.max(all_x_data)
+            else:
+                func_xmin = 0.0
+                func_xmax = 1.0 # Default if no data
+        else:
+            func_xmin = xmin if xmin is not None else 0.0
+            func_xmax = xmax if xmax is not None else 1.0
+
+        x_func = np.linspace(func_xmin, func_xmax, 500)
+        # Evaluate the function string. Use a limited global scope for security.
+        # This allows basic math operations and numpy functions, but nothing else.
+        _globals = {"x": x_func, "np": np, "math": math}
+        _locals = {}
+        try:
+            y_func = eval(function, {"__builtins__": {}}, _globals)
+        except Exception as e:
+            print(f"Error evaluating function '{function}': {e}")
+            sys.exit(1)
+
+        # Plot the function on the first subplot
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1)
+        current_func_label = func_label if func_label else function
+        plt.plot(x_func, y_func, 'r-', label=current_func_label)
+        if not labels_list and current_func_label: # If no labels from data and a function label is provided
+             labels_list = [current_func_label] # So that out() triggers the legend
+
+    out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
 @app.command()
 def scatter(
