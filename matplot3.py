@@ -384,6 +384,7 @@ def plot(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
 ):
     """
     Plot data from standard input.
@@ -472,7 +473,7 @@ def plot(
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
         set_xtick_labels(fields, data, rotation=rotation)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
 @app.command()
 def scatter(
@@ -621,6 +622,7 @@ def hist(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
 ):
     """
     Create a histogram from data in standard input.
@@ -667,7 +669,7 @@ def hist(
             label = None
         plt.hist(y, toint(bins), label=label, alpha=alpha, density=density)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False)
+    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect)
 
 @app.command()
 def jitter(
@@ -700,6 +702,7 @@ def jitter(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 3,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
 ):
     """
     Create a jitter plot from data in standard input.
@@ -794,7 +797,7 @@ def jitter(
         Y.extend(list(y))
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, equal_aspect=equal_aspect)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort: bool = False):
     """
