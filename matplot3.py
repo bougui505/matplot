@@ -367,7 +367,7 @@ def toint(x):
 @app.command()
 def plot(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
     moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
