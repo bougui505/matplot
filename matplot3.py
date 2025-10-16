@@ -960,6 +960,113 @@ def roc(
     out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
 @app.command()
+def tsne(
+    perplexity: Annotated[float, typer.Option(help="The perplexity is related to the number of nearest neighbors that is used in other manifold learning algorithms. Larger datasets usually require a larger perplexity. Consider selecting a value between 5 and 50.")] = 30.0,
+    early_exaggeration: Annotated[float, typer.Option(help="Controls how tightly clusters in the original space are bunched together in the embedded space. Larger values increase the separation between clusters.")] = 12.0,
+    learning_rate: Annotated[float, typer.Option(help="The learning rate for t-SNE. Typically between 10.0 and 1000.0. If the learning rate is too high, the data will look like a 'ball' with any point approximately at the same distance from its nearest neighbours. If the learning rate is too low, most points will look compressed in a dense cloud with few outliers. Some suggestions are between 100 and 1000.")] = 200.0,
+    n_iter: Annotated[int, typer.Option(help="Maximum number of iterations for the optimization. Should be at least 250.")] = 1000,
+    metric: Annotated[str, typer.Option(help="The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)")] = "euclidean",
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
+    npy: Annotated[str, typer.Option(help="Load data from a numpy file")] = "",
+    npz: Annotated[str, typer.Option(help="Load data from a numpy file (compressed)")] = "",
+    data_key: Annotated[str, typer.Option(help="The key to use to load data from the npz file")] = "data",
+    labels_key: Annotated[str, typer.Option(help="The key to use to load labels from the npz file")] = "",
+    ilabels_key: Annotated[str, typer.Option(help="The key to use to load interactive labels from the npz file")] = "",
+    legend: Annotated[bool, typer.Option(help="Add a legend to the plot")] = True,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
+    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
+    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
+    alpha: Annotated[float, typer.Option(help="The transparency of the markers in the plot")] = 1.0,
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+):
+    """
+    Create a t-SNE plot from data in standard input.
+
+    Args:
+        perplexity (float): The perplexity is related to the number of nearest neighbors.
+        early_exaggeration (float): Controls how tightly clusters are bunched together.
+        learning_rate (float): The learning rate for t-SNE.
+        n_iter (int): Maximum number of iterations for the optimization.
+        metric (str): The metric to use to compute distance in high dimensional space.
+        test (bool): If True, generate random data for testing.
+        save (str): The filename to save the plot to.
+        npy (str): The filename to load data from a numpy file.
+        npz (str): The filename to load data from a numpy file (compressed).
+        data_key (str): The key to use to load data from the npz file.
+        labels_key (str): The key to use to load labels from the npz file.
+        ilabels_key (str): The key to use to load interactive labels from the npz file.
+        legend (bool): If True, add a legend to the plot.
+        colorbar (bool): If True, add a colorbar to the plot.
+        cmap (str): The colormap to use for the plot.
+        size (int): The size of the markers in the plot.
+        alpha (float): The transparency of the markers in the plot.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+    """
+    global X
+    global Y
+    global INTERACTIVE_LABELS
+
+    labels = None
+    if test:
+        data = np.random.normal(loc=(0, 0, 0), size=(100, 3))
+        data = np.concatenate((data, np.random.normal(loc=(1, 1, 1), size=(100, 3))), axis=0)
+    elif npy != "":
+        data = np.load(npy)
+    elif npz != "":
+        dataz = np.load(npz)
+        print(f"{dataz.files=}")
+        data = dataz[data_key]
+        if labels_key != "":
+            labels = dataz[labels_key]
+        if ilabels_key != "":
+            ilabels = dataz[ilabels_key]
+    else:
+        print("No data provided, use --test, --npy or --npz")
+        sys.exit(1)
+    print(f"{data.shape=}")
+    print(f"{data.min()=}")
+    print(f"{data.max()=}")
+    
+    # Initialize TSNE model
+    model = TSNE(
+        n_components=2, # t-SNE typically outputs 2 or 3 dimensions
+        perplexity=perplexity,
+        early_exaggeration=early_exaggeration,
+        learning_rate=learning_rate,
+        n_iter=n_iter,
+        metric=metric,
+        init='pca', # Recommended initialization for t-SNE
+        random_state=42 # for reproducibility
+    )
+    
+    embedding = model.fit_transform(data)
+    
+    if labels is None:
+        plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha) # type: ignore
+        X.extend(list(embedding[:, 0])) # type: ignore
+        Y.extend(list(embedding[:, 1])) # type: ignore
+    else:
+        for label in np.unique(labels):
+            sel = labels == label
+            x = embedding[sel, 0] # type: ignore
+            y = embedding[sel, 1] # type: ignore
+            plt.scatter(x, y, s=size, cmap=cmap, alpha=alpha, label=label)
+            X.extend(list(x))
+            Y.extend(list(y))
+            if ilabels_key == "":
+                INTERACTIVE_LABELS.extend(list(labels[sel]))
+            else:
+                INTERACTIVE_LABELS.extend(list(ilabels[sel])) # type: ignore
+    out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
+
+@app.command()
 def umap(
     n_neighbors: Annotated[int, typer.Option(help="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation")] = 15,
     min_dist: Annotated[float, typer.Option(help="The effective minimum distance between embedded points")] = 0.1,
