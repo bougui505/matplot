@@ -25,6 +25,7 @@ from rich import print
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
+from sklearn.manifold import TSNE # Added for tsne
 from sklearn.neighbors import KernelDensity, NearestNeighbors
 from typing import Optional, Annotated
 
