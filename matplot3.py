@@ -7,12 +7,13 @@
 #
 # creation_date: Mon Mar 31 13:12:22 2025
 
+import math  # Added for arbitrary function plotting
 import os
-import sys
 import socket
+import sys
 from collections import defaultdict
 from datetime import datetime
-import math # Added for arbitrary function plotting
+from typing import Annotated, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,9 +26,8 @@ from rich import print
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
-from sklearn.manifold import TSNE # Added for tsne
+from sklearn.manifold import TSNE  # Added for tsne
 from sklearn.neighbors import KernelDensity, NearestNeighbors
-from typing import Optional, Annotated
 
 from draggable_text import DraggableText
 from ROC import ROC
@@ -1014,6 +1014,7 @@ def tsne(
     global INTERACTIVE_LABELS
 
     labels = None
+    ilabels = None
     if test:
         data = np.random.normal(loc=(0, 0, 0), size=(100, 3))
         data = np.concatenate((data, np.random.normal(loc=(1, 1, 1), size=(100, 3))), axis=0)
@@ -1052,6 +1053,8 @@ def tsne(
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha) # type: ignore
         X.extend(list(embedding[:, 0])) # type: ignore
         Y.extend(list(embedding[:, 1])) # type: ignore
+        if ilabels is not None:
+            INTERACTIVE_LABELS = ilabels
     else:
         for label in np.unique(labels):
             sel = labels == label
