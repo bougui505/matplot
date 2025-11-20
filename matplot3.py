@@ -116,8 +116,12 @@ def plot_setup(
         
         # Apply tick formatters if specified
         if XTICK_FORMAT:
+            if XTICK_FORMAT == "%d":
+                ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(XTICK_FORMAT))
         if YTICK_FORMAT:
+            if YTICK_FORMAT == "%d":
+                ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(YTICK_FORMAT))
 
 def read_data(delimiter, fields, labels):
