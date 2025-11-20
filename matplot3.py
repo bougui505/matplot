@@ -17,6 +17,7 @@ from typing import Annotated, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.ticker as mticker # Added for tick formatting
 import scipy
 import typer
 from numpy import linalg
@@ -42,6 +43,8 @@ PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 # Define X and Y as global variables
 X, Y = list(), list()
 INTERACTIVE_LABELS = list()
+XTICK_FORMAT = None
+YTICK_FORMAT = None
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -61,11 +64,17 @@ def plot_setup(
     sharex: Annotated[bool, typer.Option(help="Share the x-axis across subplots")] = False,
     sharey: Annotated[bool, typer.Option(help="Share the y-axis across subplots")] = False,
     titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces")] = "",
+    xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
+    ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
 ):
     """
     A new dataset can be defined by separating the data by an empty line.
     """
+    global XTICK_FORMAT
+    global YTICK_FORMAT
+    XTICK_FORMAT = xtick_format
+    YTICK_FORMAT = ytick_format
     global DEBUG
     DEBUG = debug
     app.pretty_exceptions_show_locals = DEBUG
@@ -104,6 +113,12 @@ def plot_setup(
             plt.grid()
         if titles != "":
             plt.title(TITLES[i])
+        
+        # Apply tick formatters if specified
+        if XTICK_FORMAT:
+            ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(XTICK_FORMAT))
+        if YTICK_FORMAT:
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(YTICK_FORMAT))
 
 def read_data(delimiter, fields, labels):
     """
