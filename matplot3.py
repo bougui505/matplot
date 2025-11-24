@@ -114,15 +114,7 @@ def plot_setup(
         if titles != "":
             plt.title(TITLES[i])
         
-        # Apply tick formatters if specified
-        if XTICK_FORMAT:
-            if XTICK_FORMAT == "%d":
-                ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-            ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(XTICK_FORMAT))
-        if YTICK_FORMAT:
-            if YTICK_FORMAT == "%d":
-                ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(YTICK_FORMAT))
+        # Tick formatters will be applied after data is plotted
 
 def read_data(delimiter, fields, labels):
     """
@@ -501,6 +493,7 @@ def plot(
             color = plt.gca().lines[-1].get_color()
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
         set_xtick_labels(fields, data, rotation=rotation)
+        _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
 
     if function is not None:
@@ -662,6 +655,7 @@ def scatter(
             do_pcr(x, y)
         set_xtick_labels(fields, data)
         set_ytick_labels(fields, data)
+        _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
@@ -857,6 +851,7 @@ def jitter(
         X.extend(list(x))
         Y.extend(list(y))
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
+        _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, equal_aspect=equal_aspect)
 
@@ -972,6 +967,7 @@ def roc(
             ax.set_aspect('equal')
             plt.title(label)
             plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")
+        _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
     if SUBPLOTS[0]*SUBPLOTS[1] == 1:
         plt.plot([xmin, xmax], [ymin, ymax], 'k--', label="Random")
     else:
@@ -1086,6 +1082,7 @@ def tsne(
                 INTERACTIVE_LABELS.extend(list(labels[sel]))
             else:
                 INTERACTIVE_LABELS.extend(list(ilabels[sel])) # type: ignore
+    _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
 @app.command()
@@ -1178,6 +1175,7 @@ def umap(
                 INTERACTIVE_LABELS.extend(list(labels[sel]))
             else:
                 INTERACTIVE_LABELS.extend(list(ilabels[sel]))  # type: ignore
+    _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
 @app.command()
