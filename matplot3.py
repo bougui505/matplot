@@ -555,6 +555,7 @@ def scatter(
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
     pcr: Annotated[bool, typer.Option(help="Principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)")] = False,
+    size: Annotated[Optional[float], typer.Option(help="The size of the markers in points**2")] = None,
     kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
     kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE")] = 1000,
     kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
@@ -671,10 +672,9 @@ def scatter(
             label = labels[0]
         else:
             label = None
-        if len(s_indices) > 0:
-            s = np.float64(data[s_indices[0]])  # type: ignore
-        else:
-            s = None
+
+        # Determine marker size: use 's' field, then global 'size' option, then Matplotlib default
+        effective_size = np.float64(data[s_indices[0]]) if len(s_indices) > 0 else size
         
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if "t" in fields:
@@ -699,7 +699,7 @@ def scatter(
             for draggable_text_instance in draggable_text_instances:
                 draggable_text_instance.connect()
 
-        plt.scatter(x, y, s=s, c=c, label=label, alpha=alpha, cmap=cmap)
+        plt.scatter(x, y, s=effective_size, c=c, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
         set_xtick_labels(fields, data)
