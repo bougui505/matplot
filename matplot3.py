@@ -555,6 +555,9 @@ def scatter(
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
     pcr: Annotated[bool, typer.Option(help="Principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)")] = False,
+    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
+    kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE")] = 1000,
+    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -566,10 +569,15 @@ def scatter(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False, 
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
 ):
     """
     Create a scatter plot from data in standard input.
+
+    Args:
+        kde (bool): If True, use kernel density estimation to color the points.
+        kde_subset (int): The number of points to use for the KDE.
+        kde_normalize (bool): If True, normalize the KDE values.
 
     Args:
         fields (str): The fields to read, separated by spaces.
@@ -591,6 +599,7 @@ def scatter(
     global X
     global Y
     global INTERACTIVE_LABELS
+    kde_c = None
     if test:
         data = dict()
         fields = ""
@@ -621,11 +630,41 @@ def scatter(
     s_indices = np.where(np.asarray(fields) == "s")[0]
     c_indices = np.where(np.asarray(fields) == "c")[0]
     plotid = 0
+
+    # Collect all x,y data first for KDE calculation if needed
+    all_x = []
+    all_y = []
+    for xfield, yfield in zip(xfields, yfields):
+        all_x.extend(list(np.float64(data[xfield]))) # type: ignore
+        all_y.extend(list(np.float64(data[yfield]))) # type: ignore
+    
+    if kde:
+        xy_data = np.vstack([all_x, all_y]).T
+        # Fit KDE
+        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_data) # Default bandwidth
+        # Score samples
+        kde_c = np.exp(kde_model.score_samples(xy_data))
+        if kde_normalize:
+            kde_c -= kde_c.min()
+            kde_c /= kde_c.max()
+
+    current_data_idx = 0
     for xfield, yfield in zip(xfields, yfields):
         x = np.float64(data[xfield])  # type: ignore
         y = np.float64(data[yfield])  # type: ignore
+        
         X.extend(list(x))  # type: ignore
         Y.extend(list(y))  # type: ignore
+
+        # Assign colors based on KDE if enabled
+        if kde:
+            c = kde_c[current_data_idx : current_data_idx + len(x)]
+            current_data_idx += len(x)
+        elif len(c_indices) > 0:
+            c = np.float64(data[c_indices[0]])  # type: ignore
+        else:
+            c = None
+
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if len(labels) > 0:
@@ -636,10 +675,7 @@ def scatter(
             s = np.float64(data[s_indices[0]])  # type: ignore
         else:
             s = None
-        if len(c_indices) > 0:
-            c = np.float64(data[c_indices[0]])  # type: ignore
-        else:
-            c = None
+        
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if "t" in fields:
             texts_to_drag = list()
@@ -657,11 +693,6 @@ def scatter(
                                               # bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5")
                                               )
                                      )
-                # text_to_drag = plt.text(0.5, 0.5, 'Hello Draggable!', # Source
-                #             fontsize=22, ha='center', va='center', color='darkblue',
-                #             bbox=dict(facecolor='lightblue', alpha=0.7, pad=7, boxstyle="round,pad=0.5"),
-                #             zorder=10 # Ensures text is drawn on top [6]
-                #             )
             draggable_text_instances = list()
             for text_to_drag in texts_to_drag:
                 draggable_text_instances.append(DraggableText(text_to_drag))
