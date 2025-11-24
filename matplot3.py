@@ -376,6 +376,24 @@ def toint(x):
         pass
     return x
 
+def _apply_axis_tick_formats(ax, x_data, y_data):
+    """
+    Applies x and y axis tick formatters based on global settings or data type.
+    """
+    effective_xtick_format = XTICK_FORMAT
+    if effective_xtick_format is None and np.all(x_data == np.round(x_data)):
+        effective_xtick_format = "%d"
+        
+    if effective_xtick_format:
+        if effective_xtick_format == "%d":
+            ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+        ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
+
+    if YTICK_FORMAT:
+        if YTICK_FORMAT == "%d":
+            ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(YTICK_FORMAT))
+
 @app.command()
 def plot(
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
