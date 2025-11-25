@@ -520,6 +520,15 @@ def plot(
                 for mx, my in zip(min_x, min_y):
                     plt.annotate(f"({format_nbr(mx)}, {format_nbr(my)})", (mx, my),
                                  textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, color='purple')
+        if mark_absolute_minima:
+            min_y_abs = np.min(y)
+            min_x_abs = x[np.argmin(y)]
+            # Plot marker for absolute minimum
+            plt.scatter(min_x_abs, min_y_abs, marker='*', color='red', s=200, zorder=6, label="Absolute Minima")
+            # Add text label for absolute minimum
+            plt.annotate(f"({format_nbr(min_x_abs)}, {format_nbr(min_y_abs)})", (min_x_abs, min_y_abs),
+                         textcoords="offset points", xytext=(0,-20), ha='center', fontsize=9, color='red',
+                         bbox=dict(boxstyle="round,pad=0.2", fc="yellow", alpha=0.7, ec="red", lw=0.5))
         if shade[plotid]:  #type: ignore
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
