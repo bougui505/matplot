@@ -18,7 +18,7 @@ from typing import Annotated, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.ticker as mticker # Added for tick formatting
-import scipy
+import scipy.signal # Added for find_peaks
 import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
@@ -421,6 +421,7 @@ def plot(
     func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
     func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
     legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
+    mark_minima: Annotated[bool, typer.Option(help="Mark the position of minima with their x and y coordinates.")] = False,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function.
@@ -506,6 +507,18 @@ def plot(
         plt.plot(x, y, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
+        if mark_minima:
+            # Find local minima by finding peaks in the inverted y data
+            minima_indices, _ = scipy.signal.find_peaks(-y)
+            if len(minima_indices) > 0:
+                min_x = x[minima_indices]
+                min_y = y[minima_indices]
+                # Plot markers for minima
+                plt.scatter(min_x, min_y, marker='x', color='purple', s=100, zorder=5)
+                # Add text labels for minima
+                for mx, my in zip(min_x, min_y):
+                    plt.annotate(f"({format_nbr(mx)}, {format_nbr(my)})", (mx, my),
+                                 textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, color='purple')
         if shade[plotid]:  #type: ignore
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
