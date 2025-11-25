@@ -524,7 +524,7 @@ def plot(
             min_y_abs = np.min(y)
             min_x_abs = x[np.argmin(y)]
             # Plot marker for absolute minimum
-            plt.scatter(min_x_abs, min_y_abs, marker='*', color='red', s=200, zorder=6, label="Absolute Minima")
+            plt.scatter(min_x_abs, min_y_abs, marker='*', color='red', s=200, zorder=6)
             # Add text label for absolute minimum
             plt.annotate(f"({format_nbr(min_x_abs)}, {format_nbr(min_y_abs)})", (min_x_abs, min_y_abs),
                          textcoords="offset points", xytext=(0,-20), ha='center', fontsize=9, color='red',
