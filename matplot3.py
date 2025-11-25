@@ -421,7 +421,8 @@ def plot(
     func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
     func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
     legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
-    mark_minima: Annotated[bool, typer.Option(help="Mark the position of minima with their x and y coordinates.")] = False,
+    mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
+    mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function.
