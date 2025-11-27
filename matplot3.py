@@ -389,10 +389,14 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
             ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
         ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
 
-    if YTICK_FORMAT:
-        if YTICK_FORMAT == "%d":
+    effective_ytick_format = YTICK_FORMAT
+    if effective_ytick_format is None and np.all(y_data == np.round(y_data)):
+        effective_ytick_format = "%d"
+
+    if effective_ytick_format:
+        if effective_ytick_format == "%d":
             ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(YTICK_FORMAT))
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(effective_ytick_format))
 
 @app.command()
 def plot(
