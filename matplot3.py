@@ -16,9 +16,9 @@ from datetime import datetime
 from typing import Annotated, Optional
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker  # Added for tick formatting
 import numpy as np
-import matplotlib.ticker as mticker # Added for tick formatting
-import scipy.signal # Added for find_peaks
+import scipy.signal  # Added for find_peaks
 import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
