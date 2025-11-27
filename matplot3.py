@@ -40,9 +40,10 @@ console = Console()
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 
-# Define X and Y as global variables
+# Define X, Y, INTERACTIVE_LABELS, GLOBAL_C_VALUES as global variables for interactive mode
 X, Y = list(), list()
 INTERACTIVE_LABELS = list()
+GLOBAL_C_VALUES = list()
 XTICK_FORMAT = None
 YTICK_FORMAT = None
 
@@ -357,8 +358,12 @@ def onclick(event):
                 label = INTERACTIVE_LABELS[index]
             else:
                 label = ""
-            print(f"Nearest point: {label} x={x}, y={y}, dist={dist:.2g}")
-            # print(f"x={event.xdata:.2f}, y={event.ydata:.2f}")
+            c_val = GLOBAL_C_VALUES[index]
+            print_str = f"Nearest point: {label} x={x}, y={y}"
+            if not np.isnan(c_val): # Only display c value if it's not NaN
+                print_str += f", c={format_nbr(c_val)}"
+            print_str += f", dist={dist:.2g}"
+            print(print_str)
 
 def toint(x):
     """
@@ -624,9 +629,11 @@ def scatter(
         test_npts (int): The number of points to generate for testing.
         test_ndata (int): The number of datasets to generate for testing.
     """
-    global X
-    global Y
-    global INTERACTIVE_LABELS
+    global X, Y, INTERACTIVE_LABELS, GLOBAL_C_VALUES
+    X = []
+    Y = []
+    INTERACTIVE_LABELS = []
+    GLOBAL_C_VALUES = []
     kde_c = None
     if test:
         data = dict()
@@ -684,14 +691,24 @@ def scatter(
         X.extend(list(x))  # type: ignore
         Y.extend(list(y))  # type: ignore
 
-        # Assign colors based on KDE if enabled
+        c_for_subplot = None # Initialize for current subplot
+
+        # Determine colors for current subplot
         if kde:
-            c = kde_c[current_data_idx : current_data_idx + len(x)]
+            c_for_subplot = kde_c[current_data_idx : current_data_idx + len(x)]
             current_data_idx += len(x)
-        elif len(c_indices) > 0:
-            c = np.float64(data[c_indices[0]])  # type: ignore
-        else:
-            c = None
+        elif len(c_indices) > plotid:
+            # Use plotid to get corresponding c field for current dataset
+            c_for_subplot = np.float64(data[c_indices[plotid]])
+        elif len(c_indices) == 1:
+            # If only one c field but multiple y fields, apply it to all
+            c_for_subplot = np.float64(data[c_indices[0]])
+        
+        # If no explicit 'c' data or KDE, fill with NaN for interactive display
+        if c_for_subplot is None:
+            c_for_subplot = np.full_like(x, np.nan)
+        
+        GLOBAL_C_VALUES.extend(list(c_for_subplot)) # Add c values for current subplot to global list
 
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
@@ -726,7 +743,7 @@ def scatter(
             for draggable_text_instance in draggable_text_instances:
                 draggable_text_instance.connect()
 
-        plt.scatter(x, y, s=effective_size, c=c, label=label, alpha=alpha, cmap=cmap)
+        plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
         set_xtick_labels(fields, data)
