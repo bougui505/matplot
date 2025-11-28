@@ -743,6 +743,8 @@ def scatter(
             for draggable_text_instance in draggable_text_instances:
                 draggable_text_instance.connect()
 
+        if np.isnan(c_for_subplot).all():
+            c_for_subplot = None
         plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
