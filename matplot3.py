@@ -1274,7 +1274,7 @@ def umap(
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
 @app.command()
-def read_metadata(filename: Annotated[str, typer.Option(help="The filename to read the metadata from")]):
+def read_metadata(filename: Annotated[str, typer.Option(..., help="The filename to read the metadata from")]):
     """
     Read metadata from a PNG file.
 
