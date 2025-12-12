@@ -1609,6 +1609,100 @@ def venn_diagram(
 
         out(save=save, datastr=datastr, labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False, legend=False)
 
+@app.command()
+def heatmap(
+    fields: Annotated[str, typer.Option(help="v: The value field, r: The row label field, c: The column label field")] = "v r c",
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
+    cmap: Annotated[str, typer.Option(help="The colormap to use for the heatmap")] = "viridis",
+    cbar_label: Annotated[str | None, typer.Option(help="Label for the colorbar")] = None,
+    rotation: Annotated[int, typer.Option(help="Rotation for x-tick labels")] = 90,
+    # output options
+    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
+    # test options
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    test_rows: Annotated[int, typer.Option(help="Number of rows for test data")] = 5,
+    test_cols: Annotated[int, typer.Option(help="Number of columns for test data")] = 7,
+):
+    """
+    Create a heatmap from data in standard input.
+
+    The input data should contain a value, a row label, and a column label for each cell.
+    Example input:
+    1.2 R1 C1
+    3.4 R1 C2
+    ...
+    5.6 R2 C1
+    """
+    if test:
+        num_rows = test_rows
+        num_cols = test_cols
+        values = np.random.rand(num_rows * num_cols)
+        row_labels = [f"R{i+1}" for i in range(num_rows) for _ in range(num_cols)]
+        col_labels = [f"C{j+1}" for _ in range(num_rows) for j in range(num_cols)]
+
+        data_dict = {
+            0: values.astype(str).tolist(),
+            1: row_labels,
+            2: col_labels
+        }
+        datastr = ""
+        fields_str = "v r c"
+    else:
+        data_dict, datastr, fields_str = read_data(delimiter, fields, "")
+
+    parsed_fields = fields_str.strip().split()
+
+    v_field_idx = np.where(np.asarray(parsed_fields) == "v")[0]
+    r_field_idx = np.where(np.asarray(parsed_fields) == "r")[0]
+    c_field_idx = np.where(np.asarray(parsed_fields) == "c")[0]
+
+    if len(v_field_idx) == 0:
+        print("Error: 'v' (value) field is required for heatmap.")
+        sys.exit(1)
+    if len(r_field_idx) == 0:
+        print("Error: 'r' (row label) field is required for heatmap.")
+        sys.exit(1)
+    if len(c_field_idx) == 0:
+        print("Error: 'c' (column label) field is required for heatmap.")
+        sys.exit(1)
+
+    values = np.float64(data_dict[v_field_idx[0]])
+    row_labels_raw = data_dict[r_field_idx[0]]
+    col_labels_raw = data_dict[c_field_idx[0]]
+
+    unique_row_labels = sorted(list(np.unique(row_labels_raw)))
+    unique_col_labels = sorted(list(np.unique(col_labels_raw)))
+
+    row_to_idx = {label: i for i, label in enumerate(unique_row_labels)}
+    col_to_idx = {label: i for i, label in enumerate(unique_col_labels)}
+
+    nrows = len(unique_row_labels)
+    ncols = len(unique_col_labels)
+
+    heatmap_matrix = np.full((nrows, ncols), np.nan)
+
+    for i in track(range(len(values)), description="Building heatmap matrix..."):
+        r_label = row_labels_raw[i]
+        c_label = col_labels_raw[i]
+        val = values[i]
+
+        row_idx = row_to_idx[r_label]
+        col_idx = col_to_idx[c_label]
+        heatmap_matrix[row_idx, col_idx] = val
+
+    plt.imshow(heatmap_matrix, cmap=cmap, origin='lower', aspect='auto')
+
+    plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor')
+    plt.yticks(np.arange(nrows), unique_row_labels)
+
+    _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
+
+    out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
+
 
 
 if __name__ == "__main__":
