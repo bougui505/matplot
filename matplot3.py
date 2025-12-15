@@ -648,6 +648,7 @@ def scatter(
     kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
     kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE")] = 1000,
     kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
+    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45, # Added rotation parameter
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -676,6 +677,8 @@ def scatter(
         alpha (float): The alpha value for the plot.
         cmap (str): The colormap to use for the plot.
         pcr (bool): If True, perform principal component regression.
+        size (float): The size of the markers in points**2.
+        rotation (int): The rotation of the xtick labels in degrees.
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
@@ -805,7 +808,7 @@ def scatter(
         plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
-        set_xtick_labels(fields, data, rotation=rotation)
+        set_xtick_labels(fields, data, rotation=rotation) # Use the defined rotation
         set_ytick_labels(fields, data)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
