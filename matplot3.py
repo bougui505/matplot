@@ -439,6 +439,9 @@ def plot(
     median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
     plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets.")] = False,
     gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve (e.g., '-', ':', '-.').")] = ':',
+    mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
+    mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
+    mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
@@ -579,17 +582,23 @@ def plot(
             y_average = np.mean(y_arrays_for_average_median, axis=0)
             plt.plot(x_avg_med_plot, y_average, average_linestyle, label="Average")
             labels_list.append("Average") # Add average to labels for legend
+            if mark_average_minima:
+                _mark_global_minimum(x_avg_med_plot, y_average, "Average", color='blue')
 
         if plot_median:
             y_median = np.median(y_arrays_for_average_median, axis=0)
             plt.plot(x_avg_med_plot, y_median, median_linestyle, label="Median")
             labels_list.append("Median") # Add median to labels for legend
+            if mark_median_minima:
+                _mark_global_minimum(x_avg_med_plot, y_median, "Median", color='green')
 
         if plot_gmean:
             # Note: Geometric mean requires positive numbers. Handle potential zeros/negatives gracefully.
             y_gmean = scipy.stats.gmean(np.array(y_arrays_for_average_median) + np.finfo(float).eps, axis=0) # Add epsilon to avoid log(0)
             plt.plot(x_avg_med_plot, y_gmean, gmean_linestyle, label="Geometric Mean")
             labels_list.append("Geometric Mean") # Add geometric mean to labels for legend
+            if mark_gmean_minima:
+                _mark_global_minimum(x_avg_med_plot, y_gmean, "Geometric Mean", color='orange')
 
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
@@ -1407,6 +1416,21 @@ def format_nbr(x, precision='.1f'):
         return f'{round(x)}'
     else:
         return format(x, precision)
+
+def _mark_global_minimum(x_data, y_data, label_prefix, color):
+    """
+    Helper function to mark and annotate the global minimum of a curve.
+    """
+    min_y_abs = np.min(y_data)
+    min_x_abs = x_data[np.argmin(y_data)]
+    
+    # Plot marker for absolute minimum
+    plt.scatter(min_x_abs, min_y_abs, marker='v', color=color, s=150, zorder=7, edgecolor='black', linewidth=0.8)
+    # Add text label for absolute minimum
+    plt.annotate(f"{label_prefix} min:\n({format_nbr(min_x_abs)}, {format_nbr(min_y_abs)})",
+                 (min_x_abs, min_y_abs),
+                 textcoords="offset points", xytext=(0,-35), ha='center', fontsize=8, color=color,
+                 bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.8, ec=color, lw=0.5))
 
 def pca(X, outfilename=None):
     """
