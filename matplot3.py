@@ -1722,6 +1722,7 @@ def heatmap(
     test_rows: Annotated[int, typer.Option(help="Number of rows for test data")] = 5,
     test_cols: Annotated[int, typer.Option(help="Number of columns for test data")] = 7,
     matrix_order: Annotated[bool, typer.Option(help="If True, plot the heatmap in matrix order (rows and columns instead of x,y)")] = False,
+    fontsize: Annotated[int, typer.Option(help="Font size for tick labels")] = 10,
 ):
     """
     Create a heatmap from data in standard input.
@@ -1792,12 +1793,12 @@ def heatmap(
 
     if matrix_order:
         plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
-        plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor')
-        plt.yticks(np.arange(nrows), unique_row_labels)
+        plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
+        plt.yticks(np.arange(nrows), unique_row_labels, fontsize=fontsize)
     else:
         plt.imshow(heatmap_matrix.T, cmap=cmap, origin='lower', aspect='auto')
-        plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor')
-        plt.yticks(np.arange(ncols), unique_col_labels)
+        plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
+        plt.yticks(np.arange(ncols), unique_col_labels, fontsize=fontsize)
 
     # Apply tick formats after setting labels.
     # This function is intended for numerical data. If string labels are used,
