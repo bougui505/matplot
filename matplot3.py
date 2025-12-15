@@ -385,24 +385,37 @@ def toint(x):
 def _apply_axis_tick_formats(ax, x_data, y_data):
     """
     Applies x and y axis tick formatters based on global settings or data type.
+    This function is intended for numerical data. It will not apply formatting
+    if the tick labels are already strings (e.g., from categorical data).
     """
-    effective_xtick_format = XTICK_FORMAT
-    if effective_xtick_format is None and np.all(x_data == np.round(x_data)):
-        effective_xtick_format = "%d"
+    # Check if tick labels are already strings (likely categorical data)
+    # If so, do not apply numerical formatting.
+    x_tick_labels = [t.get_text() for t in ax.get_xticklabels()]
+    y_tick_labels = [t.get_text() for t in ax.get_yticklabels()]
 
-    if effective_xtick_format:
-        if effective_xtick_format == "%d":
-            ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-        ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
+    # Heuristic: if any tick label is not purely numeric, assume it's categorical
+    is_x_categorical = any(not t.replace('.', '', 1).replace('-', '', 1).isdigit() for t in x_tick_labels)
+    is_y_categorical = any(not t.replace('.', '', 1).replace('-', '', 1).isdigit() for t in y_tick_labels)
 
-    effective_ytick_format = YTICK_FORMAT
-    if effective_ytick_format is None and np.all(y_data == np.round(y_data)):
-        effective_ytick_format = "%d"
+    if not is_x_categorical:
+        effective_xtick_format = XTICK_FORMAT
+        if effective_xtick_format is None and np.all(x_data == np.round(x_data)):
+            effective_xtick_format = "%d"
 
-    if effective_ytick_format:
-        if effective_ytick_format == "%d":
-            ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(effective_ytick_format))
+        if effective_xtick_format:
+            if effective_xtick_format == "%d":
+                ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+            ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
+
+    if not is_y_categorical:
+        effective_ytick_format = YTICK_FORMAT
+        if effective_ytick_format is None and np.all(y_data == np.round(y_data)):
+            effective_ytick_format = "%d"
+
+        if effective_ytick_format:
+            if effective_ytick_format == "%d":
+                ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(effective_ytick_format))
 
 @app.command()
 def plot(
@@ -638,53 +651,61 @@ def plot(
 
 @app.command()
 def scatter(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, c: A sequence of numbers to be mapped to colors using cmap (see: --cmap), s: The marker size in points**2, il: a particular field with labels to display for interactive mode, t: a field with text labels to display on the plot, xt: the xticks labels")] = "x y",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
+    moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
+    fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
-    pcr: Annotated[bool, typer.Option(help="Principal component regression (see: https://en.wikipedia.org/wiki/Principal_component_regression)")] = False,
-    size: Annotated[Optional[float], typer.Option(help="The size of the markers in points**2")] = None,
-    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
-    kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE")] = 1000,
-    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
-    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45, # Added rotation parameter
+    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
+    shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
+    alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
+    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
+    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
+    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
+    legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
+    mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
+    mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
+    plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
+    average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
+    plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets.")] = False,
+    median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
+    plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets.")] = False,
+    gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve (e.g., '-', ':', '-.').")] = ':',
+    mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
+    mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
+    mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
 ):
     """
     Create a scatter plot from data in standard input.
 
     Args:
-        kde (bool): If True, use kernel density estimation to color the points.
-        kde_subset (int): The number of points to use for the KDE.
-        kde_normalize (bool): If True, normalize the KDE values.
-
-    Args:
         fields (str): The fields to read, separated by spaces.
         labels (str): The labels to use for the data, separated by spaces.
+        moving_avg (int): The size of the moving average window.
         delimiter (str): The delimiter to use to split the data.
+        fmt (str): The format string to use for the plot, separated by spaces.
         alpha (float): The alpha value for the plot.
-        cmap (str): The colormap to use for the plot.
-        pcr (bool): If True, perform principal component regression.
-        size (float): The size of the markers in points**2.
         rotation (int): The rotation of the xtick labels in degrees.
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
         ymin (float): The minimum y value for the plot.
         ymax (float): The maximum y value for the plot.
-        colorbar (bool): If True, add a colorbar to the plot.
+        shade (str): The values to shade the area under the curve, separated by spaces.
+        alpha_shade (float): The alpha value for the shaded area.
         test (bool): If True, generate random data for testing.
         test_npts (int): The number of points to generate for testing.
         test_ndata (int): The number of datasets to generate for testing.
@@ -1784,8 +1805,10 @@ def heatmap(
         plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor')
         plt.yticks(np.arange(ncols), unique_col_labels)
 
-    # Apply tick formats after setting labels
-    _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
+    # Apply tick formats after setting labels.
+    # This function is intended for numerical data. If string labels are used,
+    # it will not apply numerical formatting, which is the desired behavior here.
+    # _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
 
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
 
