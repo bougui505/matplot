@@ -115,7 +115,7 @@ def plot_setup(
             plt.grid()
         if titles != "":
             plt.title(TITLES[i])
-        
+
         # Tick formatters will be applied after data is plotted
 
 def read_data(delimiter, fields, labels):
@@ -389,7 +389,7 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
     effective_xtick_format = XTICK_FORMAT
     if effective_xtick_format is None and np.all(x_data == np.round(x_data)):
         effective_xtick_format = "%d"
-        
+
     if effective_xtick_format:
         if effective_xtick_format == "%d":
             ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
@@ -513,7 +513,7 @@ def plot(
         all_x_data.extend(list(x_current)) # Collect x data for potential function plotting range
         X.extend(list(x_current))  #type: ignore
         Y.extend(list(y_current))  #type: ignore
-        
+
         # Store x for average/median if not set, assuming all y's share this x
         if x_for_avg_med_calculation is None:
             x_for_avg_med_calculation = x_current
@@ -521,7 +521,7 @@ def plot(
         if moving_avg > 0:
             x_current = np.convolve(x_current, np.ones((moving_avg,))/moving_avg, mode='valid')
             y_current = np.convolve(y_current, np.ones((moving_avg,))/moving_avg, mode='valid')
-        
+
         y_arrays_for_average_median.append(y_current)
 
         if len(labels_list) > 0:
@@ -575,7 +575,7 @@ def plot(
         x_avg_med_plot = x_for_avg_med_calculation
         if xfmt == "ts":
             x_avg_med_plot = np.asarray([datetime.fromtimestamp(e) for e in x_for_avg_med_calculation]) #type: ignore
-        
+
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot aggregate statistics on the first subplot
 
         if plot_average:
@@ -729,7 +729,7 @@ def scatter(
     for xfield, yfield in zip(xfields, yfields):
         all_x.extend(list(np.float64(data[xfield]))) # type: ignore
         all_y.extend(list(np.float64(data[yfield]))) # type: ignore
-    
+
     if kde:
         xy_data = np.vstack([all_x, all_y]).T
         # Fit KDE
@@ -744,7 +744,7 @@ def scatter(
     for xfield, yfield in zip(xfields, yfields):
         x = np.float64(data[xfield])  # type: ignore
         y = np.float64(data[yfield])  # type: ignore
-        
+
         X.extend(list(x))  # type: ignore
         Y.extend(list(y))  # type: ignore
 
@@ -760,11 +760,11 @@ def scatter(
         elif len(c_indices) == 1:
             # If only one c field but multiple y fields, apply it to all
             c_for_subplot = np.float64(data[c_indices[0]])
-        
+
         # If no explicit 'c' data or KDE, fill with NaN for interactive display
         if c_for_subplot is None:
             c_for_subplot = np.full_like(x, np.nan)
-        
+
         GLOBAL_C_VALUES.extend(list(c_for_subplot)) # Add c values for current subplot to global list
 
         if "il" in fields:
@@ -776,7 +776,7 @@ def scatter(
 
         # Determine marker size: use 's' field, then global 'size' option, then Matplotlib default
         effective_size = np.float64(data[s_indices[0]]) if len(s_indices) > 0 else size
-        
+
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if "t" in fields:
             texts_to_drag = list()
@@ -1201,7 +1201,7 @@ def tsne(
     print(f"{data.shape=}")
     print(f"{data.min()=}")
     print(f"{data.max()=}")
-    
+
     # Initialize TSNE model
     model = TSNE(
         n_components=2, # t-SNE typically outputs 2 or 3 dimensions
@@ -1213,9 +1213,9 @@ def tsne(
         init='pca', # Recommended initialization for t-SNE
         random_state=42 # for reproducibility
     )
-    
+
     embedding = model.fit_transform(data)
-    
+
     if labels is None:
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha) # type: ignore
         X.extend(list(embedding[:, 0])) # type: ignore
@@ -1423,7 +1423,7 @@ def _mark_global_minimum(x_data, y_data, label_prefix, color):
     """
     min_y_abs = np.min(y_data)
     min_x_abs = x_data[np.argmin(y_data)]
-    
+
     # Plot marker for absolute minimum
     plt.scatter(min_x_abs, min_y_abs, marker='v', color=color, s=150, zorder=7, edgecolor='black', linewidth=0.8)
     # Add text label for absolute minimum
@@ -1698,6 +1698,7 @@ def heatmap(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_rows: Annotated[int, typer.Option(help="Number of rows for test data")] = 5,
     test_cols: Annotated[int, typer.Option(help="Number of columns for test data")] = 7,
+    matrix_order: Annotated[bool, typer.Option(help="If True, plot the heatmap in matrix order (rows and columns instead of x,y)")] = False,
 ):
     """
     Create a heatmap from data in standard input.
@@ -1766,16 +1767,18 @@ def heatmap(
         col_idx = col_to_idx[c_label]
         heatmap_matrix[row_idx, col_idx] = val
 
-    plt.imshow(heatmap_matrix, cmap=cmap, origin='lower', aspect='auto')
-
-    plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor')
-    plt.yticks(np.arange(nrows), unique_row_labels)
+    if matrix_order:
+        plt.imshow(heatmap_matrix, cmap=cmap, origin='lower', aspect='auto')
+        plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor')
+        plt.yticks(np.arange(nrows), unique_row_labels)
+    else:
+        plt.imshow(heatmap_matrix.T, cmap=cmap, origin='lower', aspect='auto')
+        plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor')
+        plt.yticks(np.arange(ncols), unique_col_labels)
 
     _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
 
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
-
-
 
 if __name__ == "__main__":
     app()
