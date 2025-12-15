@@ -925,6 +925,7 @@ def jitter(
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 3,
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    pcr: Annotated[bool, typer.Option(help="Perform principal component regression")] = False,
 ):
     """
     Create a jitter plot from data in standard input.
