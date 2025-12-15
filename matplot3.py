@@ -534,10 +534,10 @@ def plot(
             plt.gcf().autofmt_xdate()
         if mark_minima:
             # Find local minima by finding peaks in the inverted y data
-            minima_indices, _ = scipy.signal.find_peaks(-y)
+            minima_indices, _ = scipy.signal.find_peaks(-y_current)
             if len(minima_indices) > 0:
-                min_x = x[minima_indices]
-                min_y = y[minima_indices]
+                min_x = x_current[minima_indices]
+                min_y = y_current[minima_indices]
                 # Plot markers for minima
                 plt.scatter(min_x, min_y, marker='x', color='purple', s=100, zorder=5)
                 # Add text labels for minima
@@ -545,8 +545,8 @@ def plot(
                     plt.annotate(f"({format_nbr(mx)}, {format_nbr(my)})", (mx, my),
                                  textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, color='purple')
         if mark_absolute_minima:
-            min_y_abs = np.min(y)
-            min_x_abs = x[np.argmin(y)]
+            min_y_abs = np.min(y_current)
+            min_x_abs = x_current[np.argmin(y_current)]
             # Plot marker for absolute minimum
             plt.scatter(min_x_abs, min_y_abs, marker='*', color='red', s=200, zorder=6)
             # Add text label for absolute minimum
@@ -556,7 +556,7 @@ def plot(
         if shade[plotid]:  #type: ignore
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
-            plt.fill_between(x, y, alpha=alpha_shade, color=color)
+            plt.fill_between(x_current, y_current, alpha=alpha_shade, color=color)
         set_xtick_labels(fields, data, rotation=rotation)
         _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
