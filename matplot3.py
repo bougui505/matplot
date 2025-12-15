@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker  # Added for tick formatting
 import numpy as np
 import scipy.signal  # Added for find_peaks
+import scipy.stats # Added for geometric mean
 import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
@@ -436,6 +437,8 @@ def plot(
     average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
     plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets.")] = False,
     median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
+    plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets.")] = False,
+    gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve (e.g., '-', ':', '-.').")] = ':',
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
@@ -563,14 +566,14 @@ def plot(
         _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
 
-    if (plot_average or plot_median) and len(y_arrays_for_average_median) > 1:
+    if (plot_average or plot_median or plot_gmean) and len(y_arrays_for_average_median) > 1:
         # Assuming all y's correspond to `x_for_avg_med_calculation`.
         # More robust solution would involve resampling/interpolation if x-values differ significantly.
         x_avg_med_plot = x_for_avg_med_calculation
         if xfmt == "ts":
             x_avg_med_plot = np.asarray([datetime.fromtimestamp(e) for e in x_for_avg_med_calculation]) #type: ignore
         
-        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average/median on the first subplot
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot aggregate statistics on the first subplot
 
         if plot_average:
             y_average = np.mean(y_arrays_for_average_median, axis=0)
@@ -581,6 +584,12 @@ def plot(
             y_median = np.median(y_arrays_for_average_median, axis=0)
             plt.plot(x_avg_med_plot, y_median, median_linestyle, label="Median")
             labels_list.append("Median") # Add median to labels for legend
+
+        if plot_gmean:
+            # Note: Geometric mean requires positive numbers. Handle potential zeros/negatives gracefully.
+            y_gmean = scipy.stats.gmean(np.array(y_arrays_for_average_median) + np.finfo(float).eps, axis=0) # Add epsilon to avoid log(0)
+            plt.plot(x_avg_med_plot, y_gmean, gmean_linestyle, label="Geometric Mean")
+            labels_list.append("Geometric Mean") # Add geometric mean to labels for legend
 
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
