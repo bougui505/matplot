@@ -434,6 +434,8 @@ def plot(
     mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
     plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
     average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
+    plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets.")] = False,
+    median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
@@ -496,8 +498,8 @@ def plot(
         xfields = np.ones_like(yfields) * xfields[0]
 
     all_x_data = [] # To store all x values for function plotting range
-    y_arrays_for_average = []
-    x_for_average_calculation = None
+    y_arrays_for_average_median = [] # Consolidated list for both average and median
+    x_for_avg_med_calculation = None # Consolidated x for average and median
 
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting data..."):
         x_current = np.float64(data[xfield])  #type: ignore
@@ -506,15 +508,15 @@ def plot(
         X.extend(list(x_current))  #type: ignore
         Y.extend(list(y_current))  #type: ignore
         
-        # Store x for average if not set, assuming all y's share this x
-        if x_for_average_calculation is None:
-            x_for_average_calculation = x_current
+        # Store x for average/median if not set, assuming all y's share this x
+        if x_for_avg_med_calculation is None:
+            x_for_avg_med_calculation = x_current
 
         if moving_avg > 0:
             x_current = np.convolve(x_current, np.ones((moving_avg,))/moving_avg, mode='valid')
             y_current = np.convolve(y_current, np.ones((moving_avg,))/moving_avg, mode='valid')
         
-        y_arrays_for_average.append(y_current)
+        y_arrays_for_average_median.append(y_current)
 
         if len(labels_list) > 0:
             label = labels_list[plotid]
@@ -561,23 +563,27 @@ def plot(
         _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
 
-    if plot_average and len(y_arrays_for_average) > 1:
-        # Check if all x-arrays are sufficiently similar for averaging
-        # For simplicity, we assume if `x_for_average_calculation` is set, all y's correspond to it.
+    if (plot_average or plot_median) and len(y_arrays_for_average_median) > 1:
+        # Assuming all y's correspond to `x_for_avg_med_calculation`.
         # More robust solution would involve resampling/interpolation if x-values differ significantly.
-        y_average = np.mean(y_arrays_for_average, axis=0)
-        
-        # Apply datetime formatting if original x was timestamp
-        x_average_plot = x_for_average_calculation
+        x_avg_med_plot = x_for_avg_med_calculation
         if xfmt == "ts":
-            x_average_plot = np.asarray([datetime.fromtimestamp(e) for e in x_for_average_calculation]) #type: ignore
-            plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average on the first subplot
-            plt.plot(x_average_plot, y_average, average_linestyle, label="Average")
+            x_avg_med_plot = np.asarray([datetime.fromtimestamp(e) for e in x_for_avg_med_calculation]) #type: ignore
+        
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average/median on the first subplot
+
+        if plot_average:
+            y_average = np.mean(y_arrays_for_average_median, axis=0)
+            plt.plot(x_avg_med_plot, y_average, average_linestyle, label="Average")
+            labels_list.append("Average") # Add average to labels for legend
+
+        if plot_median:
+            y_median = np.median(y_arrays_for_average_median, axis=0)
+            plt.plot(x_avg_med_plot, y_median, median_linestyle, label="Median")
+            labels_list.append("Median") # Add median to labels for legend
+
+        if xfmt == "ts":
             plt.gcf().autofmt_xdate()
-        else:
-            plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average on the first subplot
-            plt.plot(x_average_plot, y_average, average_linestyle, label="Average")
-        labels_list.append("Average") # Add average to labels for legend
 
     if function is not None:
         if xmin is None and xmax is None: # Use combined x_data for function range
