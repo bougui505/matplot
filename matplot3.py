@@ -586,6 +586,7 @@ def plot(
                 _mark_global_minimum(x_avg_med_plot, y_average, "Average", color=line_average.get_color())
 
         if plot_median:
+            y_median = np.median(y_arrays_for_average_median, axis=0)
             line_median, = plt.plot(x_avg_med_plot, y_median, median_linestyle, label="Median")
             labels_list.append("Median") # Add median to labels for legend
             if mark_median_minima:
@@ -593,6 +594,7 @@ def plot(
 
         if plot_gmean:
             # Note: Geometric mean requires positive numbers. Handle potential zeros/negatives gracefully.
+            y_gmean = scipy.stats.gmean(np.array(y_arrays_for_average_median) + np.finfo(float).eps, axis=0) # Add epsilon to avoid log(0)
             line_gmean, = plt.plot(x_avg_med_plot, y_gmean, gmean_linestyle, label="Geometric Mean")
             labels_list.append("Geometric Mean") # Add geometric mean to labels for legend
             if mark_gmean_minima:
