@@ -671,22 +671,13 @@ def scatter(
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
-    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
-    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
-    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
-    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
-    legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
-    mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
-    mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
-    plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
-    average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
-    plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets.")] = False,
-    median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
-    plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets.")] = False,
-    gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve (e.g., '-', ':', '-.').")] = ':',
-    mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
-    mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
-    mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
+    # New options for scatter plot
+    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
+    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
+    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
+    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
+    pcr: Annotated[bool, typer.Option(help="Perform principal component regression")] = False,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
 ):
     """
     Create a scatter plot from data in standard input.
@@ -1027,6 +1018,8 @@ def jitter(
         X.extend(list(x))
         Y.extend(list(y))
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
+        if pcr:
+            do_pcr(x, y)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
