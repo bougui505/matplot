@@ -805,7 +805,7 @@ def scatter(
         plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
-        set_xtick_labels(fields, data)
+        set_xtick_labels(fields, data, rotation=rotation)
         set_ytick_labels(fields, data)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
@@ -1219,8 +1219,10 @@ def tsne(
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha) # type: ignore
         X.extend(list(embedding[:, 0])) # type: ignore
         Y.extend(list(embedding[:, 1])) # type: ignore
-        if ilabels is not None:
+        if ilabels_key != "" and ilabels is not None:
             INTERACTIVE_LABELS = ilabels
+        elif ilabels_key == "":
+            INTERACTIVE_LABELS = [] # Clear if not provided
     else:
         for label in np.unique(labels):
             sel = labels == label
@@ -1229,10 +1231,10 @@ def tsne(
             plt.scatter(x, y, s=size, cmap=cmap, alpha=alpha, label=label)
             X.extend(list(x))
             Y.extend(list(y))
-            if ilabels_key == "":
-                INTERACTIVE_LABELS.extend(list(labels[sel]))
-            else:
+            if ilabels_key != "" and ilabels is not None:
                 INTERACTIVE_LABELS.extend(list(ilabels[sel])) # type: ignore
+            elif ilabels_key == "":
+                INTERACTIVE_LABELS.extend(list(labels[sel]))
     _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
@@ -1314,6 +1316,10 @@ def umap(
         plt.scatter(embedding[:, 0], embedding[:, 1], s=size, cmap=cmap, alpha=alpha)  # type: ignore
         X.extend(list(embedding[:, 0]))  # type: ignore
         Y.extend(list(embedding[:, 1]))  # type: ignore
+        if ilabels_key != "" and ilabels is not None:
+            INTERACTIVE_LABELS = ilabels
+        elif ilabels_key == "":
+            INTERACTIVE_LABELS = [] # Clear if not provided
     else:
         for label in np.unique(labels):
             sel = labels == label
@@ -1322,10 +1328,10 @@ def umap(
             plt.scatter(x, y, s=size, cmap=cmap, alpha=alpha, label=label)
             X.extend(list(x))
             Y.extend(list(y))
-            if ilabels_key == "":
-                INTERACTIVE_LABELS.extend(list(labels[sel]))
-            else:
+            if ilabels_key != "" and ilabels is not None:
                 INTERACTIVE_LABELS.extend(list(ilabels[sel]))  # type: ignore
+            elif ilabels_key == "":
+                INTERACTIVE_LABELS.extend(list(labels[sel]))
     _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
@@ -1775,6 +1781,7 @@ def heatmap(
         plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor')
         plt.yticks(np.arange(ncols), unique_col_labels)
 
+    # Apply tick formats after setting labels
     _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
 
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
