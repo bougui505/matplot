@@ -432,9 +432,11 @@ def plot(
     legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
     mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
     mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
+    plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
+    average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
 ):
     """
-    Plot data from standard input, and optionally an arbitrary function.
+    Plot data from standard input, and optionally an arbitrary function or an average curve.
 
     Args:
         fields (str): The fields to read, separated by spaces.
@@ -494,15 +496,26 @@ def plot(
         xfields = np.ones_like(yfields) * xfields[0]
 
     all_x_data = [] # To store all x values for function plotting range
+    y_arrays_for_average = []
+    x_for_average_calculation = None
+
     for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting data..."):
-        x = np.float64(data[xfield])  #type: ignore
-        y = np.float64(data[yfield])  #type: ignore
-        all_x_data.extend(list(x)) # Collect x data for potential function plotting range
-        X.extend(list(x))  #type: ignore
-        Y.extend(list(y))  #type: ignore
+        x_current = np.float64(data[xfield])  #type: ignore
+        y_current = np.float64(data[yfield])  #type: ignore
+        all_x_data.extend(list(x_current)) # Collect x data for potential function plotting range
+        X.extend(list(x_current))  #type: ignore
+        Y.extend(list(y_current))  #type: ignore
+        
+        # Store x for average if not set, assuming all y's share this x
+        if x_for_average_calculation is None:
+            x_for_average_calculation = x_current
+
         if moving_avg > 0:
-            x = np.convolve(x, np.ones((moving_avg,))/moving_avg, mode='valid')
-            y = np.convolve(y, np.ones((moving_avg,))/moving_avg, mode='valid')
+            x_current = np.convolve(x_current, np.ones((moving_avg,))/moving_avg, mode='valid')
+            y_current = np.convolve(y_current, np.ones((moving_avg,))/moving_avg, mode='valid')
+        
+        y_arrays_for_average.append(y_current)
+
         if len(labels_list) > 0:
             label = labels_list[plotid]
         else:
@@ -513,8 +526,10 @@ def plot(
             fmtstr = ""
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if xfmt == "ts":
-            x = np.asarray([datetime.fromtimestamp(e) for e in x])  #type: ignore
-        plt.plot(x, y, fmtstr, label=label, alpha=alpha)
+            x_current_plot = np.asarray([datetime.fromtimestamp(e) for e in x_current])  #type: ignore
+        else:
+            x_current_plot = x_current
+        plt.plot(x_current_plot, y_current, fmtstr, label=label, alpha=alpha)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
         if mark_minima:
@@ -543,11 +558,29 @@ def plot(
             color = plt.gca().lines[-1].get_color()
             plt.fill_between(x, y, alpha=alpha_shade, color=color)
         set_xtick_labels(fields, data, rotation=rotation)
-        _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
+        _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
 
+    if plot_average and len(y_arrays_for_average) > 1:
+        # Check if all x-arrays are sufficiently similar for averaging
+        # For simplicity, we assume if `x_for_average_calculation` is set, all y's correspond to it.
+        # More robust solution would involve resampling/interpolation if x-values differ significantly.
+        y_average = np.mean(y_arrays_for_average, axis=0)
+        
+        # Apply datetime formatting if original x was timestamp
+        x_average_plot = x_for_average_calculation
+        if xfmt == "ts":
+            x_average_plot = np.asarray([datetime.fromtimestamp(e) for e in x_for_average_calculation]) #type: ignore
+            plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average on the first subplot
+            plt.plot(x_average_plot, y_average, average_linestyle, label="Average")
+            plt.gcf().autofmt_xdate()
+        else:
+            plt.subplot(SUBPLOTS[0], SUBPLOTS[1], 1) # Plot average on the first subplot
+            plt.plot(x_average_plot, y_average, average_linestyle, label="Average")
+        labels_list.append("Average") # Add average to labels for legend
+
     if function is not None:
-        if xmin is None and xmax is None:
+        if xmin is None and xmax is None: # Use combined x_data for function range
             # Use the range of the plotted data
             if len(all_x_data) > 0:
                 func_xmin = np.min(all_x_data)
