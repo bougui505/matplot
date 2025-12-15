@@ -1005,7 +1005,7 @@ def jitter(
         plt.scatter(x, y, c=c, s=size, alpha=alpha, cmap=cmap)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, equal_aspect=equal_aspect)
+    out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort: bool = False):
     """
@@ -1181,7 +1181,6 @@ def tsne(
     global INTERACTIVE_LABELS
 
     labels = None
-    ilabels = None
     if test:
         data = np.random.normal(loc=(0, 0, 0), size=(100, 3))
         data = np.concatenate((data, np.random.normal(loc=(1, 1, 1), size=(100, 3))), axis=0)
