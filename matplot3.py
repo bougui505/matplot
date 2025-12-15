@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker  # Added for tick formatting
 import numpy as np
 import scipy.signal  # Added for find_peaks
-import scipy.stats # Added for geometric mean
+import scipy.stats  # Added for geometric mean
 import typer
 from numpy import linalg
 from PIL import Image, PngImagePlugin
@@ -1768,7 +1768,7 @@ def heatmap(
         heatmap_matrix[row_idx, col_idx] = val
 
     if matrix_order:
-        plt.imshow(heatmap_matrix, cmap=cmap, origin='lower', aspect='auto')
+        plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
         plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor')
         plt.yticks(np.arange(nrows), unique_row_labels)
     else:
