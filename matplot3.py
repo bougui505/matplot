@@ -11,7 +11,7 @@ import math  # Added for arbitrary function plotting
 import os
 import socket
 import sys
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from datetime import datetime
 from typing import Annotated, Optional
 
