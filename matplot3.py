@@ -1727,6 +1727,7 @@ def heatmap(
     test_cols: Annotated[int, typer.Option(help="Number of columns for test data")] = 7,
     matrix_order: Annotated[bool, typer.Option(help="If True, plot the heatmap in matrix order (rows and columns instead of x,y)")] = False,
     fontsize: Annotated[int, typer.Option(help="Font size for tick labels")] = 10,
+    display_values: Annotated[bool, typer.Option(help="If True, display the values on the heatmap cells")] = False,
 ):
     """
     Create a heatmap from data in standard input.
@@ -1807,13 +1808,31 @@ def heatmap(
         heatmap_matrix[row_idx, col_idx] = val
 
     if matrix_order:
-        plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
+        im = plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
         plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
         plt.yticks(np.arange(nrows), unique_row_labels, fontsize=fontsize)
     else:
-        plt.imshow(heatmap_matrix.T, cmap=cmap, origin='lower', aspect='auto')
+        im = plt.imshow(heatmap_matrix.T, cmap=cmap, origin='lower', aspect='auto')
         plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
         plt.yticks(np.arange(ncols), unique_col_labels, fontsize=fontsize)
+
+    if display_values:
+        # Loop over data dimensions and create text annotations.
+        for i in range(heatmap_matrix.shape[0]):
+            for j in range(heatmap_matrix.shape[1]):
+                val = heatmap_matrix[i, j]
+                if not np.isnan(val):
+                    # Determine text color based on background brightness
+                    # This is a simple heuristic and might need adjustment
+                    bg_brightness = im.cmap(im.norm(val))[:3] # Get RGB values
+                    text_color = "white" if sum(bg_brightness) < 1.5 else "black" # Adjust threshold as needed
+
+                    if matrix_order:
+                        plt.text(j, i, format_nbr(val, precision='.2g'),
+                                 ha="center", va="center", color=text_color, fontsize=fontsize*0.8)
+                    else:
+                        plt.text(i, j, format_nbr(val, precision='.2g'),
+                                 ha="center", va="center", color=text_color, fontsize=fontsize*0.8)
 
     # Apply tick formats after setting labels.
     # This function is intended for numerical data. If string labels are used,
