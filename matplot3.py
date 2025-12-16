@@ -68,6 +68,7 @@ def plot_setup(
     titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces")] = "",
     xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
+    orthonormal: Annotated[bool, typer.Option(help="Force orthonormal axes")] = False,
     debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
 ):
     """
@@ -113,6 +114,8 @@ def plot_setup(
             plt.semilogy()
         if grid:
             plt.grid()
+        if orthonormal:
+            ax.set_aspect('equal', adjustable='box') # Force orthonormal axes
         if titles != "":
             plt.title(TITLES[i])
 
