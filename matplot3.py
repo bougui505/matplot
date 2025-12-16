@@ -130,7 +130,6 @@ def read_data(delimiter, fields, labels):
     Returns:
         tuple: A tuple containing the data dictionary, the data string, and the fields.
     """
-    # AI! how to make this defaultdict an ordered dict (keeping original data ordering)?
     data = OrderedDict()
     datastr = ""
     imax = -1
