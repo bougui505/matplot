@@ -1816,6 +1816,7 @@ def heatmap(
     # it will not apply numerical formatting, which is the desired behavior here.
     # _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
     plt.xlabel("")  # Remove x label
+    plt.ylabel("")  # Remove y label
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
 
 if __name__ == "__main__":
