@@ -1737,9 +1737,12 @@ def heatmap(
     if test:
         num_rows = test_rows
         num_cols = test_cols
-        values = np.random.rand(num_rows * num_cols)
-        row_labels = [f"R{i+1}" for i in range(num_rows) for _ in range(num_cols)]
-        col_labels = [f"C{j+1}" for _ in range(num_rows) for j in range(num_cols)]
+        values = np.arange(num_rows * num_cols)
+        print(f"Random labels are defined from R1 to R{num_rows} and C1 to C{num_cols} for rows and columns respectively")
+        row_labels = np.random.choice([f"R{i+1}" for i in range(num_rows)], replace=False, size=num_rows)
+        col_labels = np.random.choice([f"C{j+1}" for j in range(num_cols)], replace=False, size=num_cols)
+        row_labels = [i for i in row_labels for _ in range(num_cols)]
+        col_labels = [j for _ in range(num_rows) for j in col_labels]
 
         data_dict = {
             0: values.astype(str).tolist(),
@@ -1771,8 +1774,16 @@ def heatmap(
     row_labels_raw = data_dict[r_field_idx[0]]
     col_labels_raw = data_dict[c_field_idx[0]]
 
-    unique_row_labels = sorted(list(np.unique(row_labels_raw)))
-    unique_col_labels = sorted(list(np.unique(col_labels_raw)))
+    # unique_row_labels = sorted(list(np.unique(row_labels_raw)))
+    # unique_col_labels = sorted(list(np.unique(col_labels_raw)))
+    unique_row_labels = list()
+    for e in row_labels_raw:
+        if e not in unique_row_labels:
+            unique_row_labels.append(e)
+    unique_col_labels = list()
+    for e in col_labels_raw:
+        if e not in unique_col_labels:
+            unique_col_labels.append(e)
 
     row_to_idx = {label: i for i, label in enumerate(unique_row_labels)}
     col_to_idx = {label: i for i, label in enumerate(unique_col_labels)}
@@ -1804,7 +1815,7 @@ def heatmap(
     # This function is intended for numerical data. If string labels are used,
     # it will not apply numerical formatting, which is the desired behavior here.
     # _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
-
+    # AI! remove the x label
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
 
 if __name__ == "__main__":
