@@ -1807,6 +1807,12 @@ def heatmap(
         col_idx = col_to_idx[c_label]
         heatmap_matrix[row_idx, col_idx] = val
 
+    # Check if the matrix is symmetric:
+    if heatmap_matrix.shape == heatmap_matrix.T.shape:
+        if (heatmap_matrix == heatmap_matrix.T).all():
+            print("The matrix is SYMMETRIC")
+        else:
+            print("The matrix is NOT symmetric")
     if matrix_order:
         im = plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
         plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
