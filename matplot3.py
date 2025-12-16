@@ -68,7 +68,6 @@ def plot_setup(
     titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces")] = "",
     xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
-    orthonormal: Annotated[bool, typer.Option(help="Force orthonormal axes")] = False,
     debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
 ):
     """
@@ -114,8 +113,6 @@ def plot_setup(
             plt.semilogy()
         if grid:
             plt.grid()
-        if orthonormal:
-            ax.set_aspect('equal', adjustable='box') # Force orthonormal axes
         if titles != "":
             plt.title(TITLES[i])
 
@@ -1723,6 +1720,7 @@ def heatmap(
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
     # test options
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_rows: Annotated[int, typer.Option(help="Number of rows for test data")] = 5,
@@ -1823,7 +1821,7 @@ def heatmap(
     # _apply_axis_tick_formats(plt.gca(), np.arange(ncols), np.arange(nrows))
     plt.xlabel("")  # Remove x label
     plt.ylabel("")  # Remove y label
-    out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False)
+    out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False, equal_aspect=equal_aspect)
 
 if __name__ == "__main__":
     app()
