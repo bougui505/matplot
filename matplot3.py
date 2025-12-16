@@ -150,6 +150,9 @@ def read_data(delimiter, fields, labels):
             fields += f" {fields_original}"
         for i, e in enumerate(line):
             i += field_offset
+            # Ensure the key exists in the OrderedDict
+            if i not in data:
+                data[i] = []
             data[i].append(e)
             datastr += e + ","
             if i > imax:
