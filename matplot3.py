@@ -1816,7 +1816,7 @@ def heatmap(
 
     # Check if the matrix is symmetric:
     if heatmap_matrix.shape == heatmap_matrix.T.shape:
-        if (heatmap_matrix == heatmap_matrix.T).all():
+        if np.isclose(heatmap_matrix, heatmap_matrix.T).all():
             print("The matrix is SYMMETRIC")
         else:
             print("The matrix is NOT symmetric")
