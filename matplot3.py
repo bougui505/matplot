@@ -1813,6 +1813,9 @@ def heatmap(
         count_matrix[row_idx, col_idx] += 1
 
     heatmap_matrix/=count_matrix
+    print(f"Ratio of averaged elements in the matrix: {(count_matrix>1).sum()/count_matrix.size}")
+    print(f"Mean number of values averaged in the matrix: {count_matrix.mean()}")
+    print(f"Standard deviation of the number of values averaged in the matrix {count_matrix.std()}")
 
     # Check if the matrix is symmetric:
     if heatmap_matrix.shape == heatmap_matrix.T.shape:
