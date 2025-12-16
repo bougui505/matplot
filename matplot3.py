@@ -1797,6 +1797,7 @@ def heatmap(
     ncols = len(unique_col_labels)
 
     heatmap_matrix = np.full((nrows, ncols), np.nan)
+    count_matrix = np.zeros((nrows, ncols), dtype=int)
 
     for i in track(range(len(values)), description="Building heatmap matrix..."):
         r_label = row_labels_raw[i]
@@ -1805,7 +1806,13 @@ def heatmap(
 
         row_idx = row_to_idx[r_label]
         col_idx = col_to_idx[c_label]
-        heatmap_matrix[row_idx, col_idx] = val
+        if np.isnan(heatmap_matrix[row_idx, col_idx]):
+            heatmap_matrix[row_idx, col_idx] = val
+        else:
+            heatmap_matrix[row_idx, col_idx] += val
+        count_matrix[row_idx, col_idx] += 1
+
+    heatmap_matrix/=count_matrix
 
     # Check if the matrix is symmetric:
     if heatmap_matrix.shape == heatmap_matrix.T.shape:
