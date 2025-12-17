@@ -429,7 +429,6 @@ def plot(
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -460,6 +459,7 @@ def plot(
     mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
     mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
     plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
+    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
