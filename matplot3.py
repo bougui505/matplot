@@ -422,7 +422,7 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
 
 @app.command()
 def plot(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch), s: The standard deviation field")] = "x y",
     labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
     moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
@@ -517,6 +517,7 @@ def plot(
     plotid = 0
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
+    sfields = np.where(np.asarray(fields) == "s")[0]  # New field for standard deviation
     assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
     if len(xfields) < len(yfields) and len(xfields) == 1:
         xfields = np.ones_like(yfields) * xfields[0]
@@ -542,6 +543,14 @@ def plot(
 
         y_arrays_for_average_median.append(y_current)
 
+        # Handle standard deviation if provided
+        std_current = None
+        if len(sfields) > 0:
+            sfield = sfields[plotid] if plotid < len(sfields) else sfields[0]  # Use corresponding s field or first one
+            std_current = np.float64(data[sfield])  #type: ignore
+            if moving_avg > 0:
+                std_current = np.convolve(std_current, np.ones((moving_avg,))/moving_avg, mode='valid')
+
         if len(labels_list) > 0:
             label = labels_list[plotid]
         else:
@@ -558,6 +567,10 @@ def plot(
         plt.plot(x_current_plot, y_current, fmtstr, label=label, alpha=alpha)
         if plot_points:
             plt.scatter(x_current_plot, y_current, s=size, alpha=alpha, color=plt.gca().lines[-1].get_color()) # Plot points with same color as line
+        if std_current is not None and len(std_current) == len(y_current):
+            # Plot standard deviation as shaded area
+            color = plt.gca().lines[-1].get_color()
+            plt.fill_between(x_current_plot, y_current - std_current, y_current + std_current, alpha=alpha_shade, color=color, label=f"{label} ± std" if label else None)
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
         if mark_minima:
