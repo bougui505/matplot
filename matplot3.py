@@ -458,6 +458,7 @@ def plot(
     mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
     mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
     mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
+    plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
@@ -554,6 +555,8 @@ def plot(
         else:
             x_current_plot = x_current
         plt.plot(x_current_plot, y_current, fmtstr, label=label, alpha=alpha)
+        if plot_points:
+            plt.scatter(x_current_plot, y_current, s=5, alpha=alpha, color=plt.gca().lines[-1].get_color()) # Plot points with same color as line
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
         if mark_minima:
