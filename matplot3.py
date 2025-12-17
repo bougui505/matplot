@@ -429,6 +429,7 @@ def plot(
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
+    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -556,7 +557,7 @@ def plot(
             x_current_plot = x_current
         plt.plot(x_current_plot, y_current, fmtstr, label=label, alpha=alpha)
         if plot_points:
-            plt.scatter(x_current_plot, y_current, s=5, alpha=alpha, color=plt.gca().lines[-1].get_color()) # Plot points with same color as line
+            plt.scatter(x_current_plot, y_current, s=size, alpha=alpha, color=plt.gca().lines[-1].get_color()) # Plot points with same color as line
         if xfmt == "ts":
             plt.gcf().autofmt_xdate()
         if mark_minima:
