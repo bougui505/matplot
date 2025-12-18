@@ -422,14 +422,18 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
 
 @app.command()
 def plot(
+    # Data input options
     fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch), s: The standard deviation field")] = "x y",
     labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
-    moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
+    moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
+    # Plot appearance options
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    # output options
+    plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
+    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
+    # Output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
@@ -437,16 +441,9 @@ def plot(
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
     shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
     alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
-    # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
-    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
-    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
-    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
-    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
     legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    # Statistical analysis options
     mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
     mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
     plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
@@ -458,8 +455,15 @@ def plot(
     mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
     mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
     mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
-    plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
+    # Function plotting options
+    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
+    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
+    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
+    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
+    # Test options
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
