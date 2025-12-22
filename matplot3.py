@@ -731,6 +731,7 @@ def scatter(
     INTERACTIVE_LABELS = []
     GLOBAL_C_VALUES = []
     kde_c = None
+    kde_subset = 1000  # Initialize kde_subset variable
     if test:
         data = dict()
         fields = ""
