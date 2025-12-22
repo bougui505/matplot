@@ -697,6 +697,7 @@ def scatter(
     equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
     # New options for scatter plot
     kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
+    kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE (speeds up computation)")] = 1000,
     kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
     cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
     size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
@@ -731,7 +732,6 @@ def scatter(
     INTERACTIVE_LABELS = []
     GLOBAL_C_VALUES = []
     kde_c = None
-    kde_subset = 1000  # Initialize kde_subset variable
     if test:
         data = dict()
         fields = ""
@@ -772,10 +772,20 @@ def scatter(
 
     if kde:
         xy_data = np.vstack([all_x, all_y]).T
-        # Fit KDE
-        kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_data) # Default bandwidth
-        # Score samples
-        kde_c = np.exp(kde_model.score_samples(xy_data))
+        # Apply subsetting if kde_subset is specified and less than total points
+        if kde_subset < len(xy_data):
+            # Randomly select subset for KDE computation
+            subset_indices = np.random.choice(len(xy_data), size=kde_subset, replace=False)
+            xy_subset = xy_data[subset_indices]
+            # Fit KDE on subset
+            kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_subset) # Default bandwidth
+            # Score all points using the model fitted on subset
+            kde_c = np.exp(kde_model.score_samples(xy_data))
+        else:
+            # Fit KDE on all data
+            kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_data) # Default bandwidth
+            # Score samples
+            kde_c = np.exp(kde_model.score_samples(xy_data))
         if kde_normalize:
             kde_c -= kde_c.min()
             kde_c /= kde_c.max()
