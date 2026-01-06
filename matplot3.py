@@ -52,6 +52,7 @@ app = typer.Typer(
     no_args_is_help=True,
     # pretty_exceptions_show_locals=False,  # do not show local variable
     add_completion=False,
+    rich_markup_mode=None,
 )
 
 @app.callback()
