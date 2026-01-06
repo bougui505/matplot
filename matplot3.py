@@ -362,12 +362,18 @@ def onclick(event):
                 label = INTERACTIVE_LABELS[index]
             else:
                 label = ""
-            c_val = GLOBAL_C_VALUES[index]
-            print_str = f"Nearest point: {label} x={x}, y={y}"
-            if not np.isnan(c_val): # Only display c value if it's not NaN
-                print_str += f", c={format_nbr(c_val)}"
-            print_str += f", dist={dist:.2g}"
-            print(print_str)
+            # Check if index is valid for GLOBAL_C_VALUES
+            if index < len(GLOBAL_C_VALUES):
+                c_val = GLOBAL_C_VALUES[index]
+                print_str = f"Nearest point: {label} x={x}, y={y}"
+                if not np.isnan(c_val): # Only display c value if it's not NaN
+                    print_str += f", c={format_nbr(c_val)}"
+                print_str += f", dist={dist:.2g}"
+                print(print_str)
+            else:
+                print_str = f"Nearest point: {label} x={x}, y={y}"
+                print_str += f", dist={dist:.2g}"
+                print(print_str)
 
 def toint(x):
     """
