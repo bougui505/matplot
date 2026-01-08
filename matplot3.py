@@ -88,7 +88,18 @@ def plot_setup(
     SUBPLOTS = [int(e) for e in subplots.strip().split()]
     ax = None
     global TITLES
-    TITLES = titles.strip().split()
+    # Parse titles properly to handle spaces
+    if titles.strip() == "":
+        TITLES = []
+    else:
+        # Split by spaces but preserve quoted strings
+        import shlex
+        try:
+            TITLES = shlex.split(titles)
+        except ValueError:
+            # Fallback for malformed input
+            TITLES = titles.strip().split()
+    
     if len(TITLES) < SUBPLOTS[0] * SUBPLOTS[1]:
         TITLES += [""] * (SUBPLOTS[0] * SUBPLOTS[1] - len(TITLES))
     for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
