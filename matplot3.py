@@ -1889,6 +1889,13 @@ def heatmap(
                         plt.text(i, j, format_nbr(val, precision='.2g'),
                                  ha="center", va="center", color=text_color, fontsize=fontsize*0.8)
 
+    # Remove axis lines (spines)
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+
     # Apply tick formats after setting labels.
     # This function is intended for numerical data. If string labels are used,
     # it will not apply numerical formatting, which is the desired behavior here.
