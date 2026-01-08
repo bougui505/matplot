@@ -1896,8 +1896,8 @@ def heatmap(
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
-    # Remove secondary ticks
-    ax.tick_params(axis='both', which='both', length=0)
+    # Remove only secondary ticks (keep main ticks)
+    ax.tick_params(axis='both', which='minor', length=0)
 
     # Apply tick formats after setting labels.
     # This function is intended for numerical data. If string labels are used,
