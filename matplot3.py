@@ -66,7 +66,7 @@ def plot_setup(
     subplots: Annotated[str, typer.Option(help="Define subplot grid (e.g., '2 2' for a 2x2 grid)")] = "1 1",
     sharex: Annotated[bool, typer.Option(help="Share the x-axis across subplots")] = False,
     sharey: Annotated[bool, typer.Option(help="Share the y-axis across subplots")] = False,
-    titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces. Quoted titles with spaces should be enclosed in double quotes. Example: --titles 'Title 1' 'Title 2' 'Title with spaces'")] = "",
+    titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces. Quoted titles with spaces should be enclosed in double quotes. Example: --titles \"Title 1\" \"Title 2\" \"Title with spaces\"")] = "",
     xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
