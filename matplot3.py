@@ -69,6 +69,7 @@ def plot_setup(
     titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces. Quoted titles with spaces should be enclosed in double quotes. Example: --titles \"'Title 1' 'Title 2' 'Title with spaces'\"")] = "",
     xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
     ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
+    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
 ):
     """
@@ -76,8 +77,10 @@ def plot_setup(
     """
     global XTICK_FORMAT
     global YTICK_FORMAT
+    global XTICK_FONTSIZE
     XTICK_FORMAT = xtick_format
     YTICK_FORMAT = ytick_format
+    XTICK_FONTSIZE = xtick_fontsize
     global DEBUG
     DEBUG = debug
     app.pretty_exceptions_show_locals = DEBUG
@@ -282,6 +285,9 @@ def set_xtick_labels(fields, data, rotation=45, fontsize=None):
                  rotation=rotation,
                  ha="right",
                  rotation_mode="anchor")
+        # Use global fontsize if not specified locally
+        if fontsize is None:
+            fontsize = XTICK_FONTSIZE
         if fontsize is not None:
             plt.setp(plt.gca().get_xticklabels(), fontsize=fontsize)
 
@@ -455,7 +461,6 @@ def plot(
     # Plot appearance options
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
     size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
     # Output options
@@ -627,7 +632,7 @@ def plot(
             # get the color of the last plot:
             color = plt.gca().lines[-1].get_color()
             plt.fill_between(x_current, y_current, alpha=alpha_shade, color=color)
-        set_xtick_labels(fields, data, rotation=rotation, fontsize=xtick_fontsize)
+        set_xtick_labels(fields, data, rotation=rotation)
         _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
 
@@ -707,7 +712,6 @@ def scatter(
     fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
     alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -881,7 +885,7 @@ def scatter(
         plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
-        set_xtick_labels(fields, data, rotation=rotation, fontsize=xtick_fontsize) # Use the defined rotation
+        set_xtick_labels(fields, data, rotation=rotation) # Use the defined rotation
         set_ytick_labels(fields, data)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
@@ -979,7 +983,6 @@ def jitter(
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
     rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
     cbar_label: Annotated[str | None, typer.Option(help="The label for the colorbar")] = None,
     # test options
@@ -1060,7 +1063,7 @@ def jitter(
                             marker=median_marker,
                             median_sort=median_sort)
             data[xfield] = x  # type: ignore
-        set_xtick_labels(fields, data, rotation=rotation, fontsize=xtick_fontsize)
+        set_xtick_labels(fields, data, rotation=rotation)
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if kde:
@@ -1133,7 +1136,6 @@ def roc(
     xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = 1.0,
     ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = 0.0,
     ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = 1.0,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
@@ -1230,7 +1232,6 @@ def tsne(
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
 ):
     """
     Create a t-SNE plot from data in standard input.
@@ -1341,7 +1342,6 @@ def umap(
     xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
     ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
     ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
 ):
     """
     Create a UMAP plot from data in standard input.
@@ -1776,7 +1776,6 @@ def heatmap(
     cmap: Annotated[str, typer.Option(help="The colormap to use for the heatmap")] = "viridis",
     cbar_label: Annotated[str | None, typer.Option(help="Label for the colorbar")] = None,
     rotation: Annotated[int, typer.Option(help="Rotation for x-tick labels")] = 90,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
