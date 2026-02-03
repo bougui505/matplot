@@ -439,6 +439,9 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
             if effective_xtick_format == "%d":
                 ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
+    else:
+        # Remove secondary ticks when xticklabels are text
+        ax.xaxis.set_minor_locator(mticker.NullLocator())
 
     if not is_y_categorical:
         effective_ytick_format = YTICK_FORMAT
@@ -449,6 +452,9 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
             if effective_ytick_format == "%d":
                 ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(effective_ytick_format))
+    else:
+        # Remove secondary ticks when yticklabels are text
+        ax.yaxis.set_minor_locator(mticker.NullLocator())
 
 @app.command()
 def plot(
