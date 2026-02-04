@@ -982,6 +982,7 @@ def jitter(
     median_color: Annotated[str, typer.Option(help="The color of the median markers in the plot")] = "black",
     median_marker: Annotated[str, typer.Option(help="The marker to use for the median markers in the plot")] = "_",
     median_sort: Annotated[bool, typer.Option(help="Sort by median values")] = False,
+    quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box for each jitter group")] = False,
     # output options
     save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
     xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
@@ -1069,6 +1070,21 @@ def jitter(
                             marker=median_marker,
                             median_sort=median_sort)
             data[xfield] = x  # type: ignore
+        if quartiles:
+            # Calculate quartiles for each x group
+            x_unique = np.unique(x)
+            for x_val in x_unique:
+                y_vals = y[x == x_val]
+                if len(y_vals) > 0:
+                    q1 = np.percentile(y_vals, 25)
+                    med = np.median(y_vals)
+                    q3 = np.percentile(y_vals, 75)
+                    # Plot quartile box
+                    plt.boxplot(y_vals, positions=[x_val], widths=0.1, patch_artist=True,
+                                boxprops=dict(facecolor='lightblue', alpha=0.5),
+                                medianprops=dict(color='red', linewidth=2),
+                                whiskerprops=dict(color='black'),
+                                capprops=dict(color='black'))
         set_xtick_labels(fields, data, rotation=rotation)
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
