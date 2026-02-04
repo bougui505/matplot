@@ -1080,11 +1080,11 @@ def jitter(
                     med = np.median(y_vals)
                     q3 = np.percentile(y_vals, 75)
                     # Plot quartile box
-                    plt.boxplot(y_vals, positions=[x_val], widths=0.1, patch_artist=True,
+                    plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
                                 boxprops=dict(facecolor='lightblue', alpha=0.5),
                                 medianprops=dict(color='red', linewidth=2),
                                 whiskerprops=dict(color='black'),
-                                capprops=dict(color='black'))
+                                capprops=dict(color='black'), sym="")
         set_xtick_labels(fields, data, rotation=rotation)
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
