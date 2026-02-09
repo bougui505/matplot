@@ -711,7 +711,7 @@ def plot(
 
 @app.command()
 def scatter(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch)")] = "x y",
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch), t: The text field for point labels")] = "x y",
     labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
     moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
     delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
