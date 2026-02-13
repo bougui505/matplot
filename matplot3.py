@@ -860,9 +860,6 @@ def scatter(
         else:
             label = None
 
-        # Determine marker size: use 's' field, then global 'size' option, then Matplotlib default
-        effective_size = np.float64(data[s_indices[0]]) if len(s_indices) > 0 else size
-
         plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
         if "t" in fields:
             texts_to_drag = list()
@@ -888,6 +885,9 @@ def scatter(
 
         if np.isnan(c_for_subplot).all():
             c_for_subplot = None
+
+        # Determine marker size: use 's' field, then global 'size' option, then Matplotlib default
+        effective_size = np.float64(data[s_indices[plotid]]) if len(s_indices) > 0 else size
         plt.scatter(x, y, s=effective_size, c=c_for_subplot, label=label, alpha=alpha, cmap=cmap)
         if pcr:
             do_pcr(x, y)
