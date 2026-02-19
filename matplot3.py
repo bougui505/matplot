@@ -1234,7 +1234,7 @@ def roc(
             plt.scatter(closest_x, closest_y, color='red', s=100, zorder=5, marker='o', edgecolors='black')
             
             # Add annotation with cutoff value
-            plt.annotate(f'Cutoff: {format_nbr(closest_threshold)}', 
+            plt.annotate(f'Cutoff: {format_nbr(closest_threshold, precision=".2g")}', 
                         (closest_x, closest_y),
                         xytext=(10, 10), textcoords='offset points',
                         bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7),
