@@ -1222,6 +1222,8 @@ def roc(
         plt.ylabel("True positive rate")
         if highlight_closest:
             # Find the point closest to (0,1)
+            x = np.array(x)
+            y = np.array(y)
             distances = np.sqrt((x - 0)**2 + (y - 1)**2)
             closest_idx = np.argmin(distances)
             closest_x = x[closest_idx]
