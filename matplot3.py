@@ -1161,6 +1161,7 @@ def roc(
     test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
     test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
     test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    highlight_closest: Annotated[bool, typer.Option(help="Highlight the closest point to (0,1) and display its cutoff value")] = False,
 ):
     """
     Create a ROC curve from data in standard input.
@@ -1175,6 +1176,7 @@ def roc(
         xmax (float): The maximum x value for the plot.
         ymin (float): The minimum y value for the plot.
         ymax (float): The maximum y value for the plot.
+        highlight_closest (bool): If True, highlight the closest point to (0,1) and display its cutoff value.
     """
     global X
     global Y
@@ -1218,6 +1220,24 @@ def roc(
         plt.plot(x, y, label=label)
         plt.xlabel("False positive rate")
         plt.ylabel("True positive rate")
+        if highlight_closest:
+            # Find the point closest to (0,1)
+            distances = np.sqrt((x - 0)**2 + (y - 1)**2)
+            closest_idx = np.argmin(distances)
+            closest_x = x[closest_idx]
+            closest_y = y[closest_idx]
+            closest_threshold = thresholds[closest_idx]
+            
+            # Highlight the closest point
+            plt.scatter(closest_x, closest_y, color='red', s=100, zorder=5, marker='o', edgecolors='black')
+            
+            # Add annotation with cutoff value
+            plt.annotate(f'Cutoff: {format_nbr(closest_threshold)}', 
+                        (closest_x, closest_y),
+                        xytext=(10, 10), textcoords='offset points',
+                        bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7),
+                        fontsize=8)
+        
         if SUBPLOTS[0]*SUBPLOTS[1] > 1:
             set_limits(xmin, xmax, ymin, ymax)
             ax = plt.gca()
