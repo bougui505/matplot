@@ -121,8 +121,8 @@ def print_roc(x, y, thresholds, auc, pROC_auc):
     # print('#FPR #TPR')
     # for xval, yval in zip(x, y):
     #     print(f'{xval:.2f} {yval:.2f}')
-    print(f"{auc=}")
-    print(f"{pROC_auc=}")
+    print(f"{auc=:.4g}")
+    print(f"{pROC_auc=:.4g}")
     print('--')
     for xval, yval, threshold in zip(x, y, thresholds):
         print(f'fpr={xval}')
