@@ -1974,5 +1974,100 @@ def heatmap(
     plt.ylabel("")  # Remove y label
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False, equal_aspect=equal_aspect)
 
+@app.command()
+def bar(
+    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field")] = "x y",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
+    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
+    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
+    # output options
+    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
+    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
+    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
+    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
+    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    # test options
+    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
+    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    # Bar plot specific options
+    bar_width: Annotated[float, typer.Option(help="Width of the bars")] = 0.8,
+    color: Annotated[str, typer.Option(help="Color of the bars")] = None,
+    edgecolor: Annotated[str, typer.Option(help="Color of the bar edges")] = None,
+    linewidth: Annotated[float, typer.Option(help="Width of the bar edges")] = 0.0,
+):
+    """
+    Create a bar plot from data in standard input.
+
+    Args:
+        fields (str): The fields to read, separated by spaces.
+        labels (str): The labels to use for the data, separated by spaces.
+        delimiter (str): The delimiter to use to split the data.
+        alpha (float): The alpha value for the plot.
+        rotation (int): The rotation of the xtick labels in degrees.
+        save (str): The filename to save the plot to.
+        xmin (float): The minimum x value for the plot.
+        xmax (float): The maximum x value for the plot.
+        ymin (float): The minimum y value for the plot.
+        ymax (float): The maximum y value for the plot.
+        test (bool): If True, generate random data for testing.
+        test_npts (int): The number of points to generate for testing.
+        test_ndata (int): The number of datasets to generate for testing.
+        equal_aspect (bool): If True, set the aspect ratio of the plot to equal.
+        bar_width (float): Width of the bars.
+        color (str): Color of the bars.
+        edgecolor (str): Color of the bar edges.
+        linewidth (float): Width of the bar edges.
+    """
+    if test:
+        data = dict()
+        fields = ""
+        j = 0
+        data[j] = np.arange(test_npts)
+        fields += "x "
+        j += 1
+        for i in range(test_ndata):
+            data[j] = np.random.normal(size=test_npts, loc=i, scale=100) + np.arange(test_npts) + i*test_npts
+            fields += "y "
+            j += 1
+        datastr = ""
+    else:
+        data, datastr, fields = read_data(delimiter, fields, labels)
+
+    fields = fields.strip().split()  # type: ignore
+    labels_list = labels.strip().split()  # type: ignore
+    xfields = np.where(np.asarray(fields) == "x")[0]
+    yfields = np.where(np.asarray(fields) == "y")[0]
+    assert len(xfields) == len(yfields) or len(xfields) == 1, "x and y fields must be the same length or x must be a single field"
+    if len(xfields) < len(yfields) and len(xfields) == 1:
+        xfields = np.ones_like(yfields) * xfields[0]
+
+    plotid = 0
+    for xfield, yfield in track(zip(xfields, yfields), total=len(xfields), description="Plotting bar data..."):
+        x_current = np.float64(data[xfield])  # type: ignore
+        y_current = np.float64(data[yfield])  # type: ignore
+
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
+        
+        # Create bar plot
+        if color is not None:
+            plt.bar(x_current, y_current, width=bar_width, alpha=alpha, color=color, 
+                   edgecolor=edgecolor, linewidth=linewidth)
+        else:
+            plt.bar(x_current, y_current, width=bar_width, alpha=alpha, 
+                   edgecolor=edgecolor, linewidth=linewidth)
+        
+        # Set labels if provided
+        if len(labels_list) > 0 and plotid < len(labels_list):
+            plt.gca().get_legend_handles_labels()[1][0] = labels_list[plotid]
+        
+        set_xtick_labels(fields, data, rotation=rotation)
+        _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
+        plotid += 1
+
+    out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect, legend=False)
+
 if __name__ == "__main__":
     app()
