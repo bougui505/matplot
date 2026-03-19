@@ -1997,6 +1997,10 @@ def bar(
     color: Annotated[str, typer.Option(help="Color of the bars")] = None,
     edgecolor: Annotated[str, typer.Option(help="Color of the bar edges")] = None,
     linewidth: Annotated[float, typer.Option(help="Width of the bar edges")] = 0.0,
+    yline: Annotated[float | None, typer.Option(help="Plot a horizontal line at the given y value")] = None,
+    yline_color: Annotated[str, typer.Option(help="Color of the horizontal line")] = "red",
+    yline_linestyle: Annotated[str, typer.Option(help="Line style of the horizontal line")] = "--",
+    yline_linewidth: Annotated[float, typer.Option(help="Line width of the horizontal line")] = 1.0,
 ):
     """
     Create a bar plot from data in standard input.
@@ -2020,6 +2024,10 @@ def bar(
         color (str): Color of the bars.
         edgecolor (str): Color of the bar edges.
         linewidth (float): Width of the bar edges.
+        yline (float): Plot a horizontal line at the given y value.
+        yline_color (str): Color of the horizontal line.
+        yline_linestyle (str): Line style of the horizontal line.
+        yline_linewidth (float): Line width of the horizontal line.
     """
     if test:
         data = dict()
@@ -2066,6 +2074,10 @@ def bar(
         set_xtick_labels(fields, data, rotation=rotation)
         _apply_axis_tick_formats(plt.gca(), x_current, y_current) # Apply tick formats after plotting
         plotid += 1
+
+    # Plot horizontal line if specified
+    if yline is not None:
+        plt.axhline(y=yline, color=yline_color, linestyle=yline_linestyle, linewidth=yline_linewidth)
 
     out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect, legend=False, interactive_plot=False)
 
