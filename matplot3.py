@@ -1230,15 +1230,14 @@ def roc(
             closest_y = y[closest_idx]
             closest_threshold = thresholds[closest_idx]
             
-            # Highlight the closest point
-            plt.scatter(closest_x, closest_y, color='red', s=100, zorder=5, marker='o', edgecolors='black')
+            # Highlight the closest point with a different color and marker
+            plt.scatter(closest_x, closest_y, color='yellow', s=150, zorder=5, marker='*', edgecolors='black', linewidth=1)
             
-            # Add annotation with cutoff value
-            plt.annotate(f'Cutoff: {format_nbr(closest_threshold, precision=".2g")}', 
-                        (closest_x, closest_y),
-                        xytext=(10, 10), textcoords='offset points',
-                        bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7),
-                        fontsize=8)
+            # Add the cutoff value to the legend
+            if label:
+                # Update the label to include the cutoff information
+                label += f" (Cutoff: {format_nbr(closest_threshold, precision='.2g')})"
+                plt.gca().lines[-1].set_label(label)
         
         if SUBPLOTS[0]*SUBPLOTS[1] > 1:
             set_limits(xmin, xmax, ymin, ymax)
