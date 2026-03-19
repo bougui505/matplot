@@ -2002,6 +2002,7 @@ def bar(
     yline_color: Annotated[str, typer.Option(help="Color of the horizontal line")] = "red",
     yline_linestyle: Annotated[str, typer.Option(help="Line style of the horizontal line")] = "--",
     yline_linewidth: Annotated[float, typer.Option(help="Line width of the horizontal line")] = 1.0,
+    display_values: Annotated[bool, typer.Option(help="Display the actual data values on top of the bars")] = False,
 ):
     """
     Create a bar plot from data in standard input.
@@ -2029,6 +2030,7 @@ def bar(
         yline_color (str): Color of the horizontal line.
         yline_linestyle (str): Line style of the horizontal line.
         yline_linewidth (float): Line width of the horizontal line.
+        display_values (bool): If True, display the actual data values on top of the bars.
     """
     if test:
         data = dict()
@@ -2062,11 +2064,18 @@ def bar(
         
         # Create bar plot
         if color is not None:
-            plt.bar(x_current, y_current, width=bar_width, alpha=alpha, color=color, 
+            bars = plt.bar(x_current, y_current, width=bar_width, alpha=alpha, color=color, 
                    edgecolor=edgecolor, linewidth=linewidth)
         else:
-            plt.bar(x_current, y_current, width=bar_width, alpha=alpha, 
+            bars = plt.bar(x_current, y_current, width=bar_width, alpha=alpha, 
                    edgecolor=edgecolor, linewidth=linewidth)
+        
+        # Display values on top of bars if requested
+        if display_values:
+            for bar, value in zip(bars, y_current):
+                plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + (plt.ylim()[1] - plt.ylim()[0]) * 0.005,
+                         format_nbr(value, precision='.2g'),
+                         ha='center', va='bottom', fontsize=8)
         
         # Set labels if provided
         if len(labels_list) > 0 and plotid < len(labels_list):
