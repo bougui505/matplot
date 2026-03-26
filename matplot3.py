@@ -814,12 +814,12 @@ def scatter(
             subset_indices = np.random.choice(len(xy_data), size=kde_subset, replace=False)
             xy_subset = xy_data[subset_indices]
             # Fit KDE on subset
-            kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_subset) # Default bandwidth
+            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_subset) # Default bandwidth
             # Score all points using the model fitted on subset
             kde_c = np.exp(kde_model.score_samples(xy_data))
         else:
             # Fit KDE on all data
-            kde_model = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(xy_data) # Default bandwidth
+            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_data) # Default bandwidth
             # Score samples
             kde_c = np.exp(kde_model.score_samples(xy_data))
         if kde_normalize:
