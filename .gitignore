@@ -1,4 +1,5 @@
 *.pyc
+*.sif
 tags
 matplot.sif
 test.png

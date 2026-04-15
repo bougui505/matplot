@@ -1,0 +1,30 @@
+BOOTSTRAP: docker
+FROM: debian:13
+
+%files
+matplot3.py /usr/local/bin/plot3
+draggable_text.py /usr/local/lib/python3.9/dist-packages/
+ROC.py /usr/local/lib/python3.9/dist-packages/
+
+%post
+apt-get update
+apt-get install -y python3-tk
+apt-get install -y python3-pip
+pip3 install --break-system-packages scikit-learn
+pip3 install --break-system-packages scipy
+pip3 install --break-system-packages numexpr
+pip3 install --break-system-packages numpy
+pip3 install --break-system-packages pillow
+pip3 install --break-system-packages matplotlib
+pip3 install --break-system-packages typer
+pip3 install --break-system-packages rich
+chmod +x /usr/local/bin/plot3
+
+%runscript
+exec /usr/local/bin/plot3 "$@"
+
+%help
+This is an Apptainer container for matplot3.py.
+Use it by running:
+  ./matplot3.sif [options]
+The command is aliased to 'plot3'.
