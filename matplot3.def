@@ -3,8 +3,8 @@ FROM: debian:13
 
 %files
 matplot3.py /usr/local/bin/plot3
-draggable_text.py /usr/local/lib/python3.9/dist-packages/
-ROC.py /usr/local/lib/python3.9/dist-packages/
+draggable_text.py /opt/draggable_text.py
+ROC.py /opt/ROC.py
 
 %post
 apt-get update
@@ -19,6 +19,11 @@ pip3 install --break-system-packages matplotlib
 pip3 install --break-system-packages typer
 pip3 install --break-system-packages rich
 chmod +x /usr/local/bin/plot3
+
+# Dynamically find the site-packages or dist-packages directory
+PDIR=$(python3 -c "import site; print([p for p in site.getsitepackages() if 'dist-packages' in p][0])")
+mv /opt/draggable_text.py $PDIR/
+mv /opt/ROC.py $PDIR/
 
 %runscript
 exec /usr/local/bin/plot3 "$@"
