@@ -52,25 +52,25 @@ app = typer.Typer(
     no_args_is_help=True,
     # pretty_exceptions_show_locals=False,  # do not show local variable
     add_completion=False,
-    rich_markup_mode=None,
+    rich_markup_mode="rich",
 )
 
 @app.callback()
 def plot_setup(
-    xlabel: Annotated[str, typer.Option(help="Label for the x-axis")] = "x",
-    ylabel: Annotated[str, typer.Option(help="Label for the y-axis")] = "y",
-    semilog_x: Annotated[bool, typer.Option(help="Set x-axis to log scale")] = False,
-    semilog_y: Annotated[bool, typer.Option(help="Set y-axis to log scale")] = False,
-    grid: Annotated[bool, typer.Option(help="Add a grid to the plot")] = False,
-    aspect_ratio: Annotated[Optional[str], typer.Option(help="Set the figure size (e.g., '10 5' for 10x5 inches)")] = None,
-    subplots: Annotated[str, typer.Option(help="Define subplot grid (e.g., '2 2' for a 2x2 grid)")] = "1 1",
-    sharex: Annotated[bool, typer.Option(help="Share the x-axis across subplots")] = False,
-    sharey: Annotated[bool, typer.Option(help="Share the y-axis across subplots")] = False,
-    titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces. Quoted titles with spaces should be enclosed in double quotes. Example: --titles \"'Title 1' 'Title 2' 'Title with spaces'\"")] = "",
-    xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
-    ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')")] = None,
-    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels")] = None,
-    debug: Annotated[bool, typer.Option(help="Enable debug mode")] = False,
+    xlabel: Annotated[str, typer.Option(help="Label for the x-axis", rich_help_panel="Axis & Grid")] = "x",
+    ylabel: Annotated[str, typer.Option(help="Label for the y-axis", rich_help_panel="Axis & Grid")] = "y",
+    semilog_x: Annotated[bool, typer.Option(help="Set x-axis to log scale", rich_help_panel="Axis & Grid")] = False,
+    semilog_y: Annotated[bool, typer.Option(help="Set y-axis to log scale", rich_help_panel="Axis & Grid")] = False,
+    grid: Annotated[bool, typer.Option(help="Add a grid to the plot", rich_help_panel="Axis & Grid")] = False,
+    aspect_ratio: Annotated[Optional[str], typer.Option(help="Set the figure size (e.g., '10 5' for 10x5 inches)", rich_help_panel="Layout")] = None,
+    subplots: Annotated[str, typer.Option(help="Define subplot grid (e.g., '2 2' for a 2x2 grid)", rich_help_panel="Layout")] = "1 1",
+    sharex: Annotated[bool, typer.Option(help="Share the x-axis across subplots", rich_help_panel="Layout")] = False,
+    sharey: Annotated[bool, typer.Option(help="Share the y-axis across subplots", rich_help_panel="Layout")] = False,
+    titles: Annotated[str, typer.Option(help="Titles for each subplot, separated by spaces. Quoted titles with spaces should be enclosed in double quotes. Example: --titles \"'Title 1' 'Title 2' 'Title with spaces'\"", rich_help_panel="Layout")] = "",
+    xtick_format: Annotated[Optional[str], typer.Option(help="Format string for x-axis tick labels (e.g., '%.2f', '%d', '%.1e')", rich_help_panel="Tick Formatting")] = None,
+    ytick_format: Annotated[Optional[str], typer.Option(help="Format string for y-axis tick labels (e.g., '%.2f', '%d', '%.1e')", rich_help_panel="Tick Formatting")] = None,
+    xtick_fontsize: Annotated[int | None, typer.Option(help="The fontsize of the xtick labels", rich_help_panel="Tick Formatting")] = None,
+    debug: Annotated[bool, typer.Option(help="Enable debug mode", rich_help_panel="Debug")] = False,
 ):
     """
     A new dataset can be defined by separating the data by an empty line.
@@ -456,50 +456,50 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
         # Remove secondary ticks when yticklabels are text
         ax.yaxis.set_minor_locator(mticker.NullLocator())
 
-@app.command()
+@app.command(help="Plot data from standard input, and optionally an arbitrary function or an average curve.")
 def plot(
     # Data input options
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch), s: The standard deviation field")] = "x y",
-    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
-    moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]x[/cyan]: x-axis, [cyan]y[/cyan]: y-axis, [cyan]xt[/cyan]: x-tick labels, [cyan]ts[/cyan]: timestamp (seconds), [cyan]s[/cyan]: std dev.", rich_help_panel="Data Input")] = "x y",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field.", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    moving_avg: Annotated[int, typer.Option(help="Size of the moving average window", rich_help_panel="Data Input")] = 0,
     # Plot appearance options
-    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    plot_points: Annotated[bool, typer.Option(help="Plot the individual data points on the line")] = False,
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
-    # Output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
-    alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
-    legend: Annotated[bool, typer.Option(help="Display legend on the plot")] = True,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    fmt: Annotated[str, typer.Option(help="Format string for the plot (e.g., 'r--', 'bo')", rich_help_panel="Plot Appearance")] = "",
+    alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Plot Appearance")] = 1.0,
+    rotation: Annotated[int, typer.Option(help="Rotation of xtick labels in degrees", rich_help_panel="Plot Appearance")] = 45,
+    plot_points: Annotated[bool, typer.Option(help="Plot individual data points on the line", rich_help_panel="Plot Appearance")] = False,
+    size: Annotated[int, typer.Option(help="Size of markers in the plot", rich_help_panel="Plot Appearance")] = 10,
+    # Output and limits options
+    save: Annotated[str, typer.Option(help="Filename to save the plot to (e.g., 'plot.png')", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    shade: Annotated[str | None, typer.Option(help="Shade area under the curve (0 or 1 per y field, e.g., '0 1')", rich_help_panel="Plot Appearance")] = None,
+    alpha_shade: Annotated[float, typer.Option(help="Alpha value for the shaded area", rich_help_panel="Plot Appearance")] = 0.2,
+    legend: Annotated[bool, typer.Option(help="Display legend on the plot", rich_help_panel="Plot Appearance")] = True,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Plot Appearance")] = False,
     # Statistical analysis options
-    mark_minima: Annotated[bool, typer.Option(help="Mark the position of local minima with their x and y coordinates.")] = False,
-    mark_absolute_minima: Annotated[bool, typer.Option(help="Mark the position of the absolute minimum with its x and y coordinates.")] = False,
-    plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets.")] = False,
-    average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve (e.g., '--', ':', '-.').")] = '--',
-    plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets.")] = False,
-    median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve (e.g., '-', ':', '-.').")] = '-.',
-    plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets.")] = False,
-    gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve (e.g., '-', ':', '-.').")] = ':',
-    mark_average_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the average curve.")] = False,
-    mark_median_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the median curve.")] = False,
-    mark_gmean_minima: Annotated[bool, typer.Option(help="Mark the global minimum of the geometric mean curve.")] = False,
+    mark_minima: Annotated[bool, typer.Option(help="Mark local minima with coordinates", rich_help_panel="Statistical Analysis")] = False,
+    mark_absolute_minima: Annotated[bool, typer.Option(help="Mark absolute minimum with coordinates", rich_help_panel="Statistical Analysis")] = False,
+    plot_average: Annotated[bool, typer.Option(help="Plot the average curve of all 'y' datasets", rich_help_panel="Statistical Analysis")] = False,
+    average_linestyle: Annotated[str, typer.Option(help="Linestyle for the average curve", rich_help_panel="Statistical Analysis")] = '--',
+    plot_median: Annotated[bool, typer.Option(help="Plot the median curve of all 'y' datasets", rich_help_panel="Statistical Analysis")] = False,
+    median_linestyle: Annotated[str, typer.Option(help="Linestyle for the median curve", rich_help_panel="Statistical Analysis")] = '-.',
+    plot_gmean: Annotated[bool, typer.Option(help="Plot the geometric mean curve of all 'y' datasets", rich_help_panel="Statistical Analysis")] = False,
+    gmean_linestyle: Annotated[str, typer.Option(help="Linestyle for the geometric mean curve", rich_help_panel="Statistical Analysis")] = ':',
+    mark_average_minima: Annotated[bool, typer.Option(help="Mark global minimum of the average curve", rich_help_panel="Statistical Analysis")] = False,
+    mark_median_minima: Annotated[bool, typer.Option(help="Mark global minimum of the median curve", rich_help_panel="Statistical Analysis")] = False,
+    mark_gmean_minima: Annotated[bool, typer.Option(help="Mark global minimum of the geometric mean curve", rich_help_panel="Statistical Analysis")] = False,
     # Function plotting options
-    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1'). Use 'x' as the variable.")] = None,
-    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend.")] = None,
-    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function (e.g., '-', '--', '-.', ':').")] = '-',
-    func_color: Annotated[str, typer.Option(help="Color for the plotted function (e.g., 'red', 'blue', '#FF00FF').")] = 'r',
+    function: Annotated[Optional[str], typer.Option(help="Mathematical expression to plot (e.g., 'x**2 + 2*x + 1')", rich_help_panel="Function Plotting")] = None,
+    func_label: Annotated[Optional[str], typer.Option(help="Label for the plotted function in the legend", rich_help_panel="Function Plotting")] = None,
+    func_linestyle: Annotated[str, typer.Option(help="Linestyle for the plotted function", rich_help_panel="Function Plotting")] = '-',
+    func_color: Annotated[str, typer.Option(help="Color for the plotted function", rich_help_panel="Function Plotting")] = 'r',
     # Test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 2,
 ):
     """
     Plot data from standard input, and optionally an arbitrary function or an average curve.
@@ -709,36 +709,36 @@ def plot(
 
     out(save=save, datastr=datastr, labels=labels_list, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect, legend=legend)
 
-@app.command()
+@app.command(help="Create a scatter plot from data in standard input.")
 def scatter(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, ts: The x field is a timestamp (in seconds since epoch), t: The text field for point labels")] = "x y",
-    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
-    moving_avg: Annotated[int, typer.Option(help="The size of the moving average window")] = 0,
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    fmt: Annotated[str, typer.Option(help="The format string to use for the plot")] = "",
-    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]x[/cyan]: x-axis, [cyan]y[/cyan]: y-axis, [cyan]xt[/cyan]: x-tick labels, [cyan]ts[/cyan]: timestamp, [cyan]t[/cyan]: point labels", rich_help_panel="Data Input")] = "x y",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field.", rich_help_panel="Data Input")] = "",
+    moving_avg: Annotated[int, typer.Option(help="Size of the moving average window", rich_help_panel="Data Input")] = 0,
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    fmt: Annotated[str, typer.Option(help="Format string for the plot", rich_help_panel="Plot Appearance")] = "",
+    alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Plot Appearance")] = 1.0,
+    rotation: Annotated[int, typer.Option(help="Rotation of xtick labels in degrees", rich_help_panel="Plot Appearance")] = 45,
     # output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    shade: Annotated[str | None, typer.Option(help="Give 0 (no shade) or 1 (shade) to shade the area under the curve. Give 1 value per y field. e.g. if --fields x y y, shade can be 0 1 to only shade the area under the second y field")] = None,
-    alpha_shade: Annotated[float, typer.Option(help="The alpha value for the shaded area")] = 0.2,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    shade: Annotated[str | None, typer.Option(help="Shade area under the curve (0 or 1 per y field)", rich_help_panel="Plot Appearance")] = None,
+    alpha_shade: Annotated[float, typer.Option(help="Alpha value for the shaded area", rich_help_panel="Plot Appearance")] = 0.2,
     # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Plot Appearance")] = False,
     # New options for scatter plot
-    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
-    kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE (speeds up computation)")] = 1000,
-    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
-    pcr: Annotated[bool, typer.Option(help="Perform principal component regression")] = False,
-    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
+    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points", rich_help_panel="Scatter Features")] = False,
+    kde_subset: Annotated[int, typer.Option(help="Number of points to use for the KDE", rich_help_panel="Scatter Features")] = 1000,
+    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values", rich_help_panel="Scatter Features")] = False,
+    cmap: Annotated[str, typer.Option(help="Colormap to use for the plot", rich_help_panel="Plot Appearance")] = "viridis",
+    size: Annotated[int, typer.Option(help="Size of markers in the plot", rich_help_panel="Plot Appearance")] = 10,
+    pcr: Annotated[bool, typer.Option(help="Perform principal component regression", rich_help_panel="Statistical Analysis")] = False,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot", rich_help_panel="Plot Appearance")] = False,
 ):
     """
     Create a scatter plot from data in standard input.
@@ -897,25 +897,25 @@ def scatter(
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
 
-@app.command()
+@app.command(help="Create a histogram from data in standard input.")
 def hist(
-    fields: Annotated[str, typer.Option(help="The fields to read")] = "y",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    bins: Annotated[str, typer.Option(help="The number of bins to use for the histogram")] = "auto",
-    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    density: Annotated[bool, typer.Option(help="Normalize the histogram")] = False,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]y[/cyan]: data field to histogram", rich_help_panel="Data Input")] = "y",
+    labels: Annotated[str, typer.Option(help="Labels for each dataset", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    bins: Annotated[str, typer.Option(help="Number of bins or 'auto'", rich_help_panel="Histogram Styling")] = "auto",
+    alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Histogram Styling")] = 1.0,
+    density: Annotated[bool, typer.Option(help="Normalize the histogram to form a probability density", rich_help_panel="Histogram Styling")] = False,
     # output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = None,
     # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Output & Limits")] = False,
 ):
     """
     Create a histogram from data in standard input.
@@ -964,40 +964,40 @@ def hist(
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect)
 
-@app.command()
+@app.command(help="Create a jitter plot from data in standard input.")
 def jitter(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field, c: The color field, il: The interactive labels field")] = "x y",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    xjitter: Annotated[float, typer.Option(help="The amount of jitter to add to the x values")] = 0.1,
-    yjitter: Annotated[float, typer.Option(help="The amount of jitter to add to the y values")] = 0.0,
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
-    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points")] = False,
-    kde_subset: Annotated[int, typer.Option(help="The number of points to use for the KDE")] = 1000,
-    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values")] = False,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
-    median: Annotated[bool, typer.Option(help="Plot the median of the data")] = False,
-    median_size: Annotated[int, typer.Option(help="The size of the median markers in the plot")] = 100,
-    median_color: Annotated[str, typer.Option(help="The color of the median markers in the plot")] = "black",
-    median_marker: Annotated[str, typer.Option(help="The marker to use for the median markers in the plot")] = "_",
-    median_sort: Annotated[bool, typer.Option(help="Sort by median values")] = False,
-    quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box for each jitter group")] = False,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]x[/cyan]: x-axis, [cyan]y[/cyan]: y-axis, [cyan]xt[/cyan]: x-tick labels, [cyan]c[/cyan]: color field, [cyan]il[/cyan]: interactive labels", rich_help_panel="Data Input")] = "x y",
+    labels: Annotated[str, typer.Option(help="Labels for each dataset", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    xjitter: Annotated[float, typer.Option(help="Amount of jitter to add to the x values", rich_help_panel="Jitter Styling")] = 0.1,
+    yjitter: Annotated[float, typer.Option(help="Amount of jitter to add to the y values", rich_help_panel="Jitter Styling")] = 0.0,
+    size: Annotated[int, typer.Option(help="Size of markers in the plot", rich_help_panel="Plot Appearance")] = 10,
+    alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Plot Appearance")] = 1.0,
+    kde: Annotated[bool, typer.Option(help="Use kernel density estimation to color the points", rich_help_panel="Statistical Analysis")] = False,
+    kde_subset: Annotated[int, typer.Option(help="Number of points to use for the KDE", rich_help_panel="Statistical Analysis")] = 1000,
+    kde_normalize: Annotated[bool, typer.Option(help="Normalize the KDE values", rich_help_panel="Statistical Analysis")] = False,
+    cmap: Annotated[str, typer.Option(help="Colormap to use for the plot", rich_help_panel="Plot Appearance")] = "viridis",
+    median: Annotated[bool, typer.Option(help="Plot the median of the data", rich_help_panel="Statistical Analysis")] = False,
+    median_size: Annotated[int, typer.Option(help="Size of median markers", rich_help_panel="Statistical Analysis")] = 100,
+    median_color: Annotated[str, typer.Option(help="Color of median markers", rich_help_panel="Statistical Analysis")] = "black",
+    median_marker: Annotated[str, typer.Option(help="Marker for median values", rich_help_panel="Statistical Analysis")] = "_",
+    median_sort: Annotated[bool, typer.Option(help="Sort categories by median values", rich_help_panel="Statistical Analysis")] = False,
+    quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box", rich_help_panel="Statistical Analysis")] = False,
     # output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
-    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
-    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
-    cbar_label: Annotated[str | None, typer.Option(help="The label for the colorbar")] = None,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    rotation: Annotated[int, typer.Option(help="Rotation of xtick labels in degrees", rich_help_panel="Plot Appearance")] = 45,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot", rich_help_panel="Plot Appearance")] = False,
+    cbar_label: Annotated[str | None, typer.Option(help="Label for the colorbar", rich_help_panel="Plot Appearance")] = None,
     # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 3,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
-    pcr: Annotated[bool, typer.Option(help="Perform principal component regression")] = False,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 3,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Output & Limits")] = False,
+    pcr: Annotated[bool, typer.Option(help="Perform principal component regression", rich_help_panel="Statistical Analysis")] = False,
 ):
     """
     Create a jitter plot from data in standard input.
@@ -1148,20 +1148,20 @@ def plot_median(x, y, size=100, color="black", marker="_", median_sort: bool = F
     plt.scatter(xunique, ymedians, color=color, marker=marker, s=size, label="median", zorder=100)
     return x
 
-@app.command()
+@app.command(help="Create a ROC curve from data in standard input.")
 def roc(
-    fields: Annotated[str, typer.Option(help="y: The value (the lower the better by default), a: 1 for active, 0 for inactive")] = "y a",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float, typer.Option(help="The minimum x value for the plot")] = 0.0,
-    xmax: Annotated[float, typer.Option(help="The maximum x value for the plot")] = 1.0,
-    ymin: Annotated[float, typer.Option(help="The minimum y value for the plot")] = 0.0,
-    ymax: Annotated[float, typer.Option(help="The maximum y value for the plot")] = 1.0,
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    highlight_closest: Annotated[bool, typer.Option(help="Highlight the closest point to (0,1) and display its cutoff value")] = False,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]y[/cyan]: raw values, [cyan]a[/cyan]: active (1) or inactive (0)", rich_help_panel="Data Input")] = "y a",
+    labels: Annotated[str, typer.Option(help="Labels for each dataset", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = 0.0,
+    xmax: Annotated[float, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = 1.0,
+    ymin: Annotated[float, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = 0.0,
+    ymax: Annotated[float, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = 1.0,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 2,
+    highlight_closest: Annotated[bool, typer.Option(help="Highlight the point closest to (0,1) and show its cutoff", rich_help_panel="Statistical Analysis")] = False,
 ):
     """
     Create a ROC curve from data in standard input.
@@ -1254,29 +1254,29 @@ def roc(
         labels = []  # type: ignore
     out(save=save, datastr=datastr, labels=labels, colorbar=None, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=None, equal_aspect=True)
 
-@app.command()
+@app.command(help="Create a t-SNE plot from data in standard input.")
 def tsne(
-    perplexity: Annotated[float, typer.Option(help="The perplexity is related to the number of nearest neighbors that is used in other manifold learning algorithms. Larger datasets usually require a larger perplexity. Consider selecting a value between 5 and 50.")] = 30.0,
-    early_exaggeration: Annotated[float, typer.Option(help="Controls how tightly clusters in the original space are bunched together in the embedded space. Larger values increase the separation between clusters.")] = 12.0,
-    learning_rate: Annotated[float, typer.Option(help="The learning rate for t-SNE. Typically between 10.0 and 1000.0. If the learning rate is too high, the data will look like a 'ball' with any point approximately at the same distance from its nearest neighbours. If the learning rate is too low, most points will look compressed in a dense cloud with few outliers. Some suggestions are between 100 and 1000.")] = 200.0,
-    n_iter: Annotated[int, typer.Option(help="Maximum number of iterations for the optimization. Should be at least 250.")] = 1000,
-    metric: Annotated[str, typer.Option(help="The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)")] = "euclidean",
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    npy: Annotated[str, typer.Option(help="Load data from a numpy file")] = "",
-    npz: Annotated[str, typer.Option(help="Load data from a numpy file (compressed)")] = "",
-    data_key: Annotated[str, typer.Option(help="The key to use to load data from the npz file")] = "data",
-    labels_key: Annotated[str, typer.Option(help="The key to use to load labels from the npz file")] = "",
-    ilabels_key: Annotated[str, typer.Option(help="The key to use to load interactive labels from the npz file")] = "",
-    legend: Annotated[bool, typer.Option(help="Add a legend to the plot")] = True,
-    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
-    alpha: Annotated[float, typer.Option(help="The transparency of the markers in the plot")] = 1.0,
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    perplexity: Annotated[float, typer.Option(help="Perplexity relates to the number of nearest neighbors. Consider values between 5 and 50.", rich_help_panel="t-SNE Parameters")] = 30.0,
+    early_exaggeration: Annotated[float, typer.Option(help="Controls how tightly clusters are bunched together.", rich_help_panel="t-SNE Parameters")] = 12.0,
+    learning_rate: Annotated[float, typer.Option(help="Learning rate (usually between 10 and 1000).", rich_help_panel="t-SNE Parameters")] = 200.0,
+    n_iter: Annotated[int, typer.Option(help="Maximum number of iterations (at least 250).", rich_help_panel="t-SNE Parameters")] = 1000,
+    metric: Annotated[str, typer.Option(help="Distance metric (euclidean, cosine, etc.)", rich_help_panel="t-SNE Parameters")] = "euclidean",
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    npy: Annotated[str, typer.Option(help="Load data from a .npy file", rich_help_panel="Data Input")] = "",
+    npz: Annotated[str, typer.Option(help="Load data from a .npz file", rich_help_panel="Data Input")] = "",
+    data_key: Annotated[str, typer.Option(help="Key for data in .npz file", rich_help_panel="Data Input")] = "data",
+    labels_key: Annotated[str, typer.Option(help="Key for labels in .npz file", rich_help_panel="Data Input")] = "",
+    ilabels_key: Annotated[str, typer.Option(help="Key for interactive labels in .npz file", rich_help_panel="Data Input")] = "",
+    legend: Annotated[bool, typer.Option(help="Add a legend to the plot", rich_help_panel="Plot Appearance")] = True,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot", rich_help_panel="Plot Appearance")] = False,
+    cmap: Annotated[str, typer.Option(help="Colormap to use for the plot", rich_help_panel="Plot Appearance")] = "viridis",
+    size: Annotated[int, typer.Option(help="Size of markers in the plot", rich_help_panel="Plot Appearance")] = 10,
+    alpha: Annotated[float, typer.Option(help="Transparency of markers", rich_help_panel="Plot Appearance")] = 1.0,
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value", rich_help_panel="Output & Limits")] = None,
 ):
     """
     Create a t-SNE plot from data in standard input.
@@ -1366,27 +1366,27 @@ def tsne(
     _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
-@app.command()
+@app.command(help="Create a UMAP plot from data in standard input.")
 def umap(
-    n_neighbors: Annotated[int, typer.Option(help="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation")] = 15,
-    min_dist: Annotated[float, typer.Option(help="The effective minimum distance between embedded points")] = 0.1,
-    metric: Annotated[str, typer.Option(help="The metric to use to compute distance in high dimensional space (default: euclidean, precomputed, cosine, manhattan, hamming, etc.)")] = "euclidean",
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    npy: Annotated[str, typer.Option(help="Load data from a numpy file")] = "",
-    npz: Annotated[str, typer.Option(help="Load data from a numpy file (compressed)")] = "",
-    data_key: Annotated[str, typer.Option(help="The key to use to load data from the npz file")] = "data",
-    labels_key: Annotated[str, typer.Option(help="The key to use to load labels from the npz file")] = "",
-    ilabels_key: Annotated[str, typer.Option(help="The key to use to load interactive labels from the npz file")] = "",
-    legend: Annotated[bool, typer.Option(help="Add a legend to the plot")] = True,
-    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot")] = False,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the plot")] = "viridis",
-    size: Annotated[int, typer.Option(help="The size of the markers in the plot")] = 10,
-    alpha: Annotated[float, typer.Option(help="The transparency of the markers in the plot")] = 1.0,
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    n_neighbors: Annotated[int, typer.Option(help="Size of local neighborhood for manifold approximation.", rich_help_panel="UMAP Parameters")] = 15,
+    min_dist: Annotated[float, typer.Option(help="Effective minimum distance between embedded points.", rich_help_panel="UMAP Parameters")] = 0.1,
+    metric: Annotated[str, typer.Option(help="Distance metric (euclidean, cosine, etc.)", rich_help_panel="UMAP Parameters")] = "euclidean",
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    npy: Annotated[str, typer.Option(help="Load data from a .npy file", rich_help_panel="Data Input")] = "",
+    npz: Annotated[str, typer.Option(help="Load data from a .npz file", rich_help_panel="Data Input")] = "",
+    data_key: Annotated[str, typer.Option(help="Key for data in .npz file", rich_help_panel="Data Input")] = "data",
+    labels_key: Annotated[str, typer.Option(help="Key for labels in .npz file", rich_help_panel="Data Input")] = "",
+    ilabels_key: Annotated[str, typer.Option(help="Key for interactive labels in .npz file", rich_help_panel="Data Input")] = "",
+    legend: Annotated[bool, typer.Option(help="Add a legend to the plot", rich_help_panel="Plot Appearance")] = True,
+    colorbar: Annotated[bool, typer.Option(help="Add a colorbar to the plot", rich_help_panel="Plot Appearance")] = False,
+    cmap: Annotated[str, typer.Option(help="Colormap to use for the plot", rich_help_panel="Plot Appearance")] = "viridis",
+    size: Annotated[int, typer.Option(help="Size of markers in the plot", rich_help_panel="Plot Appearance")] = 10,
+    alpha: Annotated[float, typer.Option(help="Transparency of markers", rich_help_panel="Plot Appearance")] = 1.0,
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value", rich_help_panel="Output & Limits")] = None,
 ):
     """
     Create a UMAP plot from data in standard input.
@@ -1463,8 +1463,8 @@ def umap(
     _apply_axis_tick_formats(plt.gca(), embedding[:, 0], embedding[:, 1]) # Apply tick formats
     out(save=save, datastr="", labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, legend=legend)
 
-@app.command()
-def read_metadata(filename: Annotated[str, typer.Option(..., help="The filename to read the metadata from")]):
+@app.command(help="Read metadata from a PNG file.")
+def read_metadata(filename: Annotated[str, typer.Option(..., help="PNG filename to read metadata from", rich_help_panel="Data Input")]):
     """
     Read metadata from a PNG file.
 
@@ -1598,14 +1598,14 @@ def pca(X, outfilename=None):
                  eigenvectors=eigenvectors)
     return eigenvalues, eigenvectors, center, anglex
 
-@app.command()
+@app.command(help="Create a chord diagram from data in standard input.")
 def chord_diagram(
-    fields: Annotated[str, typer.Option(help="d: The data field (matrix values), r: The row labels field, c: The column labels field")] = "d r c",
-    labels: Annotated[str, typer.Option(help="The labels to use for the data")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-):
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]d[/cyan]: matrix values, [cyan]r[/cyan]: row labels, [cyan]c[/cyan]: column labels", rich_help_panel="Data Input")] = "d r c",
+    labels: Annotated[str, typer.Option(help="Labels for the data", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+ ):
     """
     Create a chord diagram from data in standard input.
 
@@ -1689,20 +1689,20 @@ def chord_diagram(
         fig = circos.plotfig()
         out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False)
 
-@app.command()
+@app.command(help="Create a Venn diagram from data in standard input or generated test data.")
 def venn_diagram(
-    fields: Annotated[str, typer.Option(help="d: The data field (set components), l: The set label field (Unique label for each set, maximum 6 labels, 6 sets)")] = "d l",
-    labels_fill: Annotated[str, typer.Option(help="Comma-separated options for filling labels: 'number', 'logic', 'percent', 'elements'. E.g., 'number,percent'")] = "number",
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_ndata: Annotated[int, typer.Option(help="The number of sets to generate for testing (2 to 6)")] = 3,
-    test_npts: Annotated[int, typer.Option(help="The number of points in each test set")] = 10,
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    colors: Annotated[str, typer.Option(help="Comma-separated list of colors (e.g., 'red,blue,green'). Uses default colors if not specified.")] = "",
-    figsize: Annotated[str, typer.Option(help="Figure size in inches (e.g., '9 7'). Uses default if not specified.")] = "",
-    dpi: Annotated[int, typer.Option(help="Resolution of the figure in dots per inch.")] = 96,
-    fontsize: Annotated[int, typer.Option(help="Font size for labels.")] = 14,
-    sortkey: Annotated[int, typer.Option(help="Key to sort elements in 'elements' fill option. Defaults to 0 for string slicing.")] = 0,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]d[/cyan]: set components, [cyan]l[/cyan]: set labels", rich_help_panel="Data Input")] = "d l",
+    labels_fill: Annotated[str, typer.Option(help="Comma-separated fill options: 'number', 'logic', 'percent', 'elements'", rich_help_panel="Venn Styling")] = "number",
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_ndata: Annotated[int, typer.Option(help="Number of sets to generate for testing (2 to 6)", rich_help_panel="Test Data")] = 3,
+    test_npts: Annotated[int, typer.Option(help="Number of points in each test set", rich_help_panel="Test Data")] = 10,
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    colors: Annotated[str, typer.Option(help="Comma-separated list of colors", rich_help_panel="Venn Styling")] = "",
+    figsize: Annotated[str, typer.Option(help="Figure size in inches (e.g., '9 7')", rich_help_panel="Venn Styling")] = "",
+    dpi: Annotated[int, typer.Option(help="Resolution of the figure in DPI", rich_help_panel="Venn Styling")] = 96,
+    fontsize: Annotated[int, typer.Option(help="Font size for labels", rich_help_panel="Venn Styling")] = 14,
+    sortkey: Annotated[int, typer.Option(help="Key to sort elements in 'elements' fill option", rich_help_panel="Venn Styling")] = 0,
 ):
     """
     Create a Venn diagram from data in standard input or generated test data.
@@ -1814,27 +1814,27 @@ def venn_diagram(
 
         out(save=save, datastr=datastr, labels=names_for_venn, colorbar=False, xmin=None, xmax=None, ymin=None, ymax=None, interactive_plot=False, legend=False)
 
-@app.command()
+@app.command(help="Create a heatmap from data in standard input.")
 def heatmap(
-    fields: Annotated[str, typer.Option(help="v: The value field, r: The row label field, c: The column label field")] = "v r c",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    cmap: Annotated[str, typer.Option(help="The colormap to use for the heatmap")] = "viridis",
-    cbar_label: Annotated[str | None, typer.Option(help="Label for the colorbar")] = None,
-    rotation: Annotated[int, typer.Option(help="Rotation for x-tick labels")] = 90,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]v[/cyan]: value, [cyan]r[/cyan]: row label, [cyan]c[/cyan]: column label", rich_help_panel="Data Input")] = "v r c",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    cmap: Annotated[str, typer.Option(help="Colormap to use for the heatmap", rich_help_panel="Heatmap Styling")] = "viridis",
+    cbar_label: Annotated[str | None, typer.Option(help="Label for the colorbar", rich_help_panel="Heatmap Styling")] = None,
+    rotation: Annotated[int, typer.Option(help="Rotation for x-tick labels", rich_help_panel="Heatmap Styling")] = 90,
     # output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot (will be ignored if not applicable for heatmap)")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot (will be ignored if not applicable for heatmap)")] = None,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value (ignored if not applicable)", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value (ignored if not applicable)", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value (ignored if not applicable)", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value (ignored if not applicable)", rich_help_panel="Output & Limits")] = None,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Heatmap Styling")] = False,
     # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_rows: Annotated[int, typer.Option(help="Number of rows for test data")] = 5,
-    test_cols: Annotated[int, typer.Option(help="Number of columns for test data")] = 7,
-    matrix_order: Annotated[bool, typer.Option(help="If True, plot the heatmap in matrix order (rows and columns instead of x,y)")] = False,
-    fontsize: Annotated[int, typer.Option(help="Font size for tick labels")] = 10,
-    display_values: Annotated[bool, typer.Option(help="If True, display the values on the heatmap cells")] = False,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_rows: Annotated[int, typer.Option(help="Number of rows for test data", rich_help_panel="Test Data")] = 5,
+    test_cols: Annotated[int, typer.Option(help="Number of columns for test data", rich_help_panel="Test Data")] = 7,
+    matrix_order: Annotated[bool, typer.Option(help="Plot in matrix order (rows and columns instead of x,y)", rich_help_panel="Heatmap Styling")] = False,
+    fontsize: Annotated[int, typer.Option(help="Font size for tick labels", rich_help_panel="Heatmap Styling")] = 10,
+    display_values: Annotated[bool, typer.Option(help="Display values on the heatmap cells", rich_help_panel="Heatmap Styling")] = False,
 ):
     """
     Create a heatmap from data in standard input.
@@ -1975,34 +1975,34 @@ def heatmap(
     plt.ylabel("")  # Remove y label
     out(save=save, datastr=datastr, labels=[], colorbar=True, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, cbar_label=cbar_label, interactive_plot=False, equal_aspect=equal_aspect)
 
-@app.command()
+@app.command(help="Create a bar plot from data in standard input.")
 def bar(
-    fields: Annotated[str, typer.Option(help="x: The x field, y: The y field, xt: The xtick labels field")] = "x y",
-    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field. E.g., if --fields 'x y y' then labels 'Series1 Series2'")] = "",
-    delimiter: Annotated[str | None, typer.Option(help="The delimiter to use to split the data")] = None,
-    alpha: Annotated[float, typer.Option(help="The alpha value for the plot")] = 1.0,
-    rotation: Annotated[int, typer.Option(help="The rotation of the xtick labels in degrees")] = 45,
+    fields: Annotated[str, typer.Option(help="[bold]Fields to read[/bold]: [cyan]x[/cyan]: x-axis, [cyan]y[/cyan]: y-axis, [cyan]xt[/cyan]: x-tick labels", rich_help_panel="Data Input")] = "x y",
+    labels: Annotated[str, typer.Option(help="Space-separated labels for each 'y' field", rich_help_panel="Data Input")] = "",
+    delimiter: Annotated[str | None, typer.Option(help="Delimiter used to split the data", rich_help_panel="Data Input")] = None,
+    alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Bar Styling")] = 1.0,
+    rotation: Annotated[int, typer.Option(help="Rotation of xtick labels in degrees", rich_help_panel="Bar Styling")] = 45,
     # output options
-    save: Annotated[str, typer.Option(help="The filename to save the plot to")] = "",
-    xmin: Annotated[float | None, typer.Option(help="The minimum x value for the plot")] = None,
-    xmax: Annotated[float | None, typer.Option(help="The maximum x value for the plot")] = None,
-    ymin: Annotated[float | None, typer.Option(help="The minimum y value for the plot")] = None,
-    ymax: Annotated[float | None, typer.Option(help="The maximum y value for the plot")] = None,
+    save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
+    xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y value for the plot", rich_help_panel="Output & Limits")] = None,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y value for the plot", rich_help_panel="Output & Limits")] = None,
     # test options
-    test: Annotated[bool, typer.Option(help="Generate random data for testing")] = False,
-    test_npts: Annotated[int, typer.Option(help="The number of points to generate for testing")] = 1000,
-    test_ndata: Annotated[int, typer.Option(help="The number of datasets to generate for testing")] = 2,
-    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal")] = False,
+    test: Annotated[bool, typer.Option(help="Generate random data for testing", rich_help_panel="Test Data")] = False,
+    test_npts: Annotated[int, typer.Option(help="Number of points to generate for testing", rich_help_panel="Test Data")] = 1000,
+    test_ndata: Annotated[int, typer.Option(help="Number of datasets to generate for testing", rich_help_panel="Test Data")] = 2,
+    equal_aspect: Annotated[bool, typer.Option(help="Set the aspect ratio of the plot to equal", rich_help_panel="Bar Styling")] = False,
     # Bar plot specific options
-    bar_width: Annotated[float, typer.Option(help="Width of the bars")] = 0.8,
-    color: Annotated[str, typer.Option(help="Color of the bars")] = None,
-    edgecolor: Annotated[str, typer.Option(help="Color of the bar edges")] = None,
-    linewidth: Annotated[float, typer.Option(help="Width of the bar edges")] = 0.0,
-    yline: Annotated[float | None, typer.Option(help="Plot a horizontal line at the given y value")] = None,
-    yline_color: Annotated[str, typer.Option(help="Color of the horizontal line")] = "red",
-    yline_linestyle: Annotated[str, typer.Option(help="Line style of the horizontal line")] = "--",
-    yline_linewidth: Annotated[float, typer.Option(help="Line width of the horizontal line")] = 1.0,
-    display_values: Annotated[bool, typer.Option(help="Display the actual data values on top of the bars")] = False,
+    bar_width: Annotated[float, typer.Option(help="Width of the bars", rich_help_panel="Bar Styling")] = 0.8,
+    color: Annotated[str, typer.Option(help="Color of the bars", rich_help_panel="Bar Styling")] = None,
+    edgecolor: Annotated[str, typer.Option(help="Color of the bar edges", rich_help_panel="Bar Styling")] = None,
+    linewidth: Annotated[float, typer.Option(help="Width of the bar edges", rich_help_panel="Bar Styling")] = 0.0,
+    yline: Annotated[float | None, typer.Option(help="Plot a horizontal line at the given y value", rich_help_panel="Bar Styling")] = None,
+    yline_color: Annotated[str, typer.Option(help="Color of the horizontal line", rich_help_panel="Bar Styling")] = "red",
+    yline_linestyle: Annotated[str, typer.Option(help="Line style of the horizontal line", rich_help_panel="Bar Styling")] = "--",
+    yline_linewidth: Annotated[float, typer.Option(help="Line width of the horizontal line", rich_help_panel="Bar Styling")] = 1.0,
+    display_values: Annotated[bool, typer.Option(help="Display the actual data values on top of the bars", rich_help_panel="Bar Styling")] = False,
 ):
     """
     Create a bar plot from data in standard input.
