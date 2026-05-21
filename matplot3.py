@@ -983,6 +983,7 @@ def jitter(
     median_marker: Annotated[str, typer.Option(help="Marker for median values", rich_help_panel="Statistical Analysis")] = "_",
     median_sort: Annotated[bool, typer.Option(help="Sort categories by median values", rich_help_panel="Statistical Analysis")] = False,
     quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box", rich_help_panel="Statistical Analysis")] = False,
+    highlight_median: Annotated[str, typer.Option(help="Highlight the boxplot with the highest or lowest median ('highest' or 'lowest')", rich_help_panel="Statistical Analysis")] = "",
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -1019,6 +1020,8 @@ def jitter(
         median_color (str): The color of the median markers in the plot.
         median_marker (str): The marker to use for the median markers in the plot.
         median_sort (bool): If True, sort by median values.
+        quartiles (bool): If True, plot first quartile, median, and third quartile as a box.
+        highlight_median (str): Highlight the boxplot with the highest or lowest median ('highest' or 'lowest').
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
@@ -1053,6 +1056,8 @@ def jitter(
         data, datastr, fields = read_data(delimiter, fields, labels)
     fields = fields.strip().split()  # type: ignore
     labels = labels.strip().split()  # type: ignore
+    if highlight_median:
+        quartiles = True
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
     cfields = np.where(np.asarray(fields) == "c")[0]
@@ -1073,18 +1078,56 @@ def jitter(
         if quartiles:
             # Calculate quartiles for each x group
             x_unique = np.unique(x)
+            
+            # Compute medians for all categories to identify highlight target
+            medians = {}
+            for x_val in x_unique:
+                y_vals = y[x == x_val]
+                if len(y_vals) > 0:
+                    medians[x_val] = np.median(y_vals)
+            
+            target_x_val = None
+            if len(medians) > 0 and highlight_median:
+                hl_med_lower = highlight_median.lower()
+                if hl_med_lower == "highest":
+                    target_x_val = max(medians, key=medians.get)
+                elif hl_med_lower == "lowest":
+                    target_x_val = min(medians, key=medians.get)
+            
             for x_val in x_unique:
                 y_vals = y[x == x_val]
                 if len(y_vals) > 0:
                     q1 = np.percentile(y_vals, 25)
                     med = np.median(y_vals)
                     q3 = np.percentile(y_vals, 75)
+                    
+                    is_highlighted = (target_x_val is not None and x_val == target_x_val)
+                    
                     # Plot quartile box
-                    plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
-                                boxprops=dict(facecolor='lightblue', alpha=0.5),
-                                medianprops=dict(color='red', linewidth=2),
-                                whiskerprops=dict(color='black'),
-                                capprops=dict(color='black'), sym="")
+                    if is_highlighted:
+                        plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
+                                    boxprops=dict(facecolor='#ffd700', alpha=0.8, edgecolor='#b8860b', linewidth=2),
+                                    medianprops=dict(color='#d62728', linewidth=3),
+                                    whiskerprops=dict(color='black', linewidth=1.5),
+                                    capprops=dict(color='black', linewidth=1.5), sym="")
+                        
+                        # Display the median value on the plot
+                        y_range = np.max(y) - np.min(y)
+                        offset = y_range * 0.02 if y_range > 0 else 0.1
+                        med_text = format_nbr(med, precision='.2g')
+                        plt.text(x_val, np.max(y_vals) + offset, f"Median: {med_text}", 
+                                 ha='center', va='bottom', fontweight='bold', color='black',
+                                 zorder=10,
+                                 bbox=dict(facecolor='white', alpha=0.8, edgecolor='#b8860b', boxstyle='round,pad=0.2', linewidth=1))
+                        
+                        # Print the highlighted median value to stdout
+                        print(f"Highlighted {highlight_median} median (x={x_val}): {med}")
+                    else:
+                        plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
+                                    boxprops=dict(facecolor='lightblue', alpha=0.5),
+                                    medianprops=dict(color='red', linewidth=2),
+                                    whiskerprops=dict(color='black'),
+                                    capprops=dict(color='black'), sym="")
         set_xtick_labels(fields, data, rotation=rotation)
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
