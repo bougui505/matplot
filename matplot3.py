@@ -1113,29 +1113,42 @@ def jitter(
     for sub_id, x_map in subplot_y_values.items():
         medians = {x_val: np.median(y_list) for x_val, y_list in x_map.items()}
         targets = set()
+        explicit_targets = set()
         if len(medians) > 0 and highlight_median:
-            for target_token in highlight_median.strip().split():
+            tokens = highlight_median.strip().split()
+            # First pass: identify explicit targets
+            for target_token in tokens:
                 token_lower = target_token.lower()
-                if token_lower == "highest":
-                    target_x_val = max(medians, key=medians.get)
-                    targets.add(target_x_val)
-                elif token_lower == "lowest":
-                    target_x_val = min(medians, key=medians.get)
-                    targets.add(target_x_val)
-                else:
+                if token_lower not in ("highest", "lowest"):
                     # Match numeric values
                     try:
                         target_val = float(target_token)
                         for x_val in medians.keys():
                             if np.isclose(x_val, target_val):
-                                targets.add(x_val)
+                                explicit_targets.add(x_val)
                     except ValueError:
                         pass
                     
                     # Match tick labels
                     for x_val, label in subplot_x_to_label.get(sub_id, {}).items():
                         if label.lower() == token_lower:
-                            targets.add(x_val)
+                            explicit_targets.add(x_val)
+            
+            # Add explicit targets to final targets
+            targets.update(explicit_targets)
+            
+            # Second pass: handle keywords with exclusion of explicit targets
+            for target_token in tokens:
+                token_lower = target_token.lower()
+                if token_lower in ("highest", "lowest"):
+                    remaining_medians = {k: v for k, v in medians.items() if k not in explicit_targets}
+                    if len(remaining_medians) > 0:
+                        if token_lower == "highest":
+                            target_x_val = max(remaining_medians, key=remaining_medians.get)
+                            targets.add(target_x_val)
+                        elif token_lower == "lowest":
+                            target_x_val = min(remaining_medians, key=remaining_medians.get)
+                            targets.add(target_x_val)
         subplot_target_x_vals[sub_id] = targets
 
     kde_y = None
