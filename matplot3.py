@@ -1003,7 +1003,7 @@ def jitter(
     median_marker: Annotated[str, typer.Option(help="Marker for median values", rich_help_panel="Statistical Analysis")] = "_",
     median_sort: Annotated[bool, typer.Option(help="Sort categories by median values", rich_help_panel="Statistical Analysis")] = False,
     quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box", rich_help_panel="Statistical Analysis")] = False,
-    highlight_median: Annotated[str, typer.Option(help="Highlight the boxplot with the highest or lowest median ('highest' or 'lowest')", rich_help_panel="Statistical Analysis")] = "",
+    highlight_median: Annotated[str, typer.Option(help="Highlight the boxplot with the highest, lowest, or specific x-axis values (e.g. '0 3 highest')", rich_help_panel="Statistical Analysis")] = "",
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -1041,7 +1041,7 @@ def jitter(
         median_marker (str): The marker to use for the median markers in the plot.
         median_sort (bool): If True, sort by median values.
         quartiles (bool): If True, plot first quartile, median, and third quartile as a box.
-        highlight_median (str): Highlight the boxplot with the highest or lowest median ('highest' or 'lowest').
+        highlight_median (str): Highlight the boxplots with specific x-axis values or extreme medians (e.g. 'highest', 'lowest', or numeric values like '0 3 highest').
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
@@ -1081,10 +1081,68 @@ def jitter(
     xfields = np.where(np.asarray(fields) == "x")[0]
     yfields = np.where(np.asarray(fields) == "y")[0]
     cfields = np.where(np.asarray(fields) == "c")[0]
+
+    # Pre-pass: Compute medians for each subplot to identify highlight targets
+    subplot_y_values = {}
+    subplot_x_to_label = {}
+    
+    temp_plotid = 0
+    for xfield, yfield in zip(xfields, yfields):
+        sub_id = min(temp_plotid + 1, SUBPLOTS[0] * SUBPLOTS[1])
+        if sub_id not in subplot_y_values:
+            subplot_y_values[sub_id] = {}
+            subplot_x_to_label[sub_id] = {}
+            
+        x_data = np.float64(data[xfield])
+        y_data = np.float64(data[yfield])
+        
+        if 'xt' in fields:
+            xtickslabels = data[fields.index('xt')]
+            for xv, label in zip(x_data, xtickslabels):
+                subplot_x_to_label[sub_id][xv] = str(label).strip()
+                
+        for x_val in np.unique(x_data):
+            y_vals = y_data[x_data == x_val]
+            if len(y_vals) > 0:
+                if x_val not in subplot_y_values[sub_id]:
+                    subplot_y_values[sub_id][x_val] = []
+                subplot_y_values[sub_id][x_val].extend(y_vals)
+        temp_plotid += 1
+
+    subplot_target_x_vals = {}
+    for sub_id, x_map in subplot_y_values.items():
+        medians = {x_val: np.median(y_list) for x_val, y_list in x_map.items()}
+        targets = set()
+        if len(medians) > 0 and highlight_median:
+            for target_token in highlight_median.strip().split():
+                token_lower = target_token.lower()
+                if token_lower == "highest":
+                    target_x_val = max(medians, key=medians.get)
+                    targets.add(target_x_val)
+                elif token_lower == "lowest":
+                    target_x_val = min(medians, key=medians.get)
+                    targets.add(target_x_val)
+                else:
+                    # Match numeric values
+                    try:
+                        target_val = float(target_token)
+                        for x_val in medians.keys():
+                            if np.isclose(x_val, target_val):
+                                targets.add(x_val)
+                    except ValueError:
+                        pass
+                    
+                    # Match tick labels
+                    for x_val, label in subplot_x_to_label.get(sub_id, {}).items():
+                        if label.lower() == token_lower:
+                            targets.add(x_val)
+        subplot_target_x_vals[sub_id] = targets
+
     kde_y = None
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
-        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], min(plotid+1, SUBPLOTS[0]*SUBPLOTS[1]))
+        sub_id = min(plotid + 1, SUBPLOTS[0] * SUBPLOTS[1])
+        plt.subplot(SUBPLOTS[0], SUBPLOTS[1], sub_id)
         x = np.float64(data[xfield])  # type: ignore
         y = np.float64(data[yfield])  # type: ignore
         c = np.float64(data[cfields[0]]) if len(cfields) > 0 else None  # type: ignore
@@ -1098,21 +1156,7 @@ def jitter(
         if quartiles:
             # Calculate quartiles for each x group
             x_unique = np.unique(x)
-            
-            # Compute medians for all categories to identify highlight target
-            medians = {}
-            for x_val in x_unique:
-                y_vals = y[x == x_val]
-                if len(y_vals) > 0:
-                    medians[x_val] = np.median(y_vals)
-            
-            target_x_val = None
-            if len(medians) > 0 and highlight_median:
-                hl_med_lower = highlight_median.lower()
-                if hl_med_lower == "highest":
-                    target_x_val = max(medians, key=medians.get)
-                elif hl_med_lower == "lowest":
-                    target_x_val = min(medians, key=medians.get)
+            target_x_vals = subplot_target_x_vals.get(sub_id, set())
             
             for x_val in x_unique:
                 y_vals = y[x == x_val]
@@ -1121,7 +1165,7 @@ def jitter(
                     med = np.median(y_vals)
                     q3 = np.percentile(y_vals, 75)
                     
-                    is_highlighted = (target_x_val is not None and x_val == target_x_val)
+                    is_highlighted = (x_val in target_x_vals)
                     
                     # Plot quartile box
                     if is_highlighted:
