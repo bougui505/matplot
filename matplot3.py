@@ -905,6 +905,8 @@ def hist(
     bins: Annotated[str, typer.Option(help="Number of bins or 'auto'", rich_help_panel="Histogram Styling")] = "auto",
     alpha: Annotated[float, typer.Option(help="Alpha (transparency) value for the plot", rich_help_panel="Histogram Styling")] = 1.0,
     density: Annotated[bool, typer.Option(help="Normalize the histogram to form a probability density", rich_help_panel="Histogram Styling")] = False,
+    kde: Annotated[bool, typer.Option(help="Plot a kernel density estimate instead of the histogram", rich_help_panel="Histogram Styling")] = False,
+    kde_bandwidth: Annotated[str, typer.Option(help="Bandwidth for KDE ('scott', 'silverman' or float)", rich_help_panel="Histogram Styling")] = "scott",
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -927,6 +929,8 @@ def hist(
         bins (str): The number of bins to use for the histogram.
         alpha (float): The alpha value for the plot.
         density (bool): If True, normalize the histogram.
+        kde (bool): If True, plot a kernel density estimate instead of the histogram.
+        kde_bandwidth (str): The bandwidth for KDE.
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
@@ -960,7 +964,23 @@ def hist(
             label = labels[plotid]
         else:
             label = None
-        plt.hist(y, toint(bins), label=label, alpha=alpha, density=density)
+        if kde:
+            if len(y) > 0:
+                ymin_val, ymax_val = np.min(y), np.max(y)
+                yrange = ymax_val - ymin_val
+                if yrange == 0:
+                    yrange = 1.0
+                x_plot = np.linspace(ymin_val - 0.2 * yrange, ymax_val + 0.2 * yrange, 1000)
+                try:
+                    bw = float(kde_bandwidth)
+                except ValueError:
+                    bw = kde_bandwidth
+                kde_model = KernelDensity(kernel='gaussian', bandwidth=bw).fit(y[:, None])
+                density_vals = np.exp(kde_model.score_samples(x_plot[:, None]))
+                line, = plt.plot(x_plot, density_vals, label=label, alpha=alpha)
+                plt.fill_between(x_plot, density_vals, alpha=alpha * 0.3, color=line.get_color())
+        else:
+            plt.hist(y, toint(bins), label=label, alpha=alpha, density=density)
         plotid += 1
     out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect)
 
