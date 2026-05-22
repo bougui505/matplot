@@ -124,8 +124,12 @@ def plot_setup(
             plt.ylabel(ylabel)
         if semilog_x:
             plt.semilogx()
+            plt.gca().xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs='all'))
+            plt.gca().xaxis.set_major_formatter(mticker.LogFormatterSciNotation(minor_thresholds=(2.0, 0.8)))
         if semilog_y:
             plt.semilogy()
+            plt.gca().yaxis.set_major_locator(mticker.LogLocator(base=10.0, subs='all'))
+            plt.gca().yaxis.set_major_formatter(mticker.LogFormatterSciNotation(minor_thresholds=(2.0, 0.8)))
         if grid:
             plt.grid()
         if titles != "":
@@ -432,11 +436,11 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
 
     if not is_x_categorical:
         effective_xtick_format = XTICK_FORMAT
-        if effective_xtick_format is None and np.all(x_data == np.round(x_data)):
+        if effective_xtick_format is None and ax.xaxis.get_scale() != 'log' and np.all(x_data == np.round(x_data)):
             effective_xtick_format = "%d"
 
         if effective_xtick_format:
-            if effective_xtick_format == "%d":
+            if effective_xtick_format == "%d" and ax.xaxis.get_scale() != 'log':
                 ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.xaxis.set_major_formatter(mticker.FormatStrFormatter(effective_xtick_format))
     else:
@@ -445,11 +449,11 @@ def _apply_axis_tick_formats(ax, x_data, y_data):
 
     if not is_y_categorical:
         effective_ytick_format = YTICK_FORMAT
-        if effective_ytick_format is None and np.all(y_data == np.round(y_data)):
+        if effective_ytick_format is None and ax.yaxis.get_scale() != 'log' and np.all(y_data == np.round(y_data)):
             effective_ytick_format = "%d"
 
         if effective_ytick_format:
-            if effective_ytick_format == "%d":
+            if effective_ytick_format == "%d" and ax.yaxis.get_scale() != 'log':
                 ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter(effective_ytick_format))
     else:
