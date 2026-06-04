@@ -284,10 +284,10 @@ def set_xtick_labels(fields, data, rotation=45, fontsize=None):
         xval, unique_indices = np.unique(xval, return_index=True)
         xtickslabels = np.array(xtickslabels)[unique_indices]
         plt.xticks(xval, xtickslabels.astype(str).tolist())
-        # rotate the labels
+        ha = "right" if rotation != 0 else "center"
         plt.setp(plt.gca().get_xticklabels(),
                  rotation=rotation,
-                 ha="right",
+                 ha=ha,
                  rotation_mode="anchor")
         # Use global fontsize if not specified locally
         if fontsize is None:
@@ -2054,13 +2054,14 @@ def heatmap(
             print("The matrix is SYMMETRIC")
         else:
             print("The matrix is NOT symmetric")
+    ha = 'right' if rotation != 0 else 'center'
     if matrix_order:
         im = plt.imshow(heatmap_matrix, cmap=cmap, origin='upper', aspect='auto')
-        plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
+        plt.xticks(np.arange(ncols), unique_col_labels, rotation=rotation, ha=ha, rotation_mode='anchor', fontsize=fontsize)
         plt.yticks(np.arange(nrows), unique_row_labels, fontsize=fontsize)
     else:
         im = plt.imshow(heatmap_matrix.T, cmap=cmap, origin='lower', aspect='auto')
-        plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha='right', rotation_mode='anchor', fontsize=fontsize)
+        plt.xticks(np.arange(nrows), unique_row_labels, rotation=rotation, ha=ha, rotation_mode='anchor', fontsize=fontsize)
         plt.yticks(np.arange(ncols), unique_col_labels, fontsize=fontsize)
 
     if display_values:
