@@ -215,6 +215,7 @@ def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect: bool = 
         ymax (float): The maximum y value.
         equal_aspect (bool): If True, set the aspect ratio of the plot to equal.
     """
+    print(f"set_limits called with ymin={ymin}, ymax={ymax}")
     limits = plt.axis()
     if xmin is None:
         xmin = limits[0]
@@ -227,6 +228,8 @@ def set_limits(xmin=None, xmax=None, ymin=None, ymax=None, equal_aspect: bool = 
     if ymax is None:
         ymax = limits[-1]
     ax.set_ylim(bottom=float(ymin), top=float(ymax))
+    for idx, axis in enumerate(plt.gcf().axes):
+        print(f"Subplot {idx+1} ylim: {axis.get_ylim()}")
     if equal_aspect:
         ax.set_aspect('equal')
 
