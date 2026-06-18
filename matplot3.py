@@ -914,7 +914,7 @@ def hist(
     density: Annotated[bool, typer.Option(help="Normalize the histogram to form a probability density", rich_help_panel="Histogram Styling")] = False,
     kde: Annotated[bool, typer.Option(help="Plot a kernel density estimate instead of the histogram", rich_help_panel="Histogram Styling")] = False,
     kde_bandwidth: Annotated[str, typer.Option(help="Bandwidth for KDE ('scott', 'silverman' or float)", rich_help_panel="Histogram Styling")] = "scott",
-    cumulative: Annotated[bool, typer.Option(help="Plot a cumulative histogram as a red curve on a secondary y-axis", rich_help_panel="Histogram Styling")] = False,
+    cumulative: Annotated[bool, typer.Option(help="Plot a cumulative histogram as a curve on a secondary y-axis", rich_help_panel="Histogram Styling")] = False,
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -939,6 +939,7 @@ def hist(
         density (bool): If True, normalize the histogram.
         kde (bool): If True, plot a kernel density estimate instead of the histogram.
         kde_bandwidth (str): The bandwidth for KDE.
+        cumulative (bool): If True, plot a cumulative histogram as a curve on a secondary y-axis.
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
