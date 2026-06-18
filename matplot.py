@@ -432,6 +432,13 @@ histogram_options.add_option(
     help="Cumulative histogram",
 )
 histogram_options.add_option(
+    "--cumulative-reverse",
+    action="store_true",
+    dest="cumulative_reverse",
+    default=False,
+    help="Cumulative histogram from right to left",
+)
+histogram_options.add_option(
     "--cb",
     dest="centerbins",
     action="store_true",
@@ -1437,7 +1444,7 @@ def do_plot(
                 histtype=options.histtype,
                 density=options.normed,
                 label=labels,
-                cumulative=options.cumulative,
+                cumulative=-1 if options.cumulative_reverse else options.cumulative,
                 alpha=options.alpha,
                 edgecolor="black",
                 weights=weights,

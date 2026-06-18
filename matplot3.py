@@ -915,6 +915,7 @@ def hist(
     kde: Annotated[bool, typer.Option(help="Plot a kernel density estimate instead of the histogram", rich_help_panel="Histogram Styling")] = False,
     kde_bandwidth: Annotated[str, typer.Option(help="Bandwidth for KDE ('scott', 'silverman' or float)", rich_help_panel="Histogram Styling")] = "scott",
     cumulative: Annotated[bool, typer.Option(help="Plot a cumulative histogram as a curve on a secondary y-axis", rich_help_panel="Histogram Styling")] = False,
+    cumulative_reverse: Annotated[bool, typer.Option(help="Plot the cumulative histogram from right to left", rich_help_panel="Histogram Styling")] = False,
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -940,6 +941,7 @@ def hist(
         kde (bool): If True, plot a kernel density estimate instead of the histogram.
         kde_bandwidth (str): The bandwidth for KDE.
         cumulative (bool): If True, plot a cumulative histogram as a curve on a secondary y-axis.
+        cumulative_reverse (bool): If True, plot the cumulative histogram from right to left.
         save (str): The filename to save the plot to.
         xmin (float): The minimum x value for the plot.
         xmax (float): The maximum x value for the plot.
@@ -949,6 +951,9 @@ def hist(
         test_npts (int): The number of points to generate for testing.
         test_ndata (int): The number of datasets to generate for testing.
     """
+    if cumulative_reverse:
+        cumulative = True
+
     if test:
         data = dict()
         fields = ""
@@ -1001,9 +1006,13 @@ def hist(
             n, bins_edges, patches = ax.hist(y, toint(bins), label=label, alpha=alpha, density=density)
             if cumulative:
                 if density:
-                    y_curve = np.concatenate(([0], np.cumsum(n * np.diff(bins_edges))))
+                    steps = n * np.diff(bins_edges)
                 else:
-                    y_curve = np.concatenate(([0], np.cumsum(n)))
+                    steps = n
+                if cumulative_reverse:
+                    y_curve = np.concatenate((np.cumsum(steps[::-1])[::-1], [0]))
+                else:
+                    y_curve = np.concatenate(([0], np.cumsum(steps)))
                 color = 'red'
                 if len(patches) > 0:
                     try:
@@ -1011,8 +1020,10 @@ def hist(
                     except (AttributeError, TypeError, IndexError):
                         pass
                 import matplotlib.patheffects as path_effects
+                label_suffix = " (reverse cumulative)" if cumulative_reverse else " (cumulative)"
+                label_default = "reverse cumulative" if cumulative_reverse else "cumulative"
                 ax2.plot(bins_edges, y_curve, color=color,
-                         label=f"{label} (cumulative)" if label else "cumulative",
+                         label=f"{label}{label_suffix}" if label else label_default,
                          path_effects=[path_effects.withStroke(linewidth=4, foreground='white')])
         plotid += 1
 
