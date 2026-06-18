@@ -914,6 +914,7 @@ def hist(
     density: Annotated[bool, typer.Option(help="Normalize the histogram to form a probability density", rich_help_panel="Histogram Styling")] = False,
     kde: Annotated[bool, typer.Option(help="Plot a kernel density estimate instead of the histogram", rich_help_panel="Histogram Styling")] = False,
     kde_bandwidth: Annotated[str, typer.Option(help="Bandwidth for KDE ('scott', 'silverman' or float)", rich_help_panel="Histogram Styling")] = "scott",
+    cumulative: Annotated[bool, typer.Option(help="Plot a cumulative histogram as a red curve on a secondary y-axis", rich_help_panel="Histogram Styling")] = False,
     # output options
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -961,6 +962,11 @@ def hist(
     fields = fields.strip().split()  # type: ignore
     labels = labels.strip().split()  # type: ignore
     plotid = 0
+    ax = plt.gca()
+    ax2 = None
+    if cumulative and not kde:
+        ax2 = ax.twinx()
+
     for j, field in enumerate(fields):
         if field == "y":
             y = np.float64(data[j])  # type: ignore
@@ -987,9 +993,32 @@ def hist(
                 line, = plt.plot(x_plot, density_vals, label=label, alpha=alpha)
                 plt.fill_between(x_plot, density_vals, alpha=alpha * 0.3, color=line.get_color())
         else:
-            plt.hist(y, toint(bins), label=label, alpha=alpha, density=density)
+            n, bins_edges, patches = ax.hist(y, toint(bins), label=label, alpha=alpha, density=density)
+            if cumulative:
+                if density:
+                    y_curve = np.concatenate(([0], np.cumsum(n * np.diff(bins_edges))))
+                else:
+                    y_curve = np.concatenate(([0], np.cumsum(n)))
+                color = 'red'
+                if len(patches) > 0:
+                    try:
+                        color = patches[0].get_facecolor()
+                    except (AttributeError, TypeError, IndexError):
+                        pass
+                import matplotlib.patheffects as path_effects
+                ax2.plot(bins_edges, y_curve, color=color,
+                         label=f"{label} (cumulative)" if label else "cumulative",
+                         path_effects=[path_effects.withStroke(linewidth=4, foreground='white')])
         plotid += 1
-    out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect)
+
+    if cumulative and not kde:
+        h1, l1 = ax.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        if len(h1) > 0 or len(h2) > 0:
+            ax.legend(h1 + h2, l1 + l2)
+        out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect, legend=False)
+    else:
+        out(save=save, datastr=datastr, labels=labels, colorbar=False, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, interactive_plot=False, equal_aspect=equal_aspect)
 
 @app.command(help="Create a jitter plot from data in standard input.")
 def jitter(
