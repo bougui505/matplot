@@ -967,6 +967,10 @@ def hist(
     ax2 = None
     if cumulative and not kde:
         ax2 = ax.twinx()
+        if ax.get_yscale() == "log":
+            ax2.set_yscale("log")
+            ax2.yaxis.set_major_locator(mticker.LogLocator(base=10.0, subs="all"))
+            ax2.yaxis.set_major_formatter(mticker.LogFormatterSciNotation(minor_thresholds=(2.0, 0.8)))
 
     for j, field in enumerate(fields):
         if field == "y":
