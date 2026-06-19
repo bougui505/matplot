@@ -2176,6 +2176,7 @@ def bar(
     yline_linestyle: Annotated[str, typer.Option(help="Line style of the horizontal line", rich_help_panel="Bar Styling")] = "--",
     yline_linewidth: Annotated[float, typer.Option(help="Line width of the horizontal line", rich_help_panel="Bar Styling")] = 1.0,
     display_values: Annotated[bool, typer.Option(help="Display the actual data values on top of the bars", rich_help_panel="Bar Styling")] = False,
+    display_values_format: Annotated[Optional[str], typer.Option(help="Format string for displayed values (e.g. '%d', '%.1f', '.2g')", rich_help_panel="Bar Styling")] = None,
 ):
     """
     Create a bar plot from data in standard input.
@@ -2246,8 +2247,15 @@ def bar(
         # Display values on top of bars if requested
         if display_values:
             for bar, value in zip(bars, y_current):
+                if display_values_format is not None:
+                    if display_values_format.startswith('%'):
+                        formatted_val = display_values_format % value
+                    else:
+                        formatted_val = format(value, display_values_format)
+                else:
+                    formatted_val = format_nbr(value, precision='.2g')
                 plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + (plt.ylim()[1] - plt.ylim()[0]) * 0.005,
-                         format_nbr(value, precision='.2g'),
+                         formatted_val,
                          ha='center', va='bottom', fontsize=8)
         
         # Set labels if provided
