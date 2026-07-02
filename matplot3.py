@@ -1056,7 +1056,9 @@ def jitter(
     median_sort: Annotated[bool, typer.Option(help="Sort categories by median values", rich_help_panel="Statistical Analysis")] = False,
     quartiles: Annotated[bool, typer.Option(help="Plot first quartile, median, and third quartile as a box", rich_help_panel="Statistical Analysis")] = False,
     highlight_median: Annotated[str, typer.Option(help="Highlight the boxplot with the highest, lowest, or specific x-axis values (e.g. '0 3 highest')", rich_help_panel="Statistical Analysis")] = "",
+    highlight_wasserstein: Annotated[str, typer.Option(help="Highlight categories based on Wasserstein Distance comparison. Format: 'baseline_pattern prefix_delim'. Example: 'Untruncated -'", rich_help_panel="Statistical Analysis")] = "",
     # output options
+
     save: Annotated[str, typer.Option(help="Filename to save the plot to", rich_help_panel="Output & Limits")] = "",
     xmin: Annotated[float | None, typer.Option(help="Minimum x value for the plot", rich_help_panel="Output & Limits")] = None,
     xmax: Annotated[float | None, typer.Option(help="Maximum x value for the plot", rich_help_panel="Output & Limits")] = None,
@@ -1160,8 +1162,8 @@ def jitter(
                     subplot_y_values[sub_id][x_val] = []
                 subplot_y_values[sub_id][x_val].extend(y_vals)
         temp_plotid += 1
-
     subplot_target_x_vals = {}
+    subplot_wasserstein_x_vals = {}
     for sub_id, x_map in subplot_y_values.items():
         medians = {x_val: np.median(y_list) for x_val, y_list in x_map.items()}
         targets = set()
@@ -1203,6 +1205,50 @@ def jitter(
                             targets.add(target_x_val)
         subplot_target_x_vals[sub_id] = targets
 
+        w_targets = set()
+        if len(x_map) > 0 and highlight_wasserstein:
+            from scipy.stats import wasserstein_distance
+            # Parse parameters: e.g. "Untruncated -"
+            parts = highlight_wasserstein.strip().split()
+            baseline_pattern = parts[0]
+            delim = parts[1] if len(parts) > 1 else "-"
+            
+            # Group x_val by prefix
+            # sys -> {cond_name: x_val}
+            groups = defaultdict(dict)
+            for x_val, label in subplot_x_to_label.get(sub_id, {}).items():
+                if delim in label:
+                    prefix = label.split(delim)[0].strip()
+                    groups[prefix][label] = x_val
+            
+            for prefix, cond_map in groups.items():
+                # Find reference x_val
+                ref_x_val = None
+                for label, x_val in cond_map.items():
+                    if baseline_pattern in label:
+                        ref_x_val = x_val
+                        break
+                
+                if ref_x_val is not None and ref_x_val in x_map:
+                    ref_vals = np.array(x_map[ref_x_val])
+                    min_wd = float('inf')
+                    best_x_val = None
+                    
+                    for label, x_val in cond_map.items():
+                        if x_val == ref_x_val:
+                            continue
+                        if x_val in x_map:
+                            comp_vals = np.array(x_map[x_val])
+                            if len(ref_vals) > 0 and len(comp_vals) > 0:
+                                wd = wasserstein_distance(comp_vals, ref_vals)
+                                if wd < min_wd:
+                                    min_wd = wd
+                                    best_x_val = x_val
+                                    
+                    if best_x_val is not None:
+                        w_targets.add(best_x_val)
+        subplot_wasserstein_x_vals[sub_id] = w_targets
+
     kde_y = None
     plotid = 0
     for xfield, yfield in zip(xfields, yfields):
@@ -1222,6 +1268,7 @@ def jitter(
             # Calculate quartiles for each x group
             x_unique = np.unique(x)
             target_x_vals = subplot_target_x_vals.get(sub_id, set())
+            w_target_x_vals = subplot_wasserstein_x_vals.get(sub_id, set())
             
             for x_val in x_unique:
                 y_vals = y[x == x_val]
@@ -1230,27 +1277,33 @@ def jitter(
                     med = np.median(y_vals)
                     q3 = np.percentile(y_vals, 75)
                     
-                    is_highlighted = (x_val in target_x_vals)
+                    is_median_highlight = (x_val in target_x_vals)
+                    is_w_highlight = (x_val in w_target_x_vals)
                     
                     # Plot quartile box
-                    if is_highlighted:
+                    if is_median_highlight or is_w_highlight:
                         plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
                                     boxprops=dict(facecolor='#ffd700', alpha=0.8, edgecolor='#b8860b', linewidth=2),
                                     medianprops=dict(color='#d62728', linewidth=3),
                                     whiskerprops=dict(color='black', linewidth=1.5),
                                     capprops=dict(color='black', linewidth=1.5), sym="")
                         
-                        # Display the median value on the plot
                         y_range = np.max(y) - np.min(y)
                         offset = y_range * 0.02 if y_range > 0 else 0.1
-                        med_text = format_nbr(med, precision='.2g')
-                        plt.text(x_val, np.max(y_vals) + offset, f"Median: {med_text}", 
-                                 ha='center', va='bottom', fontweight='bold', color='black',
-                                 zorder=10,
-                                 bbox=dict(facecolor='white', alpha=0.8, edgecolor='#b8860b', boxstyle='round,pad=0.2', linewidth=1))
                         
-                        # Print the highlighted median value to stdout
-                        print(f"Highlighted {highlight_median} median (x={x_val}): {med}")
+                        if is_median_highlight:
+                            # Display the median value box on the plot
+                            med_text = format_nbr(med, precision='.2g')
+                            plt.text(x_val, np.max(y_vals) + offset, f"Median: {med_text}", 
+                                     ha='center', va='bottom', fontweight='bold', color='black',
+                                     zorder=10,
+                                     bbox=dict(facecolor='white', alpha=0.8, edgecolor='#b8860b', boxstyle='round,pad=0.2', linewidth=1))
+                            print(f"Highlighted {highlight_median} median (x={x_val}): {med}")
+                        else:
+                            # Display a discrete star on top of the highlighted box plot
+                            plt.text(x_val, np.max(y_vals) + offset, "★", 
+                                     ha='center', va='bottom', fontweight='bold', color='#b8860b',
+                                     zorder=10, fontsize=10)
                     else:
                         plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
                                     boxprops=dict(facecolor='lightblue', alpha=0.5),
@@ -1258,6 +1311,8 @@ def jitter(
                                     whiskerprops=dict(color='black'),
                                     capprops=dict(color='black'), sym="")
         set_xtick_labels(fields, data, rotation=rotation)
+
+
         if "il" in fields:
             INTERACTIVE_LABELS.extend(data[fields.index("il")])
         if kde:
