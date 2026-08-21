@@ -40,6 +40,9 @@ console = Console()
 # See: https://stackoverflow.com/a/61466412/1679629
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
+if hasattr(PngImagePlugin, "MAX_TEXT_MEMORY"):
+    PngImagePlugin.MAX_TEXT_MEMORY = LARGE_ENOUGH_NUMBER * (1024**2)
+
 
 # Define X, Y, INTERACTIVE_LABELS, GLOBAL_C_VALUES as global variables for interactive mode
 X, Y = list(), list()
@@ -1299,11 +1302,10 @@ def jitter(
                                      zorder=10,
                                      bbox=dict(facecolor='white', alpha=0.8, edgecolor='#b8860b', boxstyle='round,pad=0.2', linewidth=1))
                             print(f"Highlighted {highlight_median} median (x={x_val}): {med}")
-                        else:
-                            # Display a discrete star on top of the highlighted box plot
-                            plt.text(x_val, np.max(y_vals) + offset, "★", 
-                                     ha='center', va='bottom', fontweight='bold', color='#b8860b',
-                                     zorder=10, fontsize=10)
+
+
+
+
                     else:
                         plt.boxplot(y_vals, positions=[x_val], widths=xjitter, patch_artist=True,
                                     boxprops=dict(facecolor='lightblue', alpha=0.5),
@@ -1337,7 +1339,11 @@ def jitter(
             do_pcr(x, y)
         _apply_axis_tick_formats(plt.gca(), x, y) # Apply tick formats after plotting
         plotid += 1
+    
     out(save=save, datastr=datastr, labels=labels, colorbar=colorbar, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, equal_aspect=equal_aspect)
+
+
+
 
 def plot_median(x, y, size=100, color="black", marker="_", median_sort: bool = False):
     """
