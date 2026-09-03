@@ -50,6 +50,8 @@ INTERACTIVE_LABELS = list()
 GLOBAL_C_VALUES = list()
 XTICK_FORMAT = None
 YTICK_FORMAT = None
+SEMILOG_X = False
+SEMILOG_Y = False
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -81,9 +83,13 @@ def plot_setup(
     global XTICK_FORMAT
     global YTICK_FORMAT
     global XTICK_FONTSIZE
+    global SEMILOG_X
+    global SEMILOG_Y
     XTICK_FORMAT = xtick_format
     YTICK_FORMAT = ytick_format
     XTICK_FONTSIZE = xtick_fontsize
+    SEMILOG_X = semilog_x
+    SEMILOG_Y = semilog_y
     global DEBUG
     DEBUG = debug
     app.pretty_exceptions_show_locals = DEBUG
@@ -817,30 +823,42 @@ def scatter(
         all_y.extend(list(np.float64(data[yfield]))) # type: ignore
 
     if kde:
-        xy_data = np.vstack([all_x, all_y]).T
-        # Standardize features so isotropic bandwidth works across different scales
-        xy_mean = np.nanmean(xy_data, axis=0)
-        xy_std = np.nanstd(xy_data, axis=0)
-        xy_std[xy_std == 0] = 1.0
-        xy_data_scaled = (xy_data - xy_mean) / xy_std
+        x_eval = np.array(all_x, dtype=np.float64)
+        y_eval = np.array(all_y, dtype=np.float64)
 
-        # Apply subsetting if kde_subset is specified and less than total points
-        if kde_subset < len(xy_data_scaled):
-            # Randomly select subset for KDE computation
-            subset_indices = np.random.choice(len(xy_data_scaled), size=kde_subset, replace=False)
-            xy_subset = xy_data_scaled[subset_indices]
-            # Fit KDE on subset
-            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_subset) # Default bandwidth
-            # Score all points using the model fitted on subset
-            kde_c = np.exp(kde_model.score_samples(xy_data_scaled))
+        if SEMILOG_X:
+            x_eval = np.where(x_eval > 0, np.log10(x_eval), np.nan)
+        if SEMILOG_Y:
+            y_eval = np.where(y_eval > 0, np.log10(y_eval), np.nan)
+
+        xy_data = np.vstack([x_eval, y_eval]).T
+        valid_mask = np.isfinite(xy_data).all(axis=1)
+        xy_valid = xy_data[valid_mask]
+
+        if len(xy_valid) > 0:
+            xy_mean = np.mean(xy_valid, axis=0)
+            xy_std = np.std(xy_valid, axis=0)
+            xy_std[xy_std == 0] = 1.0
+            xy_valid_scaled = (xy_valid - xy_mean) / xy_std
+            xy_data_scaled = (xy_data - xy_mean) / xy_std
+
+            if kde_subset < len(xy_valid_scaled):
+                subset_indices = np.random.choice(len(xy_valid_scaled), size=kde_subset, replace=False)
+                xy_subset = xy_valid_scaled[subset_indices]
+                kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_subset)
+            else:
+                kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_valid_scaled)
+
+            kde_c = np.full(len(xy_data), np.nan)
+            kde_c[valid_mask] = np.exp(kde_model.score_samples(xy_data_scaled[valid_mask]))
+
+            if kde_normalize and np.isfinite(kde_c[valid_mask]).any():
+                valid_c = kde_c[valid_mask]
+                c_min, c_max = valid_c.min(), valid_c.max()
+                if c_max > c_min:
+                    kde_c[valid_mask] = (valid_c - c_min) / (c_max - c_min)
         else:
-            # Fit KDE on all data
-            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_data_scaled) # Default bandwidth
-            # Score samples
-            kde_c = np.exp(kde_model.score_samples(xy_data_scaled))
-        if kde_normalize:
-            kde_c -= kde_c.min()
-            kde_c /= kde_c.max()
+            kde_c = np.ones(len(xy_data))
 
     current_data_idx = 0
     for xfield, yfield in zip(xfields, yfields):
@@ -1329,12 +1347,24 @@ def jitter(
             for xu in track(xunique, description="KDE..."):
                 sel = x == xu
                 ysel = y[sel]  # type: ignore
-                kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(ysel, size=min(kde_subset, len(ysel)))[:, None])  # type: ignore
-                kde_y = np.exp(kde_ins.score_samples(ysel[:, None]))
-                if kde_normalize:
-                    kde_y -= kde_y.min()
-                    kde_y /= kde_y.max()
-                c[sel] = kde_y
+                if SEMILOG_Y:
+                    valid_mask_y = ysel > 0
+                    ysel_eval = np.log10(ysel[valid_mask_y]) if valid_mask_y.any() else ysel
+                else:
+                    ysel_eval = ysel
+                if len(ysel_eval) > 0:
+                    kde_ins = KernelDensity(kernel="gaussian", bandwidth="scott").fit(np.random.choice(ysel_eval, size=min(kde_subset, len(ysel_eval)))[:, None])  # type: ignore
+                    kde_y = np.exp(kde_ins.score_samples(ysel_eval[:, None]))
+                    if kde_normalize:
+                        c_min, c_max = kde_y.min(), kde_y.max()
+                        if c_max > c_min:
+                            kde_y = (kde_y - c_min) / (c_max - c_min)
+                    if SEMILOG_Y:
+                        c_sub = np.zeros_like(ysel)
+                        c_sub[valid_mask_y] = kde_y
+                        c[sel] = c_sub
+                    else:
+                        c[sel] = kde_y
             c = np.asarray(c)
         x += np.random.uniform(size=x.shape, low=-xjitter/2, high=xjitter/2)
         y += np.random.uniform(size=y.shape, low=-yjitter/2, high=yjitter/2)
