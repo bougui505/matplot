@@ -818,20 +818,26 @@ def scatter(
 
     if kde:
         xy_data = np.vstack([all_x, all_y]).T
+        # Standardize features so isotropic bandwidth works across different scales
+        xy_mean = np.nanmean(xy_data, axis=0)
+        xy_std = np.nanstd(xy_data, axis=0)
+        xy_std[xy_std == 0] = 1.0
+        xy_data_scaled = (xy_data - xy_mean) / xy_std
+
         # Apply subsetting if kde_subset is specified and less than total points
-        if kde_subset < len(xy_data):
+        if kde_subset < len(xy_data_scaled):
             # Randomly select subset for KDE computation
-            subset_indices = np.random.choice(len(xy_data), size=kde_subset, replace=False)
-            xy_subset = xy_data[subset_indices]
+            subset_indices = np.random.choice(len(xy_data_scaled), size=kde_subset, replace=False)
+            xy_subset = xy_data_scaled[subset_indices]
             # Fit KDE on subset
             kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_subset) # Default bandwidth
             # Score all points using the model fitted on subset
-            kde_c = np.exp(kde_model.score_samples(xy_data))
+            kde_c = np.exp(kde_model.score_samples(xy_data_scaled))
         else:
             # Fit KDE on all data
-            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_data) # Default bandwidth
+            kde_model = KernelDensity(kernel='gaussian', bandwidth="scott").fit(xy_data_scaled) # Default bandwidth
             # Score samples
-            kde_c = np.exp(kde_model.score_samples(xy_data))
+            kde_c = np.exp(kde_model.score_samples(xy_data_scaled))
         if kde_normalize:
             kde_c -= kde_c.min()
             kde_c /= kde_c.max()
