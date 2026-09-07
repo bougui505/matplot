@@ -115,9 +115,21 @@ def plot_setup(
         except ValueError:
             # Fallback for malformed input
             TITLES = titles.strip().split()
-    
     if len(TITLES) < SUBPLOTS[0] * SUBPLOTS[1]:
         TITLES += [""] * (SUBPLOTS[0] * SUBPLOTS[1] - len(TITLES))
+    TITLES = [t.replace("\\n", "\n") for t in TITLES]
+
+    # Parse ylabels properly to handle per-row labels
+    try:
+        ylabels_list = shlex.split(ylabel)
+    except (ValueError, NameError):
+        ylabels_list = [ylabel]
+    if len(ylabels_list) == 1:
+        ylabels_list = ylabels_list * SUBPLOTS[0]
+    elif len(ylabels_list) < SUBPLOTS[0]:
+        ylabels_list += [ylabels_list[-1]] * (SUBPLOTS[0] - len(ylabels_list))
+    ylabels_list = [y.replace("\\n", "\n") for y in ylabels_list]
+
     for i in range(SUBPLOTS[0] * SUBPLOTS[1]):
         ax = plt.subplot(
             SUBPLOTS[0],
@@ -134,9 +146,9 @@ def plot_setup(
         if not sharex:
             plt.xlabel(xlabel)
         if sharey and subplot_ij[1] == 0:
-            plt.ylabel(ylabel)
+            plt.ylabel(ylabels_list[subplot_ij[0]])
         if not sharey:
-            plt.ylabel(ylabel)
+            plt.ylabel(ylabels_list[subplot_ij[0]])
         if semilog_x:
             plt.semilogx()
             plt.gca().xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs='all'))
@@ -173,14 +185,18 @@ def read_data(delimiter, fields, labels):
     while len(lines) > 0 and lines[-1].strip() == "":
         lines.pop()
     fields_original = fields
-    for line in lines:
-        line = line.strip().split(delimiter)
-        # check if the line is empty
-        if len(line) == 0:
-            # create new fields
-            field_offset = imax + 1
-            # duplicate the fields
-            fields += f" {fields_original}"
+    last_was_empty = True
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            if not last_was_empty:
+                field_offset = imax + 1
+                fields += f" {fields_original}"
+                datastr += "\n"
+                last_was_empty = True
+            continue
+        last_was_empty = False
+        line = stripped.split(delimiter)
         for i, e in enumerate(line):
             i += field_offset
             # Ensure the key exists in the OrderedDict
