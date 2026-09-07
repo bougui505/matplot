@@ -97,8 +97,12 @@ def plot_setup(
         xaspect, yaspect = aspect_ratio.split()
         plt.figure(figsize=(float(xaspect), float(yaspect)))
     global SUBPLOTS
+    global SHAREX
+    global SHAREY
     SUBPLOTS = [int(e) for e in subplots.strip().split()]
-    ax = None
+    SHAREX = sharex
+    SHAREY = sharey
+    first_ax = None
     global TITLES
     # Parse titles properly to handle spaces
     if titles.strip() == "":
@@ -119,9 +123,11 @@ def plot_setup(
             SUBPLOTS[0],
             SUBPLOTS[1],
             i + 1,
-            sharex=None if not sharex else ax,
-            sharey=None if not sharey else ax,
+            sharex=first_ax if sharex else None,
+            sharey=first_ax if sharey else None,
         )
+        if first_ax is None:
+            first_ax = ax
         subplot_ij = np.unravel_index(i, SUBPLOTS)
         if sharex and subplot_ij[0] == SUBPLOTS[0] - 1:
             plt.xlabel(xlabel)
@@ -370,6 +376,14 @@ def out(
     if labels is not None:
         if len(labels) > 0 and legend:
             plt.legend()
+    if 'SHAREX' in globals() and 'SHAREY' in globals() and 'SUBPLOTS' in globals():
+        for idx, axis in enumerate(plt.gcf().axes):
+            if idx < SUBPLOTS[0] * SUBPLOTS[1]:
+                subplot_ij = np.unravel_index(idx, SUBPLOTS)
+                if SHAREX and subplot_ij[0] != SUBPLOTS[0] - 1:
+                    plt.setp(axis.get_xticklabels(), visible=False)
+                if SHAREY and subplot_ij[1] != 0:
+                    plt.setp(axis.get_yticklabels(), visible=False)
     if save == "":
         # build a kdtree for X, Y
         global NEIGH
